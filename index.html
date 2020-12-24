@@ -1,0 +1,26 @@
+<style>
+body {
+    font-family: sans-serif
+}
+</style>
+
+<script src="https://aneeshdurg.me/webgl-common/common.js"></script>
+<script src="synth.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadTwgl();
+        synth_main(document.getElementById("glcanvas"));
+    });
+</script>
+
+<div style="max-height: 20%; overflow: auto">
+    <a href="../"><h1 id="title">Video Synthesizer</h1></a>
+    <div id="ui">
+    </div>
+</div>
+<hr>
+<br><br>
+<div style="width: 100%; text-align: center">
+    <canvas id="glcanvas" style="height: 70%; display: inline"></canvas>
+</div>
