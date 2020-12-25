@@ -36,6 +36,48 @@ class Rotator extends Function {
     }
 }
 
+class Reflector extends Function {
+    id = 3
+    params = {reflect_theta: 0, reflect_y: 0}
+
+    constructor(theta, y, feedback) {
+        super(feedback || 0);
+        this.params.reflect_theta = theta;
+        this.params.reflect_y = y;
+    }
+}
+
+class Noise extends Function {
+    id = 4
+    params = {noise_r: 0, noise_g: 0, noise_b: 0}
+    constructor(noise_r, noise_b, noise_g, feedback) {
+        super(feedback || 0);
+        this.params.noise_r = 10000 * noise_r;
+        this.params.noise_g = 10000 * noise_g;
+        this.params.noise_b = 10000 * noise_b;
+    }
+}
+
+class HueShift extends Function {
+    id = 5
+    params = {hue_shift: 0}
+    constructor(hue_shift, feedback) {
+        super(feedback || 0);
+        this.params.hue_shift = hue_shift;
+    }
+}
+
+
+class Zoom extends Function {
+    id = 6
+    params = {zoom: 1, zoom_center: [0.5, 0.5]}
+    constructor(zoom, zoom_center, feedback) {
+        super(feedback || 0);
+        this.params.zoom = zoom || 1;
+        this.params.zoom_center = zoom_center;
+    }
+}
+
 class Synth {
     dimensions = [1000, 1000];
 
@@ -96,10 +138,14 @@ async function synth_main(canvas, root) {
     const fragShader = await getFile(root + "/synth.frag.c");
     const obj = new Synth(canvas, fragShader);
     // TODO create a UI for this
-    obj.functions.push(new Oscillator([0.25, 0], 0, [1, 0, 0]));
-    obj.functions.push(new Rotator(Math.PI / 4, 1));
-    obj.functions.push(new Oscillator([0, 0.25], 0, [0, 0, 1], 0.5));
-    obj.functions.push(new Rotator(Math.PI / 4, 1));
+    obj.functions.push(new Oscillator([0, 0.5], 0, [1, 0, 0]));
+    obj.functions.push(new Oscillator([0.25, 0], 0, [0, 0, 1], 1));
+    obj.functions.push(new Noise(Math.random(), Math.random(), Math.random(), 1));
+    obj.functions.push(new HueShift(5, 1));
+    for(let i = 1; i <= 32; i++)
+        obj.functions.push(new Reflector(i * Math.PI / 32, i / 300, 1));
+    obj.functions.push(new Zoom(2, [0.5, 0.5], 1));
+    obj.functions.push(new Zoom(2, [0.25, 0.25], 1));
 
     function f(time) {
         obj.render(time);
