@@ -135,17 +135,31 @@ class Synth {
 async function synth_main(canvas, root) {
     root = root || ".";
 
-    const fragShader = await getFile(root + "/synth.frag.c");
+    let fragShader = await getFile(root + "/synth.frag.c");
+    fragShader = fragShader.split("\n");
+    for (let i = 0; i < fragShader.length; i++) {
+        if (fragShader[i].includes("#include")) {
+            const module_file = fragShader[i].split('"')[1];
+            let module = await getFile(root + "/" + module_file);
+            module = module.split("\n");
+            fragShader[i] = module.join("\n");
+        }
+    }
+    fragShader = fragShader.join("\n");
+
     const obj = new Synth(canvas, fragShader);
     // TODO create a UI for this
     obj.functions.push(new Oscillator([0, 0.5], 0, [1, 0, 0]));
     obj.functions.push(new Oscillator([0.25, 0], 0, [0, 0, 1], 1));
-    obj.functions.push(new Noise(Math.random(), Math.random(), Math.random(), 1));
+    const nr = Math.random();
+    const ng = Math.random();
+    const nb = Math.random();
+    obj.functions.push(new Noise(nr, ng, nb, 1));
     obj.functions.push(new HueShift(5, 1));
-    for(let i = 1; i <= 32; i++)
-        obj.functions.push(new Reflector(i * Math.PI / 32, i / 300, 1));
-    obj.functions.push(new Zoom(2, [0.5, 0.5], 1));
-    obj.functions.push(new Zoom(2, [0.25, 0.25], 1));
+    obj.functions.push(new Rotator(0.1, 1));
+    for(let i = 1; i <= 8; i++)
+        obj.functions.push(new Reflector(i * Math.PI / 8, 0, 1));
+    obj.functions.push(new Zoom(1.5, [0.5, 0.5], 1));
 
     function f(time) {
         obj.render(time);
