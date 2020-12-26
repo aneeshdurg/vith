@@ -10,20 +10,7 @@ precision mediump int;
 #define PI 3.1415926538
 #define GOLDEN_RATIO 1.6180339887
 
-//   __                  _   _
-//  / _|_   _ _ __   ___| |_(_) ___  _ __  ___
-// | |_| | | | '_ \ / __| __| |/ _ \| '_ \/ __|
-// |  _| |_| | | | | (__| |_| | (_) | | | \__ \
-// |_|  \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
-// figlet: functions
 #define FN_RENDER    0
-#define FN_OSC       1
-#define FN_ROTATE    2
-#define FN_REFLECT   3
-#define FN_NOISE     4
-#define FN_HUE_SHIFT 5
-#define FN_ZOOM      6
-// TODO kaleidoscope, hue shift, grayscale, low_pass/high pass thresholding
 
 uniform vec2 u_dimensions;
 uniform vec2 u_tex_dimensions;
@@ -103,24 +90,7 @@ void main() {
     switch(u_function) {
     case FN_RENDER:
         break;
-    case FN_OSC:
-        oscillator();
-        break;
-    case FN_ROTATE:
-        rotate();
-        break;
-    case FN_REFLECT:
-        reflect();
-        break;
-    case FN_NOISE:
-        noise();
-        break;
-    case FN_HUE_SHIFT:
-        hue_shift();
-        break;
-    case FN_ZOOM:
-        zoom();
-        break;
+    GENERATE_CASES;
     default:
         // shouldn't happen
         color_out = vec4(1., 0., 1., 1.);

@@ -1,4 +1,4 @@
-/// modulefn: hue_shuft
+/// modulefn: hue_shift
 uniform float u_hue_shift;
 
 void hue_shift() {
