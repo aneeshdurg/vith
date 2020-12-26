@@ -1,7 +1,8 @@
 class Synth {
     dimensions = [1000, 1000];
 
-    functions = [];
+    stages = [];
+    stageModules = {};
 
     constructor(canvas, fragShader) {
         this.dimensions = [1000, 1000];
@@ -21,8 +22,9 @@ class Synth {
     }
 
     render(time) {
-        this.functions.forEach((fn_params, stage) => {
+        this.stages.forEach((name, stage) => {
             this.fbs.bind_dst();
+            const fn_params = this.stageModules[name];
             const params = {
                 u_dimensions: this.dimensions,
                 u_tex_dimensions: this.dimensions,
@@ -45,10 +47,25 @@ class Synth {
             u_tex_dimensions: this.dimensions,
             u_texture: this.fbs.src(),
             u_function: 0,
-            u_stage: this.functions.length + 1,
+            u_stage: this.stages.length + 1,
             u_feedback: 1,
         });
         render(this.gl);
+    }
+
+    add_stage(name, module) {
+        if (this.stages.indexOf(name) != -1)
+            throw new Error("name collision");
+        this.stageModules[name] = module;
+        this.stages.push(name);
+    }
+
+    remove_stage(name) {
+        const idx = this.stages.indexOf(name);
+        if (idx == -1)
+            throw new Error("no such stage");
+        delete this.stageModules[name];
+        this.stages.splice(idx, 1);
     }
 }
 
@@ -58,17 +75,17 @@ async function synth_main(canvas, root) {
     const fragShader = await getFile(root + "/synth.frag.c");
     const obj = new Synth(canvas, fragShader);
     // TODO create a UI for this
-    obj.functions.push(new Oscillator([0, 0.5], 0, [1, 0, 0]));
-    obj.functions.push(new Oscillator([0.25, 0], 0, [0, 0, 1], 1));
+    obj.add_stage('o1', new Oscillator([0, 0.5], 0, [1, 0, 0]));
+    obj.add_stage('o2', new Oscillator([0.25, 0], 0, [0, 0, 1], 1));
     const nr = Math.random();
     const ng = Math.random();
     const nb = Math.random();
-    obj.functions.push(new Noise(nr, ng, nb, 1));
-    obj.functions.push(new HueShift(5, 1));
-    obj.functions.push(new Rotate(0.1, 1));
+    obj.add_stage('n1', new Noise(nr, ng, nb, 1));
+    obj.add_stage('h1', new HueShift(5, 1));
+    obj.add_stage('ro1', new Rotate(0.1, 1));
     for(let i = 1; i <= 8; i++)
-        obj.functions.push(new Reflect(i * Math.PI / 8, 0, 1));
-    obj.functions.push(new Zoom(1.5, [0.5, 0.5], 1));
+        obj.add_stage(`re${i}`, new Reflector(i * Math.PI / 8, 0, 1));
+    obj.add_stage('z1', new Zoom(1.5, [0.5, 0.5], 1));
 
     function f(time) {
         obj.render(time);
@@ -78,4 +95,147 @@ async function synth_main(canvas, root) {
     requestAnimationFrame(f);
 
     window.obj = obj;
+
+    const ui = document.getElementById("ui");
+
+    customElements.define('synth-reflector', ReflectElement);
+    document.getElementById("add_new").addEventListener("click", () => {
+        ui.appendChild(new ReflectElement(obj));
+    });
+}
+
+const globalCounters = {};
+
+class Type {
+    name = ""
+    range = []
+    defaultValue = 0
+
+    constructor(range, defaultValue) {
+        this.range = range;
+        this.defaultValue = defaultValue;
+    }
+
+    validate(entry) {
+        return false;
+    }
+
+    create(container) {
+    }
+}
+
+class Float extends Type {
+    name = "float"
+
+    validate(entry) {
+        return !isNaN(entry) && entry >= this.range[0] && entry <= this.range[1];
+    }
+
+    create(container, cb) {
+        console.log("init", this.range[0]);
+        const input = document.createElement('input');
+        input.addEventListener('change', () => {
+            const value = parseFloat(input.value);
+            if (!this.validate(value)) {
+                input.style = "color: red";
+            } else {
+                input.style = "";
+                cb(value);
+            }
+        });
+        input.value = this.defaultValue;
+        console.log(input, input.value);
+        container.appendChild(input);
+    }
+}
+
+class SynthElementBase extends HTMLElement {
+    get_title() {
+        return "";
+    }
+
+    get_args() {
+        //returns a map of str -> Type
+        return {};
+    }
+
+    get_type() {
+        return Type;
+    }
+
+    get_feedback() {
+        return 0;
+    }
+
+    constructor(synth) {
+        super();
+        const shadow = this.attachShadow({mode: 'open'});
+        const args = this.get_args();
+        const container = document.createElement('div');
+        container.style = "border: solid 1px; padding: 0.5em";
+        container.innerHTML = `<h2>${this.get_title()}</h2>`;
+
+        const params = [];
+        const createElement = (arg, type) => {
+            const label = document.createElement('label');
+            container.appendChild(label);
+            label.for = arg;
+            label.innerText = `${arg}: `;
+
+            const el = document.createElement('div');
+            container.appendChild(el);
+            el.id = arg;
+            el.style = "display: inline;";
+
+            type.create(el, (value) => {
+                this.onchange(arg, value);
+            });
+
+            container.appendChild(document.createElement('br'));
+        };
+
+        for (let arg of Object.keys(args)) {
+            params.push(args[arg].defaultValue);
+            createElement(arg, args[arg]);
+        }
+        createElement('feedback', new Float([0, 10], 1));
+
+        shadow.appendChild(container);
+
+        const counter = globalCounters[this.get_title()] || 0;
+        globalCounters[this.get_title()] = counter + 1;
+        this.name = `${this.get_title()}-${counter}`;
+
+        const constructor = this.get_type();
+        synth.add_stage(this.name, new constructor(...params, 1));
+
+        this.synth = synth;
+    }
+
+    onchange(arg, val) { }
+}
+
+class ReflectElement extends SynthElementBase {
+    get_title() {
+        return "Reflect";
+    }
+
+    get_args() {
+        return {
+            reflect_theta: new Float([0, Math.PI], Math.PI / 2),
+            reflect_y: new Float([-1, 1], 0),
+        }
+    }
+
+    get_type() {
+        return Reflector;
+    }
+
+    onchange(arg, val) {
+        console.log("change", arg, val);
+        if (arg === "feedback")
+            this.synth.stageModules[this.name].feedback = val;
+        else
+            this.synth.stageModules[this.name].params[arg] = val;
+    }
 }

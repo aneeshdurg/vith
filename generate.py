@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import glob
 import os
 import re
@@ -82,10 +83,6 @@ def create_fragshader():
 def create_module_library(modules, output):
     module_names = sorted(list(modules.keys()))
     module_ids = "const MODULE_IDS = {"
-    for id_, module in enumerate(module_names):
-        module_ids += f'{module}: {id_ + 1}, '
-    module_ids += '}\n'
-    output.write(module_ids)
 
     for id_, module in enumerate(module_names):
         initalizer = ""
@@ -105,6 +102,7 @@ def create_module_library(modules, output):
                 uppercase_next = False
             else:
                 class_name += c
+        module_ids += f'module: {{ class: {class_name} }},'
 
         output.write(textwrap.dedent(
             f'''\
@@ -119,6 +117,9 @@ def create_module_library(modules, output):
         }}
         '''
         ))
+
+    module_ids += '}\n'
+    output.write(module_ids)
 
 setup_build_dir()
 copy_regular()
