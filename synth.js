@@ -99,55 +99,17 @@ async function synth_main(canvas, root) {
     const ui = document.getElementById("ui");
 
     customElements.define('synth-reflector', ReflectElement);
-    document.getElementById("add_new").addEventListener("click", () => {
+    document.getElementById("add_new_ref").addEventListener("click", () => {
         ui.appendChild(new ReflectElement(obj));
+    });
+
+    customElements.define('synth-oscillator', OscillatorElement);
+    document.getElementById("add_new_osc").addEventListener("click", () => {
+        ui.appendChild(new OscillatorElement(obj));
     });
 }
 
 const globalCounters = {};
-
-class Type {
-    name = ""
-    range = []
-    defaultValue = 0
-
-    constructor(range, defaultValue) {
-        this.range = range;
-        this.defaultValue = defaultValue;
-    }
-
-    validate(entry) {
-        return false;
-    }
-
-    create(container) {
-    }
-}
-
-class Float extends Type {
-    name = "float"
-
-    validate(entry) {
-        return !isNaN(entry) && entry >= this.range[0] && entry <= this.range[1];
-    }
-
-    create(container, cb) {
-        console.log("init", this.range[0]);
-        const input = document.createElement('input');
-        input.addEventListener('change', () => {
-            const value = parseFloat(input.value);
-            if (!this.validate(value)) {
-                input.style = "color: red";
-            } else {
-                input.style = "";
-                cb(value);
-            }
-        });
-        input.value = this.defaultValue;
-        console.log(input, input.value);
-        container.appendChild(input);
-    }
-}
 
 class SynthElementBase extends HTMLElement {
     get_title() {
@@ -187,8 +149,9 @@ class SynthElementBase extends HTMLElement {
             el.id = arg;
             el.style = "display: inline;";
 
-            type.create(el, (value) => {
-                this.onchange(arg, value);
+            el.appendChild(type);
+            type.addEventListener('change', () => {
+                this.onchange(arg, type.value);
             });
 
             container.appendChild(document.createElement('br'));
@@ -198,7 +161,7 @@ class SynthElementBase extends HTMLElement {
             params.push(args[arg].defaultValue);
             createElement(arg, args[arg]);
         }
-        createElement('feedback', new Float([0, 10], 1));
+        createElement('feedback', new FloatEntry([0, 10], 1));
 
         shadow.appendChild(container);
 
@@ -212,7 +175,32 @@ class SynthElementBase extends HTMLElement {
         this.synth = synth;
     }
 
-    onchange(arg, val) { }
+    onchange(arg, val) {
+        console.log("change", arg, val);
+        if (arg === "feedback")
+            this.synth.stageModules[this.name].feedback = val;
+        else
+            this.synth.stageModules[this.name].params[arg] = val;
+    }
+}
+
+
+class OscillatorElement extends SynthElementBase {
+    get_title() {
+        return "Oscillator";
+    }
+
+    get_args() {
+        return {
+            osc_f: new VecEntry(2, ["x", "y"], [[0, 100], [0, 100]], [0.25, 0]),
+            osc_c: new FloatBar([0, 100], 0),
+            osc_color: new VecEntry(3, ["r", "g", "b"], [[0, 1], [0, 1], [0, 1]], [1, 0, 0]),
+        }
+    }
+
+    get_type() {
+        return Oscillator;
+    }
 }
 
 class ReflectElement extends SynthElementBase {
@@ -222,20 +210,12 @@ class ReflectElement extends SynthElementBase {
 
     get_args() {
         return {
-            reflect_theta: new Float([0, Math.PI], Math.PI / 2),
-            reflect_y: new Float([-1, 1], 0),
+            reflect_theta: new FloatEntry([0, Math.PI], Math.PI / 2),
+            reflect_y: new FloatEntry([-1, 1], 0),
         }
     }
 
     get_type() {
         return Reflector;
-    }
-
-    onchange(arg, val) {
-        console.log("change", arg, val);
-        if (arg === "feedback")
-            this.synth.stageModules[this.name].feedback = val;
-        else
-            this.synth.stageModules[this.name].params[arg] = val;
     }
 }

@@ -4,7 +4,7 @@ set -ex
 [ ! -e .live/ ] && git clone https://github.com/aneeshdurg/video-synth .live
 
 pushd .live
-git pull
+git pull origin gh-pages
 git checkout gh-pages || git checkout -b gh-pages
 
 rm -r *

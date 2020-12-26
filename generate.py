@@ -24,6 +24,7 @@ def copy_regular():
 
         shutil.copy("index.html", "build/index.html")
         shutil.copy("synth.js", "build/synth.js")
+        shutil.copy("ui.js", "build/ui.js")
 
 def process_module(filename, modules, output):
     print("Processing module", filename)

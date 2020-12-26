@@ -1,0 +1,14 @@
+<script src="ui.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        document.body.appendChild(new FloatEntry([0, 1], 0.5));
+        document.body.appendChild(new VecEntry(
+            2, ["x", "y"], [[0, 1], [0, 1]], [0.5, 0.7]
+        ));
+        document.body.appendChild(new VecEntry(
+            3, ["x", "y", "z"], [[0, 1], [0, 1], [0, 1]], [0.5, 0.7, 0.8]
+        ));
+        document.body.appendChild(new FloatBar([0, 1], 0.5));
+    });
+</script>
+<body></body>
