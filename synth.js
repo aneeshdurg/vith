@@ -75,17 +75,17 @@ async function synth_main(canvas, root) {
     const fragShader = await getFile(root + "/synth.frag.c");
     const obj = new Synth(canvas, fragShader);
     // TODO create a UI for this
-    obj.add_stage('o1', new Oscillator([0, 0.5], 0, [1, 0, 0]));
-    obj.add_stage('o2', new Oscillator([0.25, 0], 0, [0, 0, 1], 1));
-    const nr = Math.random();
-    const ng = Math.random();
-    const nb = Math.random();
-    obj.add_stage('n1', new Noise(nr, ng, nb, 1));
-    obj.add_stage('h1', new HueShift(5, 1));
-    obj.add_stage('ro1', new Rotate(0.1, 1));
-    for(let i = 1; i <= 8; i++)
-        obj.add_stage(`re${i}`, new Reflector(i * Math.PI / 8, 0, 1));
-    obj.add_stage('z1', new Zoom(1.5, [0.5, 0.5], 1));
+    // obj.add_stage('o1', new Oscillator([0, 0.5], 0, [1, 0, 0]));
+    // obj.add_stage('o2', new Oscillator([0.25, 0], 0, [0, 0, 1], 1));
+    // const nr = Math.random();
+    // const ng = Math.random();
+    // const nb = Math.random();
+    // obj.add_stage('n1', new Noise(nr, ng, nb, 1));
+    // obj.add_stage('h1', new HueShift(5, 1));
+    // obj.add_stage('ro1', new Rotate(0.1, 1));
+    // for(let i = 1; i <= 8; i++)
+    //     obj.add_stage(`re${i}`, new Reflector(i * Math.PI / 8, 0, 1));
+    // obj.add_stage('z1', new Zoom(1.5, [0.5, 0.5], 1));
 
     function f(time) {
         obj.render(time);
@@ -96,16 +96,31 @@ async function synth_main(canvas, root) {
 
     window.obj = obj;
 
-    const ui = document.getElementById("ui");
+    const ui = document.getElementById("ui-container");
 
-    customElements.define('synth-reflector', ReflectElement);
+    document.getElementById("add_new_hue").addEventListener("click", () => {
+        ui.appendChild(new HueShiftElement(obj));
+    });
+
+    document.getElementById("add_new_noise").addEventListener("click", () => {
+        ui.appendChild(new NoiseElement(obj));
+    });
+
+    document.getElementById("add_new_osc").addEventListener("click", () => {
+        ui.appendChild(new OscillatorElement(obj));
+    });
+
     document.getElementById("add_new_ref").addEventListener("click", () => {
         ui.appendChild(new ReflectElement(obj));
     });
 
-    customElements.define('synth-oscillator', OscillatorElement);
-    document.getElementById("add_new_osc").addEventListener("click", () => {
-        ui.appendChild(new OscillatorElement(obj));
+
+    document.getElementById("add_new_rot").addEventListener("click", () => {
+        ui.appendChild(new RotatorElement(obj));
+    });
+
+    document.getElementById("add_new_zoom").addEventListener("click", () => {
+        ui.appendChild(new ZoomElement(obj));
     });
 }
 
@@ -137,6 +152,20 @@ class SynthElementBase extends HTMLElement {
         container.style = "border: solid 1px; padding: 0.5em";
         container.innerHTML = `<h2>${this.get_title()}</h2>`;
 
+        const moveup = document.createElement('button');
+        moveup.innerText = 'Move up';
+        container.appendChild(moveup);
+
+        const movedn = document.createElement('button');
+        movedn.innerText = 'Move down';
+        container.appendChild(movedn);
+
+        const remove = document.createElement('button');
+        remove.innerText = 'Remove';
+        container.appendChild(remove);
+
+        container.appendChild(document.createElement('br'));
+
         const params = [];
         const createElement = (arg, type) => {
             const label = document.createElement('label');
@@ -161,7 +190,7 @@ class SynthElementBase extends HTMLElement {
             params.push(args[arg].defaultValue);
             createElement(arg, args[arg]);
         }
-        createElement('feedback', new FloatEntry([0, 10], 1));
+        createElement('feedback', new FloatBar([0, 10], 1));
 
         shadow.appendChild(container);
 
@@ -173,10 +202,39 @@ class SynthElementBase extends HTMLElement {
         synth.add_stage(this.name, new constructor(...params, 1));
 
         this.synth = synth;
+
+        moveup.addEventListener('click', () => {
+            const idx = this.synth.stages.indexOf(this.name);
+            if (idx != 0) {
+                const other = this.synth.stages[idx - 1];
+                this.synth.stages[idx] = other;
+                this.synth.stages[idx - 1] = this.name;
+                const parentEl =this.parentElement;
+                this.remove();
+                parentEl.insertBefore(this, parentEl.childNodes[idx - 1]);
+            }
+        });
+
+        movedn.addEventListener('click', () => {
+            const idx = this.synth.stages.indexOf(this.name);
+            if (idx != (this.synth.stages.length - 1)) {
+                const other = this.synth.stages[idx + 1];
+                this.synth.stages[idx] = other;
+                this.synth.stages[idx + 1] = this.name;
+
+                const parentEl =this.parentElement;
+                this.remove();
+                parentEl.insertBefore(this, parentEl.childNodes[idx + 1]);
+            }
+        });
+
+        remove.addEventListener('click', () => {
+            this.synth.remove_stage(this.name);
+            this.remove();
+        });
     }
 
     onchange(arg, val) {
-        console.log("change", arg, val);
         if (arg === "feedback")
             this.synth.stageModules[this.name].feedback = val;
         else
@@ -184,6 +242,41 @@ class SynthElementBase extends HTMLElement {
     }
 }
 
+class HueShiftElement extends SynthElementBase {
+    get_title() {
+        return "HueShift";
+    }
+
+    get_args() {
+        return {
+            hue_shift: new FloatBar([0, 360], 0),
+        }
+    }
+
+    get_type() {
+        return HueShift;
+    }
+}
+customElements.define('synth-hue', HueShiftElement);
+
+class NoiseElement extends SynthElementBase {
+    get_title() {
+        return "Noise";
+    }
+
+    get_args() {
+        return {
+            noise_r: new FloatBar([0, 10000], 0),
+            noise_g: new FloatBar([0, 10000], 0),
+            noise_b: new FloatBar([0, 10000], 0),
+        }
+    }
+
+    get_type() {
+        return Noise;
+    }
+}
+customElements.define('synth-noise', NoiseElement);
 
 class OscillatorElement extends SynthElementBase {
     get_title() {
@@ -192,7 +285,7 @@ class OscillatorElement extends SynthElementBase {
 
     get_args() {
         return {
-            osc_f: new VecEntry(2, ["x", "y"], [[0, 100], [0, 100]], [0.25, 0]),
+            osc_f: new VecEntry(2, ["x", "y"], [[0, 10], [0, 10]], [0.25, 0]),
             osc_c: new FloatBar([0, 100], 0),
             osc_color: new VecEntry(3, ["r", "g", "b"], [[0, 1], [0, 1], [0, 1]], [1, 0, 0]),
         }
@@ -202,6 +295,7 @@ class OscillatorElement extends SynthElementBase {
         return Oscillator;
     }
 }
+customElements.define('synth-oscillator', OscillatorElement);
 
 class ReflectElement extends SynthElementBase {
     get_title() {
@@ -210,8 +304,8 @@ class ReflectElement extends SynthElementBase {
 
     get_args() {
         return {
-            reflect_theta: new FloatEntry([0, Math.PI], Math.PI / 2),
-            reflect_y: new FloatEntry([-1, 1], 0),
+            reflect_theta: new FloatBar([0, Math.PI], Math.PI / 2),
+            reflect_y: new FloatBar([-1, 1], 0),
         }
     }
 
@@ -219,3 +313,39 @@ class ReflectElement extends SynthElementBase {
         return Reflector;
     }
 }
+customElements.define('synth-reflector', ReflectElement);
+
+class RotatorElement extends SynthElementBase {
+    get_title() {
+        return "Rotator";
+    }
+
+    get_args() {
+        return {
+            rotation: new FloatBar([0, 4 * Math.PI], 0),
+        }
+    }
+
+    get_type() {
+        return Rotate;
+    }
+}
+customElements.define('synth-rot', RotatorElement);
+
+class ZoomElement extends SynthElementBase {
+    get_title() {
+        return "Zoom";
+    }
+
+    get_args() {
+        return {
+            zoom: new FloatBar([0, 4], 1),
+            zoom_center: new VecEntry(2, ["x", "y"], [[0, 1], [0, 1]], [0.5, 0.5]),
+        }
+    }
+
+    get_type() {
+        return Zoom;
+    }
+}
+customElements.define('synth-zoom', ZoomElement);
