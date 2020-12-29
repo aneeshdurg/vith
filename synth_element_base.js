@@ -20,9 +20,26 @@ class SynthElementBase extends HTMLElement {
         super();
         const shadow = this.attachShadow({mode: 'open'});
         const args = this.get_args();
+        const box = document.createElement('div');
+        box.style = "border: solid 1px; padding: 0.5em";
+        const title = document.createElement('h2')
+        title.innerText = this.get_title();
+        box.appendChild(title);
+
         const container = document.createElement('div');
-        container.style = "border: solid 1px; padding: 0.5em";
-        container.innerHTML = `<h2>${this.get_title()}</h2>`;
+        container.style.display = "none";
+        box.appendChild(container);
+
+        this.container_visible = false;
+        title.onclick = () => {
+            if (this.container_visible) {
+                container.style.display = "none";
+            } else {
+                container.style.display = "";
+            }
+
+            this.container_visible = !this.container_visible;
+        }
 
         const moveup = document.createElement('button');
         moveup.innerText = 'Move up';
@@ -64,7 +81,7 @@ class SynthElementBase extends HTMLElement {
         }
         createElement('feedback', new FloatBar([0, 10], 1));
 
-        shadow.appendChild(container);
+        shadow.appendChild(box);
 
         const counter = globalCounters[this.get_title()] || 0;
         globalCounters[this.get_title()] = counter + 1;
