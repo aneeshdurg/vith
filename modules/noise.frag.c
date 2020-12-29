@@ -1,7 +1,7 @@
 /// modulefn: noise
-uniform float u_noise_r;
-uniform float u_noise_g;
-uniform float u_noise_b;
+uniform float u_noise_r; /// { "start": 0, "end": 10000, "default": 0 }
+uniform float u_noise_g; /// { "start": 0, "end": 10000, "default": 0 }
+uniform float u_noise_b; /// { "start": 0, "end": 10000, "default": 0 }
 
 // 2D Random
 float random (in vec2 st, float noise_param) {

@@ -21,7 +21,7 @@ class Synth {
         this.fbs = new FrameBufferManager(this.gl, this.dimensions);
     }
 
-    render(time) {
+    async render(time) {
         this.stages.forEach((name, stage) => {
             this.fbs.bind_dst();
             const fn_params = this.stageModules[name];
@@ -51,6 +51,8 @@ class Synth {
             u_feedback: 1,
         });
         render(this.gl);
+
+        await new Promise(r => setTimeout(r, 10));
     }
 
     add_stage(name, module) {
@@ -87,8 +89,8 @@ async function synth_main(canvas, root) {
     //     obj.add_stage(`re${i}`, new Reflector(i * Math.PI / 8, 0, 1));
     // obj.add_stage('z1', new Zoom(1.5, [0.5, 0.5], 1));
 
-    function f(time) {
-        obj.render(time);
+    async function f(time) {
+        await obj.render(time);
         requestAnimationFrame(f);
     }
 
@@ -111,12 +113,12 @@ async function synth_main(canvas, root) {
     });
 
     document.getElementById("add_new_ref").addEventListener("click", () => {
-        ui.appendChild(new ReflectElement(obj));
+        ui.appendChild(new ReflectorElement(obj));
     });
 
 
     document.getElementById("add_new_rot").addEventListener("click", () => {
-        ui.appendChild(new RotatorElement(obj));
+        ui.appendChild(new RotateElement(obj));
     });
 
     document.getElementById("add_new_zoom").addEventListener("click", () => {
@@ -125,227 +127,3 @@ async function synth_main(canvas, root) {
 }
 
 const globalCounters = {};
-
-class SynthElementBase extends HTMLElement {
-    get_title() {
-        return "";
-    }
-
-    get_args() {
-        //returns a map of str -> Type
-        return {};
-    }
-
-    get_type() {
-        return Type;
-    }
-
-    get_feedback() {
-        return 0;
-    }
-
-    constructor(synth) {
-        super();
-        const shadow = this.attachShadow({mode: 'open'});
-        const args = this.get_args();
-        const container = document.createElement('div');
-        container.style = "border: solid 1px; padding: 0.5em";
-        container.innerHTML = `<h2>${this.get_title()}</h2>`;
-
-        const moveup = document.createElement('button');
-        moveup.innerText = 'Move up';
-        container.appendChild(moveup);
-
-        const movedn = document.createElement('button');
-        movedn.innerText = 'Move down';
-        container.appendChild(movedn);
-
-        const remove = document.createElement('button');
-        remove.innerText = 'Remove';
-        container.appendChild(remove);
-
-        container.appendChild(document.createElement('br'));
-
-        const params = [];
-        const createElement = (arg, type) => {
-            const label = document.createElement('label');
-            container.appendChild(label);
-            label.for = arg;
-            label.innerText = `${arg}: `;
-
-            const el = document.createElement('div');
-            container.appendChild(el);
-            el.id = arg;
-            el.style = "display: inline;";
-
-            el.appendChild(type);
-            type.addEventListener('change', () => {
-                this.onchange(arg, type.value);
-            });
-
-            container.appendChild(document.createElement('br'));
-        };
-
-        for (let arg of Object.keys(args)) {
-            params.push(args[arg].defaultValue);
-            createElement(arg, args[arg]);
-        }
-        createElement('feedback', new FloatBar([0, 10], 1));
-
-        shadow.appendChild(container);
-
-        const counter = globalCounters[this.get_title()] || 0;
-        globalCounters[this.get_title()] = counter + 1;
-        this.name = `${this.get_title()}-${counter}`;
-
-        const constructor = this.get_type();
-        synth.add_stage(this.name, new constructor(...params, 1));
-
-        this.synth = synth;
-
-        moveup.addEventListener('click', () => {
-            const idx = this.synth.stages.indexOf(this.name);
-            if (idx != 0) {
-                const other = this.synth.stages[idx - 1];
-                this.synth.stages[idx] = other;
-                this.synth.stages[idx - 1] = this.name;
-                const parentEl =this.parentElement;
-                this.remove();
-                parentEl.insertBefore(this, parentEl.childNodes[idx - 1]);
-            }
-        });
-
-        movedn.addEventListener('click', () => {
-            const idx = this.synth.stages.indexOf(this.name);
-            if (idx != (this.synth.stages.length - 1)) {
-                const other = this.synth.stages[idx + 1];
-                this.synth.stages[idx] = other;
-                this.synth.stages[idx + 1] = this.name;
-
-                const parentEl =this.parentElement;
-                this.remove();
-                parentEl.insertBefore(this, parentEl.childNodes[idx + 1]);
-            }
-        });
-
-        remove.addEventListener('click', () => {
-            this.synth.remove_stage(this.name);
-            this.remove();
-        });
-    }
-
-    onchange(arg, val) {
-        if (arg === "feedback")
-            this.synth.stageModules[this.name].feedback = val;
-        else
-            this.synth.stageModules[this.name].params[arg] = val;
-    }
-}
-
-class HueShiftElement extends SynthElementBase {
-    get_title() {
-        return "HueShift";
-    }
-
-    get_args() {
-        return {
-            hue_shift: new FloatBar([0, 360], 0),
-        }
-    }
-
-    get_type() {
-        return HueShift;
-    }
-}
-customElements.define('synth-hue', HueShiftElement);
-
-class NoiseElement extends SynthElementBase {
-    get_title() {
-        return "Noise";
-    }
-
-    get_args() {
-        return {
-            noise_r: new FloatBar([0, 10000], 0),
-            noise_g: new FloatBar([0, 10000], 0),
-            noise_b: new FloatBar([0, 10000], 0),
-        }
-    }
-
-    get_type() {
-        return Noise;
-    }
-}
-customElements.define('synth-noise', NoiseElement);
-
-class OscillatorElement extends SynthElementBase {
-    get_title() {
-        return "Oscillator";
-    }
-
-    get_args() {
-        return {
-            osc_f: new VecEntry(2, ["x", "y"], [[0, 10], [0, 10]], [0.25, 0]),
-            osc_c: new FloatBar([0, 100], 0),
-            osc_color: new VecEntry(3, ["r", "g", "b"], [[0, 1], [0, 1], [0, 1]], [1, 0, 0]),
-        }
-    }
-
-    get_type() {
-        return Oscillator;
-    }
-}
-customElements.define('synth-oscillator', OscillatorElement);
-
-class ReflectElement extends SynthElementBase {
-    get_title() {
-        return "Reflect";
-    }
-
-    get_args() {
-        return {
-            reflect_theta: new FloatBar([0, Math.PI], Math.PI / 2),
-            reflect_y: new FloatBar([-1, 1], 0),
-        }
-    }
-
-    get_type() {
-        return Reflector;
-    }
-}
-customElements.define('synth-reflector', ReflectElement);
-
-class RotatorElement extends SynthElementBase {
-    get_title() {
-        return "Rotator";
-    }
-
-    get_args() {
-        return {
-            rotation: new FloatBar([0, 4 * Math.PI], 0),
-        }
-    }
-
-    get_type() {
-        return Rotate;
-    }
-}
-customElements.define('synth-rot', RotatorElement);
-
-class ZoomElement extends SynthElementBase {
-    get_title() {
-        return "Zoom";
-    }
-
-    get_args() {
-        return {
-            zoom: new FloatBar([0, 4], 1),
-            zoom_center: new VecEntry(2, ["x", "y"], [[0, 1], [0, 1]], [0.5, 0.5]),
-        }
-    }
-
-    get_type() {
-        return Zoom;
-    }
-}
-customElements.define('synth-zoom', ZoomElement);

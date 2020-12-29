@@ -17,33 +17,6 @@ class Type extends HTMLElement {
     }
 }
 
-class FloatEntry extends Type {
-    validate(entry) {
-        return !isNaN(entry) && entry >= this.range[0] && entry <= this.range[1];
-    }
-
-    constructor(range, defaultValue) {
-        super(range, defaultValue);
-
-        const input = document.createElement('input');
-        input.addEventListener('change', () => {
-            const value = parseFloat(input.value);
-            if (!this.validate(value)) {
-                input.style = "color: red";
-            } else {
-                input.style = "";
-                this.value = value;
-            }
-
-            this.dispatchEvent(new Event('change'));
-        });
-        input.value = this.defaultValue;
-        this.value = this.defaultValue;
-        this.shadow.appendChild(input);
-    }
-}
-customElements.define('float-entry', FloatEntry);
-
 class FloatBar extends Type {
     validate(entry) {
         return !isNaN(entry) && entry >= this.range[0] && entry <= this.range[1];
@@ -59,6 +32,8 @@ class FloatBar extends Type {
         const slider = document.createElement('div');
         slider.style = "background: white; height: 1em; width: 1%; position: relative; left: 0em";
         const input = document.createElement('input');
+        const func_gen = document.createElement('input');
+        func_gen.type = 'checkbox';
 
         const percent = 10 * (this.defaultValue - this.range[0]) / (this.range[1] - this.range[0]);
         slider.style.left = `${percent}em`;
@@ -101,13 +76,31 @@ class FloatBar extends Type {
 
             this.dispatchEvent(new Event('change'));
         });
-        input.value = this.defaultValue;
 
+        input.value = this.defaultValue;
         this.value = this.defaultValue;
+
+        this.generate = false;
+        const f = (time) => {
+            if (this.generate) {
+                const value = ((Math.sin(time / 1000) + 1)/2) * (this.range[1] - this.range[0]) + this.range[0];
+                this.value = value;
+                input.value = value;
+                this.dispatchEvent(new Event('change'));
+                requestAnimationFrame(f);
+            }
+        }
+        func_gen.addEventListener('change', () => {
+            this.generate = func_gen.checked;
+            if (this.generate)
+                f(0);
+        });
 
         bar.appendChild(slider);
         container.appendChild(bar);
         container.appendChild(input);
+        container.appendChild(document.createElement('br'));
+        container.appendChild(func_gen);
         this.shadow.appendChild(container);
     }
 }

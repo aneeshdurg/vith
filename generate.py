@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import glob
+import json
+import math
 import os
 import re
 import shutil
@@ -24,25 +26,93 @@ def copy_regular():
 
         shutil.copy("index.html", "build/index.html")
         shutil.copy("synth.js", "build/synth.js")
+        shutil.copy("synth_element_base.js", "build/synth_element_base.js")
         shutil.copy("ui.js", "build/ui.js")
+
+def parse(data):
+    if isinstance(data, float) or isinstance(data, int):
+        return float(data)
+    elif isinstance(data, str):
+        try:
+            parsed = float(eval(data))
+        except:
+            return None
+        return parsed
+    elif isinstance(data, list):
+        parsed = [parse(d) for d in data]
+        if any([p is None for p in parsed]):
+            return None
+        return parsed
+    return None
+
+def validate_info(type_, info):
+    if 'start' not in info or 'end' not in info:
+        return None
+
+    start = parse(info['start'])
+    if start is None:
+        print("invalid start", info['start'])
+        return None
+    end = parse(info['end'])
+    if end is None:
+        print("invalid end", info['end'])
+        return None
+    default = parse(info['default'])
+    if default is None:
+        print("invalid default", info['default'])
+        return None
+
+    valid = None
+    if type_ == "float":
+        valid = lambda b: isinstance(b, float)
+    elif type_.startswith('vec'):
+        count = int(type_[len('vec'):])
+        valid = lambda b: isinstance(b, list) and len(b) == count
+    else:
+        assert False, "!!!"
+
+    if not valid(start) or not valid(end) or not valid(default):
+        return None
+
+    names = None
+    ret = {'start': start, 'end': end, 'default': default}
+    if type_.startswith('vec'):
+        assert 'names' in info
+        ret['names'] = info['names']
+    return ret
 
 def process_module(filename, modules, output):
     print("Processing module", filename)
     with open(filename) as f:
         lines = f.readlines()
     descriptor = {}
-    name = None
+    module_name = None
     for line in lines:
         if line.startswith("/// modulefn: "):
-            name = line.split(':')[1].strip()
+            module_name = line.split(':')[1].strip()
         if line.startswith("uniform"):
+            error_str = "Invalid line: {}".format(line)
+
             line = line.strip().replace(';', '')
-            print("   ", line)
-            parts = line.split(" ")
+            parts = line.split("///")
+            assert len(parts) == 2, error_str
+
+            info = json.loads(parts[1])
+            parts = list(filter(lambda x: len(x), parts[0].split(" ")))
+
+            name = parts[2].replace("u_", "")
+            type_ = parts[1]
+            assert type_ in ("float", "vec2", "vec3"), error_str
+
+            validated_info = validate_info(type_, info)
+            assert validated_info, error_str
+
+            print("   ", name, type_, validated_info)
+
             # TODO search for doc comment
-            descriptor[parts[2]] = parts[1].strip()
-    assert name, filename
-    modules[name] = descriptor
+            descriptor[name] = {'type': type_, 'info': validated_info}
+    assert module_name, filename
+    modules[module_name] = descriptor
     output += [line.replace('\n', '') for line in lines] + ['\n']
 
 def create_fragshader():
@@ -81,6 +151,34 @@ def create_fragshader():
 
     return modules
 
+def generate_initializer(name, arg):
+    info = arg['info']
+
+    initalizer_class = {
+        'float': 'FloatBar', 'vec2': 'VecEntry', 'vec3': 'VecEntry'
+    }
+    class_name = initalizer_class[arg['type']]
+
+    initalizer = f"new {class_name}("
+    if arg['type'] == 'float':
+        initalizer += '[{},{}], {}'.format(
+            info['start'], info['end'], info['default']
+        )
+    else:
+        count = int(arg['type'][len('vec'):])
+        names = ','.join(['"{}"'.format(x) for x in info['names']])
+        default = ','.join([str(x) for x in info['default']])
+
+        initalizer += f"{count}, "
+        initalizer += f"[{names}], "
+        initalizer += "["
+        for i in range(count):
+            initalizer += f"[{info['start'][i]}, {info['end'][i]}],"
+        initalizer += "], "
+        initalizer += f"[{default}]"
+    initalizer += ")"
+    return f'{name}: {initalizer}'
+
 def create_module_library(modules, output):
     module_names = sorted(list(modules.keys()))
     module_ids = "const MODULE_IDS = {"
@@ -89,7 +187,6 @@ def create_module_library(modules, output):
         initalizer = ""
         args = ""
         for param in modules[module]:
-            param = param[2:]
             initalizer += f'this.params.{param} = {param};\n'
             args += f'{param}, '
 
@@ -105,6 +202,11 @@ def create_module_library(modules, output):
                 class_name += c
         module_ids += f'module: {{ class: {class_name} }},'
 
+        descriptor = modules[module]
+        arg_list = [
+            generate_initializer(name, descriptor[name])
+            for name in descriptor
+        ]
         output.write(textwrap.dedent(
             f'''\
         class {class_name} extends Function {{
@@ -116,6 +218,23 @@ def create_module_library(modules, output):
                 {initalizer}
             }}
         }}
+
+        class {class_name}Element extends SynthElementBase {{
+            get_title() {{
+                return "{class_name}";
+            }}
+
+            get_type() {{
+                return {class_name};
+            }}
+
+            get_args() {{
+                return {{
+                    {','.join(arg_list)}
+                }}
+            }}
+        }}
+        customElements.define('synth-{class_name.lower()}', {class_name}Element);
         '''
         ))
 

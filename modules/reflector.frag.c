@@ -1,6 +1,6 @@
 /// modulefn: reflector
-uniform float u_reflect_theta; // between 0 and PI for now
-uniform float u_reflect_y;
+uniform float u_reflect_theta; /// { "start": 0, "end": "math.pi", "default": "math.pi / 2" }
+uniform float u_reflect_y; /// { "start": 0, "end": 1, "default": 0 }
 
 void reflector() {
     vec2 coords = gl_FragCoord.xy;

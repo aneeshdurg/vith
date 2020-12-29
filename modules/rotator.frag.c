@@ -1,5 +1,5 @@
 /// modulefn: rotate
-uniform float u_rotation;
+uniform float u_rotation; /// { "start": 0, "end": "2 * math.pi", "default": 0 }
 
 void rotate() {
     vec2 coords = gl_FragCoord.xy;

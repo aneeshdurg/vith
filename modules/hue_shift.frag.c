@@ -1,5 +1,5 @@
 /// modulefn: hue_shift
-uniform float u_hue_shift;
+uniform float u_hue_shift; /// { "start": 0, "end": 360, "default": 180 }
 
 void hue_shift() {
     color_out.rgb = hsv_to_rgb(
