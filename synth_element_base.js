@@ -26,6 +26,17 @@ class SynthElementBase extends HTMLElement {
         title.innerText = this.get_title();
         box.appendChild(title);
 
+        const enable_label = document.createElement('label');
+        enable_label.for = "enable";
+        enable_label.innerText = "Enable: ";
+        const enable = document.createElement('input');
+        enable.id = "enable";
+        enable.type = 'checkbox';
+        enable.checked = true;
+
+        box.appendChild(enable_label);
+        box.appendChild(enable);
+
         const container = document.createElement('div');
         container.style.display = "none";
         box.appendChild(container);
@@ -120,6 +131,10 @@ class SynthElementBase extends HTMLElement {
         remove.addEventListener('click', () => {
             this.synth.remove_stage(this.name);
             this.remove();
+        });
+
+        enable.addEventListener('change', () => {
+            this.synth.toggle_stage(this.name, enable.checked);
         });
     }
 

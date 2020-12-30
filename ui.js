@@ -32,7 +32,12 @@ class FloatBar extends Type {
         const slider = document.createElement('div');
         slider.style = "background: white; height: 1em; width: 1%; position: relative; left: 0em";
         const input = document.createElement('input');
+
+        const gen_label = document.createElement('label');
+        gen_label.for = "generate";
+        gen_label.innerText = "function: ";
         const func_gen = document.createElement('input');
+        func_gen.id = "generate";
         func_gen.type = 'checkbox';
 
         const percent = 10 * (this.defaultValue - this.range[0]) / (this.range[1] - this.range[0]);
@@ -100,6 +105,7 @@ class FloatBar extends Type {
         container.appendChild(bar);
         container.appendChild(input);
         container.appendChild(document.createElement('br'));
+        container.appendChild(gen_label);
         container.appendChild(func_gen);
         this.shadow.appendChild(container);
     }

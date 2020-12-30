@@ -23,8 +23,12 @@ class Synth {
 
     async render(time) {
         this.stages.forEach((name, stage) => {
-            this.fbs.bind_dst();
             const fn_params = this.stageModules[name];
+            if (!fn_params.enable) {
+                return;
+            }
+
+            this.fbs.bind_dst();
             const params = {
                 u_dimensions: this.dimensions,
                 u_tex_dimensions: this.dimensions,
@@ -68,6 +72,10 @@ class Synth {
             throw new Error("no such stage");
         delete this.stageModules[name];
         this.stages.splice(idx, 1);
+    }
+
+    toggle_stage(name, state) {
+        this.stageModules[name].enable = state;
     }
 }
 
