@@ -28,6 +28,7 @@ def copy_regular():
         shutil.copy("synth.js", "build/synth.js")
         shutil.copy("synth_element_base.js", "build/synth_element_base.js")
         shutil.copy("ui.js", "build/ui.js")
+        shutil.copy("function_generator.js", "build/function_generator.js")
 
 def parse(data):
     if isinstance(data, float) or isinstance(data, int):
@@ -200,7 +201,7 @@ def create_module_library(modules, output):
                 uppercase_next = False
             else:
                 class_name += c
-        module_ids += f'module: {{ class: {class_name} }},'
+        human_name = module.replace('_', ' ')
 
         descriptor = modules[module]
         arg_list = [
@@ -237,6 +238,7 @@ def create_module_library(modules, output):
         customElements.define('synth-{class_name.lower()}', {class_name}Element);
         '''
         ))
+        module_ids += f'"{human_name}": "{class_name}Element",'
 
     module_ids += '}\n'
     output.write(module_ids)

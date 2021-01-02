@@ -1,3 +1,5 @@
+const globalCounters = {};
+
 class SynthElementBase extends HTMLElement {
     get_title() {
         return "";

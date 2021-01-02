@@ -84,54 +84,25 @@ async function synth_main(canvas, root) {
 
     const fragShader = await getFile(root + "/synth.frag.c");
     const obj = new Synth(canvas, fragShader);
-    // TODO create a UI for this
-    // obj.add_stage('o1', new Oscillator([0, 0.5], 0, [1, 0, 0]));
-    // obj.add_stage('o2', new Oscillator([0.25, 0], 0, [0, 0, 1], 1));
-    // const nr = Math.random();
-    // const ng = Math.random();
-    // const nb = Math.random();
-    // obj.add_stage('n1', new Noise(nr, ng, nb, 1));
-    // obj.add_stage('h1', new HueShift(5, 1));
-    // obj.add_stage('ro1', new Rotate(0.1, 1));
-    // for(let i = 1; i <= 8; i++)
-    //     obj.add_stage(`re${i}`, new Reflector(i * Math.PI / 8, 0, 1));
-    // obj.add_stage('z1', new Zoom(1.5, [0.5, 0.5], 1));
+    window.obj = obj;
 
     async function f(time) {
         await obj.render(time);
         requestAnimationFrame(f);
     }
-
     requestAnimationFrame(f);
-
-    window.obj = obj;
 
     const ui = document.getElementById("ui-container");
 
-    document.getElementById("add_new_hue").addEventListener("click", () => {
-        ui.appendChild(new HueShiftElement(obj));
-    });
-
-    document.getElementById("add_new_noise").addEventListener("click", () => {
-        ui.appendChild(new NoiseElement(obj));
-    });
-
-    document.getElementById("add_new_osc").addEventListener("click", () => {
-        ui.appendChild(new OscillatorElement(obj));
-    });
-
-    document.getElementById("add_new_ref").addEventListener("click", () => {
-        ui.appendChild(new ReflectorElement(obj));
-    });
-
-
-    document.getElementById("add_new_rot").addEventListener("click", () => {
-        ui.appendChild(new RotateElement(obj));
-    });
-
-    document.getElementById("add_new_zoom").addEventListener("click", () => {
-        ui.appendChild(new ZoomElement(obj));
+    const add_new_select = document.getElementById("add_new_select");
+    for (let module of Object.keys(MODULE_IDS)) {
+        const opt = document.createElement('option');
+        opt.innerText = module;
+        opt.value = MODULE_IDS[module];
+        add_new_select.appendChild(opt);
+    }
+    document.getElementById("add_new").addEventListener('click', () => {
+        const moduleElem = eval(add_new_select.value);
+        ui.appendChild(new moduleElem(obj));
     });
 }
-
-const globalCounters = {};

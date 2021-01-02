@@ -79,6 +79,7 @@ vec3 rgb_to_hsv(vec3 rgb) {
 #include "modules/oscillator.frag.c"
 #include "modules/reflector.frag.c"
 #include "modules/rotator.frag.c"
+#include "modules/swirl.frag.c"
 #include "modules/zoom.frag.c"
 
 // TODO split up each module into files
