@@ -156,7 +156,6 @@ class FunctionGenerator{
         const maxy = this.graph.height / 2;
         this.ctx.moveTo(0, maxy);
         for (let i = 0; i < this.graph.width; i++) {
-            console.log(this.func(i, [-1, 1], this.params));
             this.ctx.lineTo(i, maxy - maxy * this.func(i, [-1, 1], this.params));
         }
         this.ctx.stroke();
