@@ -20,8 +20,12 @@ class SynthElementBase extends HTMLElement {
 
     constructor(synth) {
         super();
+        this.synth = synth;
+
         const shadow = this.attachShadow({mode: 'open'});
         const args = this.get_args();
+        this.args = args;
+
         const box = document.createElement('div');
         box.style = "border: solid 1px; padding: 0.5em";
         const title = document.createElement('h2')
@@ -82,7 +86,11 @@ class SynthElementBase extends HTMLElement {
 
             el.appendChild(type);
             type.addEventListener('change', () => {
-                this.onchange(arg, type.value);
+                if (type.customonchange) {
+                    type.customonchange(this);
+                } else {
+                    this.onchange(arg, type.value);
+                }
             });
 
             container.appendChild(document.createElement('br'));
@@ -102,8 +110,6 @@ class SynthElementBase extends HTMLElement {
 
         const constructor = this.get_type();
         synth.add_stage(this.name, new constructor(...params, 1));
-
-        this.synth = synth;
 
         moveup.addEventListener('click', () => {
             const idx = this.synth.stages.indexOf(this.name);

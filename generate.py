@@ -24,11 +24,16 @@ def copy_regular():
         if entry in ["build", "modules", "synth.frag.c"]:
             continue
 
-        shutil.copy("index.html", "build/index.html")
-        shutil.copy("synth.js", "build/synth.js")
-        shutil.copy("synth_element_base.js", "build/synth_element_base.js")
-        shutil.copy("ui.js", "build/ui.js")
-        shutil.copy("function_generator.js", "build/function_generator.js")
+        files = [
+            "customui.js",
+            "function_generator.js",
+            "index.html",
+            "synth.js",
+            "synth_element_base.js",
+            "ui.js",
+        ]
+        for file_ in files:
+            shutil.copy(file_, f"build/{file_}")
 
 def parse(data):
     if isinstance(data, float) or isinstance(data, int):
@@ -97,21 +102,21 @@ def process_module(filename, modules, output):
             line = line.strip().replace(';', '')
             parts = line.split("///")
             assert len(parts) == 2, error_str
+            static_parts = list(filter(lambda x: len(x), parts[0].split(" ")))
+            name = static_parts[2].replace("u_", "")
+            type_ = static_parts[1]
 
-            info = json.loads(parts[1])
-            parts = list(filter(lambda x: len(x), parts[0].split(" ")))
-
-            name = parts[2].replace("u_", "")
-            type_ = parts[1]
-            assert type_ in ("float", "vec2", "vec3"), error_str
-
-            validated_info = validate_info(type_, info)
-            assert validated_info, error_str
-
-            print("   ", name, type_, validated_info)
-
-            # TODO search for doc comment
-            descriptor[name] = {'type': type_, 'info': validated_info}
+            info = parts[1]
+            if "custom" in info:
+                print("   ", name, "CUSTOM")
+                descriptor[name] = {'type': "custom"}
+            else:
+                assert type_ in ("float", "vec2", "vec3"), error_str
+                info = json.loads(info)
+                validated_info = validate_info(type_, info)
+                assert validated_info, error_str
+                print("   ", name, type_, validated_info)
+                descriptor[name] = {'type': type_, 'info': validated_info}
     assert module_name, filename
     modules[module_name] = descriptor
     output += [line.replace('\n', '') for line in lines] + ['\n']
@@ -152,7 +157,10 @@ def create_fragshader():
 
     return modules
 
-def generate_initializer(name, arg):
+def generate_initializer(name, arg, parent_class_name):
+    if arg['type'] == 'custom':
+        return f'{name}: new {parent_class_name}_{name}(this.synth)'
+
     info = arg['info']
 
     initalizer_class = {
@@ -205,7 +213,7 @@ def create_module_library(modules, output):
 
         descriptor = modules[module]
         arg_list = [
-            generate_initializer(name, descriptor[name])
+            generate_initializer(name, descriptor[name], class_name)
             for name in descriptor
         ]
         output.write(textwrap.dedent(

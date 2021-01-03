@@ -56,7 +56,6 @@ class FunctionGenerator{
         this.c = 0;
 
         this.draw_axes();
-        console.log(this);
 
         container.appendChild(document.createElement('br'));
         container.appendChild(document.createElement('br'));

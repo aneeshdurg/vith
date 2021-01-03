@@ -77,6 +77,7 @@ vec3 rgb_to_hsv(vec3 rgb) {
 #include "modules/hue_shift.frag.c"
 #include "modules/noise.frag.c"
 #include "modules/oscillator.frag.c"
+#include "modules/picture.frag.c"
 #include "modules/reflector.frag.c"
 #include "modules/rotator.frag.c"
 #include "modules/swirl.frag.c"
