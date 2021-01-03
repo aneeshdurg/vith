@@ -5,6 +5,15 @@ class GenParams {
     }
 }
 
+class DefaultSinParams extends GenParams {
+    params = {freq: 1, c: 0};
+}
+
+
+class DefaultStepParams extends GenParams {
+    params = {freq: 1};
+}
+
 const sin_generator = (t, range, genparams) => {
     const params = genparams.get();
     let value = Math.sin(params.freq * 2 * Math.PI * t / 1000 + params.c);
@@ -18,10 +27,15 @@ const step_generator = (t, range, genparams) => {
     return ((t / 1000 * params.freq) % (range[1] - range[0])) + range[0];
 };
 
+const generators = {
+    sin: { func: sin_generator, params: new DefaultSinParams() },
+    step: { func: step_generator, params: new DefaultStepParams() }
+}
+
 class FunctionGenerator{
     cancel = false;
 
-    constructor (parentEl, resolver) {
+    constructor (parentEl, current, resolver) {
         const container = document.createElement('div');
         container.className = "functiongen";
 
@@ -75,29 +89,20 @@ class FunctionGenerator{
         function_ui.appendChild(c_label);
         function_ui.appendChild(c_input);
 
-        const set_sin = () => {
+        if (current === "sin") {
             this.func = sin_generator;
-            this.params = new GenParams();
-            this.params.params.freq = 1;
-            this.params.params.c = 0;
+            this.params = new DefaultSinParams();
             c_label.style.display = "";
             c_input.style.display = "";
             c_input.value = 0;
             freq_input.value = 1;
-        };
-        sin_button.addEventListener('click', set_sin);
-
-        const set_step = () => {
+        } else {
             this.func = step_generator;
-            this.params = new GenParams();
-            this.params.params.freq = 1;
+            this.params = new DefaultStepParams();
             c_label.style.display = "none";
             c_input.style.display = "none";
             freq_input.value = 1;
-        };
-        step_button.addEventListener('click', set_step);
-
-        set_sin();
+        }
 
         freq_input.addEventListener('change', () => {
             this.params.params.freq = parseFloat(freq_input.value);

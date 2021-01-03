@@ -1,9 +1,3 @@
-const generators = {
-    sin: (t, range) => (((Math.sin(t / 1000) + 1) / 2) * (range[1] - range[0])) + range[0],
-    step: (time, range) => ((time / 1000) % (range[1] - range[0])) + range[0],
-    // step: (t) => ((t / 1000) % 1) * 2 - 1,
-}
-
 function createModal(resolver) {
     const modal = document.createElement('div');
     modal.addEventListener('click', (e) => {
@@ -121,21 +115,19 @@ class FloatBar extends Type {
         this.value = this.defaultValue;
 
         this.generate = false;
-        let func = generators[func_select.value];
+        let func = generators[func_select.value].func;
+        let params = generators[func_select.value].params;
         const f = (time) => {
             if (this.generate) {
-                let value = func(time, this.range);
-                // value = ((value + 1) / 2);
-                // value *= (this.range[1] - this.range[0]) + this.range[0];
-
-                this.value = value;
-                input.value = value;
+                this.value = func(time, this.range, params);
+                input.value = this.value;
                 this.dispatchEvent(new Event('change'));
                 requestAnimationFrame(f);
             }
         }
         func_select.addEventListener('change', () => {
-            func = generators[func_select.value];
+            func = generators[func_select.value].func;
+            params = generators[func_select.value].params;
         });
         func_gen.addEventListener('change', () => {
             this.generate = func_gen.checked;
@@ -147,12 +139,13 @@ class FloatBar extends Type {
             let resolver = null;
             const p = new Promise(r => { resolver = r; });
             const modal = createModal(resolver);
-            const generator = new FunctionGenerator(modal, resolver);
+            const generator = new FunctionGenerator(modal, func_select.value, resolver);
             const value = await p;
             generator.remove();
             modal.remove();
             if (value) {
-                func = (time, range) => value.func(time, range, value.params);
+                func = value.func;
+                params = value.params;
                 let needs_restart = false;
                 if (!this.generate)
                     needs_restart = true;
