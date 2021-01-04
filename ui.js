@@ -31,6 +31,13 @@ class Type extends HTMLElement {
         this.defaultValue = defaultValue;
         this.shadow = this.attachShadow({mode: 'open'});
     }
+
+    save() {
+        return undefined; // TODO
+    }
+
+    load() {
+    }
 }
 
 class BoolEntry extends Type {
@@ -47,6 +54,16 @@ class BoolEntry extends Type {
         });
 
         this.shadow.appendChild(input);
+    }
+
+    save() {
+        return this.value;
+    }
+
+    load(data) {
+        console.log("loading bool", data);
+        this.value = data;
+        this.dispatchEvent(new Event('change'));
     }
 }
 customElements.define('bool-entry', BoolEntry);
@@ -130,55 +147,49 @@ class FloatBar extends Type {
         const func_gen = document.createElement('input');
         func_gen.id = "generate";
         func_gen.type = 'checkbox';
-        const func_select = document.createElement('select');
+        this.func_select = document.createElement('select');
         const func_modal = document.createElement('button');
         func_modal.innerText = "Edit function";
         Object.keys(generators).forEach((k, i) => {
             const opt = document.createElement('option');
             opt.value = k;
             opt.innerText = k;
-            func_select.appendChild(opt);
+            this.func_select.appendChild(opt);
         });
 
         this.generate = false;
-        let func = generators[func_select.value].func;
-        let params = generators[func_select.value].params;
-        const f = (time) => {
-            if (this.generate) {
-                this.set_value(func(time, this.range, params));
-                requestAnimationFrame(f);
-            }
-        }
-        func_select.addEventListener('change', () => {
-            func = generators[func_select.value].func;
-            params = generators[func_select.value].params;
+        this.func = generators[this.func_select.value].func;
+        this.params = generators[this.func_select.value].params;
+
+        this.func_select.addEventListener('change', () => {
+            this.func = generators[this.func_select.value].func;
+            this.params = generators[this.func_select.value].params;
         });
         func_gen.addEventListener('change', () => {
             this.generate = func_gen.checked;
             if (this.generate)
-                f(0);
+                this.start_generation(0);
         });
 
         func_modal.addEventListener('click', async () => {
             let resolver = null;
             const p = new Promise(r => { resolver = r; });
             const modal = createModal(resolver);
-            const generator = new FunctionGenerator(modal, func_select.value, resolver);
-            const value = await p;
+            const generator = new FunctionGenerator(modal, this.func_select.value, resolver);
+            const params = await p;
             generator.remove();
             modal.remove();
-            if (!value)
+            if (!params)
                 return;
 
-            func = value.func;
-            params = value.params;
+            this.params = params;
             let needs_restart = false;
             if (!this.generate)
                 needs_restart = true;
             this.generate = true;
             func_gen.checked = true;
             if (needs_restart)
-                f(0);
+                this.start_generation(0);
         });
 
         container.appendChild(this.slider);
@@ -187,10 +198,48 @@ class FloatBar extends Type {
         container.appendChild(gen_label);
         if (!supressFunctionGen) {
             container.appendChild(func_gen);
-            container.appendChild(func_select);
+            container.appendChild(this.func_select);
             container.appendChild(func_modal);
         }
         this.shadow.appendChild(container);
+    }
+
+    start_generation(time) {
+        if (this.generate) {
+            this.set_value(this.func(time, this.range, this.params));
+            requestAnimationFrame(this.start_generation.bind(this));
+        }
+    }
+
+    save() {
+        const savedata = {
+            value: this.value,
+        }
+
+        if (this.generate) {
+            savedata.generate = this.generate;
+            savedata.func = this.func_select.value;
+            savedata.params = this.params.save();
+        } else {
+            savedata.generate = false;
+        }
+        return savedata;
+    }
+
+    load(data) {
+        console.log("loading float", data);
+        this.set_value(data.value);
+
+        if (data.generate) {
+            this.params = new GenParams();
+            this.params.load(data.params);
+
+            this.func_select.value = data.func;
+            this.func = generators[this.func_select.value].func;
+
+            this.generate = true;
+            this.start_generation(0);
+        }
     }
 }
 customElements.define('float-bar', FloatBar);
@@ -201,6 +250,7 @@ class VecEntry extends Type {
     constructor(nelem, names, range, defaultValue) {
         super(range, defaultValue);
         this.nelem = nelem;
+        this.names = names;
 
         for (let i = 0; i < this.nelem; i++) {
             const entry = new FloatBar(this.range[i], this.defaultValue[i])
@@ -224,6 +274,23 @@ class VecEntry extends Type {
         }
 
         this.value = this.defaultValue;
+    }
+
+    save() {
+        const values = {}
+        for (let i = 0; i < this.nelem; i++) {
+            values[this.names[i]] = this.floats[i].save();
+        }
+        return values;
+    }
+
+    load(data) {
+        console.log("loading vec", data);
+        for (let name of Object.keys(data)) {
+            const i = this.names.indexOf(name);
+            // TODO validate i
+            this.floats[i].load(data[name]);
+        }
     }
 }
 customElements.define('vec-entry', VecEntry);

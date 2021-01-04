@@ -46,6 +46,10 @@ class Picture_picture_texture extends Type {
             this.img.src = reader.result;
         };
     }
+
+    save() {
+        return undefined; // TODO
+    }
 }
 customElements.define('picture-picture-texture', Picture_picture_texture);
 
@@ -64,6 +68,10 @@ class Picture_picture_dimensions extends Type {
 
     set_value(value) {
         this.data.innerText = value;
+    }
+
+    save() {
+        return undefined; // TODO
     }
 }
 customElements.define('picture-picture-dimensions', Picture_picture_dimensions);
@@ -166,6 +174,10 @@ class Webcam_webcam_texture extends Type {
         f();
 
         this.shadow.appendChild(this.container);
+    }
+
+    save() {
+        return undefined; // TODO
     }
 }
 customElements.define('webcam-webcam-texture', Webcam_webcam_texture);

@@ -35,13 +35,13 @@ class SynthElementBase extends HTMLElement {
         const enable_label = document.createElement('label');
         enable_label.for = "enable";
         enable_label.innerText = "Enable: ";
-        const enable = document.createElement('input');
-        enable.id = "enable";
-        enable.type = 'checkbox';
-        enable.checked = true;
+        this.enable = document.createElement('input');
+        this.enable.id = "enable";
+        this.enable.type = 'checkbox';
+        this.enable.checked = true;
 
         box.appendChild(enable_label);
-        box.appendChild(enable);
+        box.appendChild(this.enable);
 
         const container = document.createElement('div');
         container.style.display = "none";
@@ -100,7 +100,8 @@ class SynthElementBase extends HTMLElement {
             params.push(args[arg].defaultValue);
             createElement(arg, args[arg]);
         }
-        createElement('feedback', new FloatBar([0, 10], 1));
+        this.feedback_el = new FloatBar([0, 10], 1);
+        createElement('feedback', this.feedback_el);
 
         shadow.appendChild(box);
 
@@ -142,10 +143,11 @@ class SynthElementBase extends HTMLElement {
 
             for (let arg of Object.keys(args))
                 args[arg].generate = false;
+            this.feedback_el.generate = false;
         });
 
-        enable.addEventListener('change', () => {
-            this.synth.toggle_stage(this.name, enable.checked);
+        this.enable.addEventListener('change', () => {
+            this.synth.toggle_stage(this.name, this.enable.checked);
         });
     }
 
@@ -154,5 +156,30 @@ class SynthElementBase extends HTMLElement {
             this.synth.stageModules[this.name].feedback = val;
         else
             this.synth.stageModules[this.name].params[arg] = val;
+    }
+
+    save() {
+        const saved_args = {};
+        for (let arg of Object.keys(this.args)) {
+            saved_args[arg] = this.args[arg].save();
+        }
+        saved_args.feedback = this.feedback_el.save();
+
+        return {
+            title: this.get_title(),
+            enabled: this.enable.checked,
+            args: saved_args
+        }
+    }
+
+    load(data) {
+        this.enable.checked = data.enabled;
+        for (let arg of Object.keys(this.args)) {
+            console.log("Loading", arg, data.args[arg]);
+            this.args[arg].load(data.args[arg]);
+        }
+
+        console.log("Loading feedback", data.args.feedback);
+        this.feedback_el.load(data.args.feedback);
     }
 }

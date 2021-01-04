@@ -3,6 +3,14 @@ class GenParams {
     get() {
         return this.params;
     }
+
+    save() {
+        return this.params;
+    }
+
+    load(params) {
+        this.params = params;
+    }
 }
 
 class DefaultSinParams extends GenParams {
@@ -63,13 +71,6 @@ class FunctionGenerator{
         const function_ui = document.createElement('div');
         function_ui.className = 'function-ui';
 
-        const sin_button = document.createElement('button');
-        sin_button.innerText = 'sin';
-        function_ui.appendChild(sin_button);
-        const step_button = document.createElement('button');
-        step_button.innerText = 'step';
-        function_ui.appendChild(step_button);
-
         function_ui.appendChild(document.createElement('br'));
         const freq_label = document.createElement('label');
         freq_label.for = "freq_input";
@@ -125,7 +126,7 @@ class FunctionGenerator{
         done_button.innerText = 'done';
         function_ui.appendChild(done_button);
         done_button.addEventListener('click', () => {
-            resolver({'func': this.func, 'params': this.params});
+            resolver(this.params);
         });
 
         container.appendChild(function_ui);

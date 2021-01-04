@@ -105,4 +105,39 @@ async function synth_main(canvas, root) {
         const moduleElem = eval(add_new_select.value);
         ui.appendChild(new moduleElem(obj));
     });
+
+    document.getElementById("save").addEventListener('click', () => {
+        const saved = [];
+        for (let i = 0; i < ui.children.length; i++) {
+            saved.push(ui.children[i].save());
+        }
+
+        const savedata = encodeURI(JSON.stringify(saved));
+        const downloader = document.createElement('a');
+        downloader.setAttribute('href', 'data:text/plain;charset=utf-8,' + savedata);
+        downloader.setAttribute('download', 'videoSynth.savedata');
+        downloader.style.display = "none";
+        document.body.appendChild(downloader);
+
+        downloader.click();
+
+        document.body.removeChild(downloader);
+    });
+
+    const loadUpload = document.getElementById("load");
+    loadUpload.addEventListener("change", () => {
+        let file = loadUpload.files[0];
+        let reader = new FileReader();
+        reader.readAsText(file)
+        reader.onloadend = () => {
+            const savedata = JSON.parse(reader.result);
+            // TODO validation
+            for (let elem of savedata) {
+                const moduleElem = eval(elem.title + 'Element');
+                const new_elem = new moduleElem(obj);
+                ui.appendChild(new_elem);
+                new_elem.load(elem);
+            }
+        };
+    });
 }
