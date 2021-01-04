@@ -83,6 +83,7 @@ vec3 rgb_to_hsv(vec3 rgb) {
 #include "modules/rotator.frag.c"
 #include "modules/swirl.frag.c"
 #include "modules/threshold.frag.c"
+#include "modules/webcam.frag.c"
 #include "modules/zoom.frag.c"
 
 // TODO split up each module into files
