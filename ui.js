@@ -144,9 +144,9 @@ class FloatBar extends Type {
         const gen_label = document.createElement('label');
         gen_label.for = "generate";
         gen_label.innerText = "function: ";
-        const func_gen = document.createElement('input');
-        func_gen.id = "generate";
-        func_gen.type = 'checkbox';
+        this.func_gen = document.createElement('input');
+        this.func_gen.id = "generate";
+        this.func_gen.type = 'checkbox';
         this.func_select = document.createElement('select');
         const func_modal = document.createElement('button');
         func_modal.innerText = "Edit function";
@@ -165,8 +165,8 @@ class FloatBar extends Type {
             this.func = generators[this.func_select.value].func;
             this.params = generators[this.func_select.value].params;
         });
-        func_gen.addEventListener('change', () => {
-            this.generate = func_gen.checked;
+        this.func_gen.addEventListener('change', () => {
+            this.generate = this.func_gen.checked;
             if (this.generate)
                 this.start_generation(0);
         });
@@ -187,7 +187,7 @@ class FloatBar extends Type {
             if (!this.generate)
                 needs_restart = true;
             this.generate = true;
-            func_gen.checked = true;
+            this.func_gen.checked = true;
             if (needs_restart)
                 this.start_generation(0);
         });
@@ -197,7 +197,7 @@ class FloatBar extends Type {
         container.appendChild(document.createElement('br'));
         container.appendChild(gen_label);
         if (!supressFunctionGen) {
-            container.appendChild(func_gen);
+            container.appendChild(this.func_gen);
             container.appendChild(this.func_select);
             container.appendChild(func_modal);
         }
@@ -236,6 +236,7 @@ class FloatBar extends Type {
 
             this.func_select.value = data.func;
             this.func = generators[this.func_select.value].func;
+            this.func_gen.checked = true;
 
             this.generate = true;
             this.start_generation(0);

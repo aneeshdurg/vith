@@ -48,7 +48,11 @@ class Picture_picture_texture extends Type {
     }
 
     save() {
-        return undefined; // TODO
+        return this.img.src;
+    }
+
+    load(data) {
+        this.img.src = data;
     }
 }
 customElements.define('picture-picture-texture', Picture_picture_texture);
