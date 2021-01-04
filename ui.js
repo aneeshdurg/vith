@@ -31,17 +31,9 @@ class Type extends HTMLElement {
         this.defaultValue = defaultValue;
         this.shadow = this.attachShadow({mode: 'open'});
     }
-
-    validate(entry) {
-        return false;
-    }
 }
 
 class BoolEntry extends Type {
-    validate(entry) {
-        return true;
-    }
-
     constructor(defaultValue) {
         super([0, 0], defaultValue);
 
@@ -59,9 +51,57 @@ class BoolEntry extends Type {
 }
 customElements.define('bool-entry', BoolEntry);
 
+class Slider extends Type {
+    constructor(range, defaultValue) {
+        super(range, defaultValue);
+
+        const container = document.createElement('div');
+        container.style = "padding-bottom: 0.5em;"
+        const bar = document.createElement('div');
+        bar.style = "background: black; width: 10em; height: 1em;";
+        this.slider = document.createElement('div');
+        this.slider.style = "background: white; height: 1em; width: 1%; position: relative; left: 0em";
+
+        const handler = (e) => {
+            if (e.target != bar)
+                return;
+            const rect = e.target.getBoundingClientRect();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+
+            const x = (clientX - rect.left) / rect.width;
+            this.value = x * (this.range[1] - this.range[0]) + this.range[0];
+            this.dispatchEvent(new Event('change'));
+        };
+        bar.addEventListener('mousemove', (e) => { if (e.buttons & 1) handler(e); });
+        bar.addEventListener('touchmove', handler);
+
+        bar.appendChild(this.slider);
+        container.appendChild(bar);
+        this.shadow.appendChild(container);
+    }
+
+    set_value(value) {
+        const x = (value - this.range[0]) / (this.range[1] - this.range[0]);
+        this.slider.style.left = `${x * 10}em`;
+    }
+}
+customElements.define('slider-elem', Slider);
+
 class FloatBar extends Type {
     validate(entry) {
         return !isNaN(entry) && entry >= this.range[0] && entry <= this.range[1];
+    }
+
+    _set_value(value) {
+        this.value = value;
+        this.input.value = this.value;
+        this.slider.set_value(value);
+    }
+
+    set_value(value) {
+        this._set_value(value);
+        this.dispatchEvent(new Event('change'));
     }
 
     constructor(range, defaultValue, supressFunctionGen) {
@@ -69,11 +109,20 @@ class FloatBar extends Type {
 
         const container = document.createElement('div');
 
-        const bar = document.createElement('div');
-        bar.style = "background: black; width: 10em; height: 1em;";
-        const slider = document.createElement('div');
-        slider.style = "background: white; height: 1em; width: 1%; position: relative; left: 0em";
-        const input = document.createElement('input');
+        this.slider = new Slider(range, defaultValue);
+        this.input = document.createElement('input');
+        this._set_value(this.defaultValue);
+
+        this.input.addEventListener('change', () => {
+            const value = parseFloat(this.input.value);
+            if (!this.validate(value)) {
+                this.input.style = "color: red";
+            } else {
+                this.input.style = "";
+                this.set_value(value);
+            }
+        });
+        this.slider.addEventListener('change', () => { this.set_value(this.slider.value); });
 
         const gen_label = document.createElement('label');
         gen_label.for = "generate";
@@ -91,59 +140,12 @@ class FloatBar extends Type {
             func_select.appendChild(opt);
         });
 
-        const percent = 10 * (this.defaultValue - this.range[0]) / (this.range[1] - this.range[0]);
-        slider.style.left = `${percent}em`;
-        this.slider = slider;
-
-        let enable = false;
-        const enable_handler = () => { enable = true; };
-        const disable_handler = () => { enable = false; };
-
-        const handler = (e) => {
-            if (!enable || e.target != bar)
-                return;
-            const rect = e.target.getBoundingClientRect();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
-
-            const x = (clientX - rect.left) / rect.width;
-            slider.style.left = `${x * 10}em`;
-            this.value = x * (this.range[1] - this.range[0]) + this.range[0];
-            input.value = this.value;
-
-            this.dispatchEvent(new Event('change'));
-        };
-
-        bar.addEventListener('mousedown', enable_handler);
-        bar.addEventListener('mousemove', handler);
-        bar.addEventListener('mouseup', disable_handler);
-
-        bar.addEventListener('touchmove', handler);
-        input.addEventListener('change', () => {
-            const value = parseFloat(input.value);
-            if (!this.validate(value)) {
-                input.style = "color: red";
-            } else {
-                input.style = "";
-                this.value = value;
-                const x = (value - this.range[0]) / (this.range[1] - this.range[0]);
-                slider.style.left = `${x * 10}em`;
-            }
-
-            this.dispatchEvent(new Event('change'));
-        });
-
-        input.value = this.defaultValue;
-        this.value = this.defaultValue;
-
         this.generate = false;
         let func = generators[func_select.value].func;
         let params = generators[func_select.value].params;
         const f = (time) => {
             if (this.generate) {
-                this.value = func(time, this.range, params);
-                input.value = this.value;
-                this.dispatchEvent(new Event('change'));
+                this.set_value(func(time, this.range, params));
                 requestAnimationFrame(f);
             }
         }
@@ -165,24 +167,22 @@ class FloatBar extends Type {
             const value = await p;
             generator.remove();
             modal.remove();
-            if (value) {
-                func = value.func;
-                params = value.params;
-                let needs_restart = false;
-                if (!this.generate)
-                    needs_restart = true;
-                this.generate = true;
-                func_gen.checked = true;
-                if (needs_restart)
-                    f(0);
-            } else {
-                // we didn't get a value
-            }
+            if (!value)
+                return;
+
+            func = value.func;
+            params = value.params;
+            let needs_restart = false;
+            if (!this.generate)
+                needs_restart = true;
+            this.generate = true;
+            func_gen.checked = true;
+            if (needs_restart)
+                f(0);
         });
 
-        bar.appendChild(slider);
-        container.appendChild(bar);
-        container.appendChild(input);
+        container.appendChild(this.slider);
+        container.appendChild(this.input);
         container.appendChild(document.createElement('br'));
         container.appendChild(gen_label);
         if (!supressFunctionGen) {

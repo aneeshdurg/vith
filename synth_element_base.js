@@ -82,7 +82,7 @@ class SynthElementBase extends HTMLElement {
             const el = document.createElement('div');
             container.appendChild(el);
             el.id = arg;
-            el.style = "display: inline;";
+            el.style = "padding-left: 2em;";
 
             el.appendChild(type);
             type.addEventListener('change', () => {
