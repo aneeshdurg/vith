@@ -6,6 +6,8 @@ class Picture_picture_texture extends Type {
     customonchange(element) {
         this.synth.stageModules[element.name].params['picture_texture'] = this.tex;
         this.synth.stageModules[element.name].params['picture_dimensions'] = this.dimensions;
+
+        element.args.picture_dimensions.set_value(this.dimensions);
     }
 
     imgload() {
@@ -59,6 +61,10 @@ class Picture_picture_dimensions extends Type {
         this.data.style = 'border: solid 1px; padding: 2px';
         this.data.innerText = synth.dimensions;
         this.shadow.appendChild(this.data);
+    }
+
+    set_value(value) {
+        this.data.innerText = value;
     }
 }
 customElements.define('picture-picture-dimensions', Picture_picture_dimensions);

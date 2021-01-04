@@ -37,6 +37,28 @@ class Type extends HTMLElement {
     }
 }
 
+class BoolEntry extends Type {
+    validate(entry) {
+        return true;
+    }
+
+    constructor(defaultValue) {
+        super([0, 0], defaultValue);
+
+        const input = document.createElement('input');
+        input.id = "generate";
+        input.type = 'checkbox';
+        input.checked = defaultValue;
+        input.addEventListener('change', () => {
+            this.value = input.checked;
+            this.dispatchEvent(new Event('change'));
+        });
+
+        this.shadow.appendChild(input);
+    }
+}
+customElements.define('bool-entry', BoolEntry);
+
 class FloatBar extends Type {
     validate(entry) {
         return !isNaN(entry) && entry >= this.range[0] && entry <= this.range[1];

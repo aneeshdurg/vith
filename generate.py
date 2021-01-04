@@ -36,7 +36,9 @@ def copy_regular():
             shutil.copy(file_, f"build/{file_}")
 
 def parse(data):
-    if isinstance(data, float) or isinstance(data, int):
+    if isinstance(data, bool):
+        return data
+    elif isinstance(data, float) or isinstance(data, int):
         return float(data)
     elif isinstance(data, str):
         try:
@@ -52,17 +54,22 @@ def parse(data):
     return None
 
 def validate_info(type_, info):
-    if 'start' not in info or 'end' not in info:
-        return None
+    if type_ != "bool":
+        if 'start' not in info or 'end' not in info:
+            print("no start or end")
+            return None
 
-    start = parse(info['start'])
-    if start is None:
-        print("invalid start", info['start'])
-        return None
-    end = parse(info['end'])
-    if end is None:
-        print("invalid end", info['end'])
-        return None
+        start = parse(info['start'])
+        if start is None:
+            print("invalid start", info['start'])
+            return None
+        end = parse(info['end'])
+        if end is None:
+            print("invalid end", info['end'])
+            return None
+    else:
+        start = True
+        end = False
     default = parse(info['default'])
     if default is None:
         print("invalid default", info['default'])
@@ -71,6 +78,8 @@ def validate_info(type_, info):
     valid = None
     if type_ == "float":
         valid = lambda b: isinstance(b, float)
+    elif type_ == "bool":
+        valid = lambda b: isinstance(b, bool)
     elif type_.startswith('vec'):
         count = int(type_[len('vec'):])
         valid = lambda b: isinstance(b, list) and len(b) == count
@@ -78,6 +87,7 @@ def validate_info(type_, info):
         assert False, "!!!"
 
     if not valid(start) or not valid(end) or not valid(default):
+        print("invalid boundries", start, end, default)
         return None
 
     names = None
@@ -111,7 +121,7 @@ def process_module(filename, modules, output):
                 print("   ", name, "CUSTOM")
                 descriptor[name] = {'type': "custom"}
             else:
-                assert type_ in ("float", "vec2", "vec3"), error_str
+                assert type_ in ("bool", "float", "vec2", "vec3"), error_str
                 info = json.loads(info)
                 validated_info = validate_info(type_, info)
                 assert validated_info, error_str
@@ -164,7 +174,10 @@ def generate_initializer(name, arg, parent_class_name):
     info = arg['info']
 
     initalizer_class = {
-        'float': 'FloatBar', 'vec2': 'VecEntry', 'vec3': 'VecEntry'
+        'bool': 'BoolEntry',
+        'float': 'FloatBar',
+        'vec2': 'VecEntry',
+        'vec3': 'VecEntry'
     }
     class_name = initalizer_class[arg['type']]
 
@@ -173,6 +186,8 @@ def generate_initializer(name, arg, parent_class_name):
         initalizer += '[{},{}], {}'.format(
             info['start'], info['end'], info['default']
         )
+    elif arg['type'] == 'bool':
+        initalizer += '{}'.format(json.dumps(info['default']))
     else:
         count = int(arg['type'][len('vec'):])
         names = ','.join(['"{}"'.format(x) for x in info['names']])

@@ -139,6 +139,9 @@ class SynthElementBase extends HTMLElement {
         remove.addEventListener('click', () => {
             this.synth.remove_stage(this.name);
             this.remove();
+
+            for (let arg of Object.keys(args))
+                args[arg].generate = false;
         });
 
         enable.addEventListener('change', () => {
