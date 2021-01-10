@@ -1,5 +1,5 @@
 body {
-    font-family: sans-serif
+    font-family: sans-serif;
 }
 
 .sidebar {
@@ -16,8 +16,11 @@ body {
 
 .display-container {
     height: 100%;
-    width: 75%;
-    text-align: center;
+    width: 70%;
+    /*text-align: center;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .functiongen {

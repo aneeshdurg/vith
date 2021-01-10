@@ -75,7 +75,7 @@ class Picture_picture_dimensions extends Type {
     }
 
     save() {
-        return undefined; // TODO
+        return undefined;
     }
 }
 customElements.define('picture-picture-dimensions', Picture_picture_dimensions);
@@ -181,7 +181,7 @@ class Webcam_webcam_texture extends Type {
     }
 
     save() {
-        return undefined; // TODO
+        return undefined;
     }
 }
 customElements.define('webcam-webcam-texture', Webcam_webcam_texture);

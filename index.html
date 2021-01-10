@@ -18,6 +18,8 @@
     <script src="function_generator.js"></script>
     <script src="synth_element_base.js"></script>
     <script src="module_lib.js"></script>
+    <script src="meta_module.js"></script>
+    <script src="saveload.js"></script>
     <script src="synth.js"></script>
 
     <script>
@@ -36,7 +38,7 @@
                 <button id="controls-next" class="controls-next">next</button>
                 <br>
                 <div id ="controls-0">
-                    <h2> Add new module </h2>
+                    <h2> Add new stage </h2>
                     <button id="add_new">Add new</button>
                     <select id="add_new_select"></select>
                 </div>
@@ -44,19 +46,23 @@
                     <div>
                         <h2> Add/create meta module </h2>
                         <p>
-                        Click create and select modules below to add to a new <i>meta module</i>
+                        Combine multiple stages into a <i>meta module</i>!
                         </p>
                         <button id="create-module">Create</button>
+                        <!-- TODO edit/delete -->
                         <div id="add-meta-module" style="display: none;">
                             <button id="add-meta">Add new</button>
                             <select id="add-meta-select"></select>
                         </div>
-                        <!-- TODO list created modules -->
                     </div>
                 </div>
                 <div id="controls-2" style="display: none">
-                    <h2> Save/load </h2>
-                    <button id="save">Save</button>
+                    <h2> Save / Load </h2>
+                    <p>
+                    Save the current synth or load a previous save
+                    </p>
+                    <button id="save">Save current synth</button>
+                    <br>
                     <br>
                     <label for="load">Load: </label>
                     <input id="load" type="file" accept="text/*"></text>

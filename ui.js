@@ -33,7 +33,7 @@ class Type extends HTMLElement {
     }
 
     save() {
-        return undefined; // TODO
+        return undefined;
     }
 
     load() {

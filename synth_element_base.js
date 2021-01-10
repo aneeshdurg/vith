@@ -171,12 +171,10 @@ class SynthElementBase extends SynthStageBase {
     }
 
     onchange(arg, val) {
-        try {
-            if (arg === "feedback")
-                this.synth.stageModules[this.name].feedback = val;
-            else
-                this.synth.stageModules[this.name].params[arg] = val;
-        } catch (e) {} // TODO
+        if (arg === "feedback")
+            this.synth.stageModules[this.name].feedback = val;
+        else
+            this.synth.stageModules[this.name].params[arg] = val;
     }
 
     save() {

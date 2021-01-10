@@ -86,7 +86,6 @@ vec3 rgb_to_hsv(vec3 rgb) {
 #include "modules/webcam.frag.c"
 #include "modules/zoom.frag.c"
 
-// TODO split up each module into files
 void main() {
     vec2 coords = gl_FragCoord.xy;
     vec2 c = coords * u_tex_dimensions / u_dimensions;
