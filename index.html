@@ -1,59 +1,5 @@
-<style>
-body {
-    font-family: sans-serif
-}
-
-.sidebar {
-    float: left;
-    height: 100%;
-    width: 25%;
-    overflow: auto;
-    border: solid 2px;
-}
-
-#ui {
-    padding: 0.5em;
-}
-
-.display-container {
-    height: 100%;
-    width: 75%;
-    text-align: center;
-}
-
-.functiongen {
-    background: white;
-
-    position: fixed;
-    left: 25%;
-    width: 50%;
-    top: 10%;
-    height: 80%;
-
-    border: solid 1px;
-    padding: 0.5em;
-    text-align: center;
-
-    overflow: auto;
-}
-
-.function-ui {
-    text-align: left;
-    width: 80%;
-    display: inline-block;
-}
-
-canvas {
-    height: 70%;
-    display: inline;
-}
-
-.functioncanvas {
-    width: 80%;
-}
-</style>
-
 <head>
+    <link rel="stylesheet" href="style.css">
     <script src="https://aneeshdurg.me/webgl-common/common.js"></script>
     <script>
     class Function {
@@ -82,23 +28,58 @@ canvas {
     </script>
 </head>
 <body>
-<div class="sidebar">
-    <a href="../"><h1 id="title">Video Synthesizer</h1></a>
-    <div id="ui">
-        <button id="save">Save</button>
-        <label for="load">Load: </label>
-        <input id="load" type="file" accept="text/*"></text>
-        <br>
-        <h2> Add new module </h2>
-        <button id="add_new">Add new</button>
-        <select id="add_new_select"></select>
-        <br>
-        <hr>
-        <br>
-        <div id="ui-container"></div>
+    <div class="sidebar">
+        <div id="ui">
+            <h1 class="title">Video Synthesizer</h1>
+            <div id="controls">
+                <button id="controls-prev" class="controls-prev">prev</button>
+                <button id="controls-next" class="controls-next">next</button>
+                <br>
+                <div id ="controls-0">
+                    <h2> Add new module </h2>
+                    <button id="add_new">Add new</button>
+                    <select id="add_new_select"></select>
+                </div>
+                <div id="controls-1" style="display: none">
+                    <div>
+                        <h2> Add/create meta module </h2>
+                        <p>
+                        Click create and select modules below to add to a new <i>meta module</i>
+                        </p>
+                        <button id="create-module">Create</button>
+                        <div id="add-meta-module" style="display: none;">
+                            <button id="add-meta">Add new</button>
+                            <select id="add-meta-select"></select>
+                        </div>
+                        <!-- TODO list created modules -->
+                    </div>
+                </div>
+                <div id="controls-2" style="display: none">
+                    <h2> Save/load </h2>
+                    <button id="save">Save</button>
+                    <br>
+                    <label for="load">Load: </label>
+                    <input id="load" type="file" accept="text/*"></text>
+                </div>
+                <!--
+                <div id="controls-3" style="display: none">
+                    <h2> Record </h2>
+                    <input
+                        type="number"
+                        min="0"
+                        value="100"
+                        id="record-duration"></input>
+                    <button id="Record">Record</button>
+                </div>
+                -->
+            </div>
+            <br>
+            <hr>
+            <br>
+            <div id="ui-container"></div>
+        </div>
     </div>
-</div>
-<div class="display-container">
-    <canvas id="glcanvas"></canvas>
-</div>
+    <div class="display-container">
+        <canvas id="glcanvas"></canvas>
+    </div>
 </body>

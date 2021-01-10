@@ -1,30 +1,19 @@
 const globalCounters = {};
 
-class SynthElementBase extends HTMLElement {
+class SynthStageBase extends HTMLElement {
     get_title() {
         return "";
     }
 
-    get_args() {
-        //returns a map of str -> Type
-        return {};
-    }
-
-    get_type() {
-        return Type;
-    }
-
-    get_feedback() {
-        return 0;
-    }
-
-    constructor(synth) {
+    constructor(synth, pre_setup) {
         super();
+        if (pre_setup)
+            pre_setup(this);
+
         this.synth = synth;
 
         const shadow = this.attachShadow({mode: 'open'});
-        const args = this.get_args();
-        this.args = args;
+        this.shadow = shadow;
 
         const box = document.createElement('div');
         box.style = "border: solid 1px; padding: 0.5em";
@@ -35,16 +24,17 @@ class SynthElementBase extends HTMLElement {
         const enable_label = document.createElement('label');
         enable_label.for = "enable";
         enable_label.innerText = "Enable: ";
-        this.enable = document.createElement('input');
-        this.enable.id = "enable";
-        this.enable.type = 'checkbox';
-        this.enable.checked = true;
+        this.enable_el = document.createElement('input');
+        this.enable_el.id = "enable";
+        this.enable_el.type = 'checkbox';
+        this.enable_el.checked = true;
 
         box.appendChild(enable_label);
-        box.appendChild(this.enable);
+        box.appendChild(this.enable_el);
 
         const container = document.createElement('div');
         container.style.display = "none";
+        this.container = container;
         box.appendChild(container);
 
         this.container_visible = false;
@@ -66,51 +56,14 @@ class SynthElementBase extends HTMLElement {
         movedn.innerText = 'Move down';
         container.appendChild(movedn);
 
-        const remove = document.createElement('button');
-        remove.innerText = 'Remove';
-        container.appendChild(remove);
+        this.remove_btn = document.createElement('button');
+        this.remove_btn.innerText = 'Remove';
+        container.appendChild(this.remove_btn);
 
         container.appendChild(document.createElement('br'));
 
-        const params = [];
-        const createElement = (arg, type) => {
-            const label = document.createElement('label');
-            container.appendChild(label);
-            label.for = arg;
-            label.innerText = `${arg}: `;
-
-            const el = document.createElement('div');
-            container.appendChild(el);
-            el.id = arg;
-            el.style = "padding-left: 2em;";
-
-            el.appendChild(type);
-            type.addEventListener('change', () => {
-                if (type.customonchange) {
-                    type.customonchange(this);
-                } else {
-                    this.onchange(arg, type.value);
-                }
-            });
-
-            container.appendChild(document.createElement('br'));
-        };
-
-        for (let arg of Object.keys(args)) {
-            params.push(args[arg].defaultValue);
-            createElement(arg, args[arg]);
-        }
-        this.feedback_el = new FloatBar([0, 10], 1);
-        createElement('feedback', this.feedback_el);
 
         shadow.appendChild(box);
-
-        const counter = globalCounters[this.get_title()] || 0;
-        globalCounters[this.get_title()] = counter + 1;
-        this.name = `${this.get_title()}-${counter}`;
-
-        const constructor = this.get_type();
-        synth.add_stage(this.name, new constructor(...params, 1));
 
         moveup.addEventListener('click', () => {
             const idx = this.synth.stages.indexOf(this.name);
@@ -137,7 +90,7 @@ class SynthElementBase extends HTMLElement {
             }
         });
 
-        remove.addEventListener('click', () => {
+        this.remove_btn.addEventListener('click', () => {
             this.synth.remove_stage(this.name);
             this.remove();
 
@@ -146,16 +99,84 @@ class SynthElementBase extends HTMLElement {
             this.feedback_el.generate = false;
         });
 
-        this.enable.addEventListener('change', () => {
-            this.synth.toggle_stage(this.name, this.enable.checked);
+        this.enable_el.addEventListener('change', () => {
+            this.synth.toggle_stage(this.name, this.enable_el.checked);
         });
     }
 
+    reparent_to_module(module) {
+        this.remove_btn.style.display = "none";
+        this.synth = module;
+        // this.parentElement = module;
+    }
+}
+
+class SynthElementBase extends SynthStageBase {
+    get_args() {
+        //returns a map of str -> Type
+        return {};
+    }
+
+    get_type() {
+        return Type;
+    }
+
+    get_feedback() {
+        return 0;
+    }
+
+    constructor(synth) {
+        super(synth);
+        const args = this.get_args();
+        this.args = args;
+
+        const params = [];
+        const createElement = (arg, type) => {
+            const label = document.createElement('label');
+            this.container.appendChild(label);
+            label.for = arg;
+            label.innerText = `${arg}: `;
+
+            const el = document.createElement('div');
+            this.container.appendChild(el);
+            el.id = arg;
+            el.style = "padding-left: 2em;";
+
+            el.appendChild(type);
+            type.addEventListener('change', () => {
+                if (type.customonchange) {
+                    type.customonchange(this);
+                } else {
+                    this.onchange(arg, type.value);
+                }
+            });
+
+            this.container.appendChild(document.createElement('br'));
+        };
+
+        for (let arg of Object.keys(args)) {
+            params.push(args[arg].defaultValue);
+            createElement(arg, args[arg]);
+        }
+        this.feedback_el = new FloatBar([0, 10], 1);
+        createElement('feedback', this.feedback_el);
+
+        const counter = globalCounters[this.get_title()] || 0;
+        globalCounters[this.get_title()] = counter + 1;
+        this.name = `${this.get_title()}-${counter}`;
+
+        const constructor = this.get_type();
+        synth.add_stage(this.name, new constructor(...params, 1));
+
+    }
+
     onchange(arg, val) {
-        if (arg === "feedback")
-            this.synth.stageModules[this.name].feedback = val;
-        else
-            this.synth.stageModules[this.name].params[arg] = val;
+        try {
+            if (arg === "feedback")
+                this.synth.stageModules[this.name].feedback = val;
+            else
+                this.synth.stageModules[this.name].params[arg] = val;
+        } catch (e) {} // TODO
     }
 
     save() {
@@ -167,19 +188,19 @@ class SynthElementBase extends HTMLElement {
 
         return {
             title: this.get_title(),
-            enabled: this.enable.checked,
+            enabled: this.enable_el.checked,
             args: saved_args
         }
     }
 
     load(data) {
-        this.enable.checked = data.enabled;
+        this.enable_el.checked = data.enabled;
         for (let arg of Object.keys(this.args)) {
-            console.log("Loading", arg, data.args[arg]);
+            // console.log("Loading", arg, data.args[arg]);
             this.args[arg].load(data.args[arg]);
         }
 
-        console.log("Loading feedback", data.args.feedback);
+        // console.log("Loading feedback", data.args.feedback);
         this.feedback_el.load(data.args.feedback);
     }
 }

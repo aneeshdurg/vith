@@ -28,6 +28,7 @@ def copy_regular():
             "customui.js",
             "function_generator.js",
             "index.html",
+            "style.css",
             "synth.js",
             "synth_element_base.js",
             "ui.js",

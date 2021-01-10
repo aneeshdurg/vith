@@ -9,7 +9,7 @@ void swirl() {
     float r = length(c);
     float theta = atan(c.y, c.x);
     theta += r * u_factor;
-    c = r * vec2(sin(theta), cos(theta));
+    c = r * vec2(cos(theta), sin(theta));
 
     c  = (c + 1.) / 2.;
     c *= u_tex_dimensions;

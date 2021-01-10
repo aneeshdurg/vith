@@ -1,0 +1,74 @@
+body {
+    font-family: sans-serif
+}
+
+.sidebar {
+    float: left;
+    height: 100%;
+    width: 25%;
+    overflow: auto;
+    border: solid 2px;
+}
+
+#ui {
+    padding: 0.5em;
+}
+
+.display-container {
+    height: 100%;
+    width: 75%;
+    text-align: center;
+}
+
+.functiongen {
+    background: white;
+
+    position: fixed;
+    left: 25%;
+    width: 50%;
+    top: 10%;
+    height: 80%;
+
+    border: solid 1px;
+    padding: 0.5em;
+    text-align: center;
+
+    overflow: auto;
+}
+
+.function-ui {
+    text-align: left;
+    width: 80%;
+    display: inline-block;
+}
+
+canvas {
+    height: 70%;
+    display: inline;
+}
+
+.functioncanvas {
+    width: 80%;
+}
+
+.controls-next {
+    float: right;
+}
+
+.controls-prev {
+    float: left;
+}
+
+.create-module-ui {
+    border: solid 1px;
+    padding: 1em;
+}
+
+.create-module-selection {
+    border: solid 1px;
+    padding: 1em;
+}
+
+.errors {
+    color: red;
+}

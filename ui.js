@@ -61,7 +61,7 @@ class BoolEntry extends Type {
     }
 
     load(data) {
-        console.log("loading bool", data);
+        // console.log("loading bool", data);
         this.value = data;
         this.dispatchEvent(new Event('change'));
     }
@@ -227,7 +227,9 @@ class FloatBar extends Type {
     }
 
     load(data) {
-        console.log("loading float", data);
+        if (data === undefined)
+            return;
+        // console.log("loading float", data);
         this.set_value(data.value);
 
         if (data.generate) {
@@ -286,7 +288,9 @@ class VecEntry extends Type {
     }
 
     load(data) {
-        console.log("loading vec", data);
+        if (data === undefined)
+            return;
+        // console.log("loading vec", data);
         for (let name of Object.keys(data)) {
             const i = this.names.indexOf(name);
             // TODO validate i
