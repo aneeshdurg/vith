@@ -7,7 +7,10 @@ import re
 import shutil
 import textwrap
 
-def setup_build_dir():
+from dataclasses import dataclass
+from typing import Callable, Dict, Optional
+
+def setup_build_dir() -> None:
     os.makedirs("build", exist_ok=True)
     os.chdir("build")
     for g in glob.glob("*"):
@@ -18,7 +21,7 @@ def setup_build_dir():
 
     os.chdir("..")
 
-def copy_regular():
+def copy_regular() -> None:
     print("Copying regular files")
     for entry in os.listdir('.'):
         if entry in ["build", "modules", "synth.frag.c"]:
@@ -38,11 +41,11 @@ def copy_regular():
         for file_ in files:
             shutil.copy(file_, f"build/{file_}")
 
-def parse(data):
+def parse(data) -> None:
     if isinstance(data, bool):
         return data
     elif isinstance(data, float) or isinstance(data, int):
-        return float(data)
+        return data
     elif isinstance(data, str):
         try:
             parsed = float(eval(data))
@@ -56,7 +59,23 @@ def parse(data):
         return parsed
     return None
 
-def validate_info(type_, info):
+@dataclass
+class TypeInfo:
+    constructor: str
+    validator: Callable[..., bool]
+
+type_info: Dict[str, TypeInfo] = {
+    'bool': TypeInfo('BoolEntry', lambda b: isinstance(b, bool)),
+    'float': TypeInfo(
+        'FloatBar',
+        lambda b: isinstance(b, float) or isinstance(b, int)
+    ),
+    'int': TypeInfo('IntEntry', lambda b: isinstance(b, int)),
+    'vec2': TypeInfo('VecEntry', lambda b: isinstance(b, list) and len(b) == 2),
+    'vec3': TypeInfo('VecEntry', lambda b: isinstance(b, list) and len(b) == 3),
+}
+
+def validate_info(type_: str, info: Dict) -> Optional[Dict]:
     if type_ != "bool":
         if 'start' not in info or 'end' not in info:
             print("no start or end")
@@ -78,17 +97,7 @@ def validate_info(type_, info):
         print("invalid default", info['default'])
         return None
 
-    valid = None
-    if type_ == "float":
-        valid = lambda b: isinstance(b, float)
-    elif type_ == "bool":
-        valid = lambda b: isinstance(b, bool)
-    elif type_.startswith('vec'):
-        count = int(type_[len('vec'):])
-        valid = lambda b: isinstance(b, list) and len(b) == count
-    else:
-        assert False, "!!!"
-
+    valid = type_info[type_].validator
     if not valid(start) or not valid(end) or not valid(default):
         print("invalid boundries", start, end, default)
         return None
@@ -124,7 +133,7 @@ def process_module(filename, modules, output):
                 print("   ", name, "CUSTOM")
                 descriptor[name] = {'type': "custom"}
             else:
-                assert type_ in ("bool", "float", "vec2", "vec3"), error_str
+                assert type_ in type_info, error_str
                 info = json.loads(info)
                 validated_info = validate_info(type_, info)
                 assert validated_info, error_str
@@ -170,22 +179,17 @@ def create_fragshader():
 
     return modules
 
+
 def generate_initializer(name, arg, parent_class_name):
     if arg['type'] == 'custom':
         return f'{name}: new {parent_class_name}_{name}(this.synth)'
 
     info = arg['info']
 
-    initalizer_class = {
-        'bool': 'BoolEntry',
-        'float': 'FloatBar',
-        'vec2': 'VecEntry',
-        'vec3': 'VecEntry'
-    }
-    class_name = initalizer_class[arg['type']]
+    class_name = type_info[arg['type']].constructor
 
     initalizer = f"new {class_name}("
-    if arg['type'] == 'float':
+    if arg['type'] in ['float', 'int']:
         initalizer += '[{},{}], {}'.format(
             info['start'], info['end'], info['default']
         )

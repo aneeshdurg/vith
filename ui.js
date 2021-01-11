@@ -128,6 +128,12 @@ class FloatBar extends Type {
 
         this.slider = new Slider(range, defaultValue);
         this.input = document.createElement('input');
+        this.input.style.boxShadow = "none";
+        this.input.type = "number";
+        this.input.min = this.range[0];
+        this.input.max = this.range[1];
+        this.input.step = (this.range[1] - this.range[0]) / 1000;
+
         this._set_value(this.defaultValue);
 
         this.input.addEventListener('change', () => {
@@ -246,6 +252,19 @@ class FloatBar extends Type {
     }
 }
 customElements.define('float-bar', FloatBar);
+
+class IntEntry extends FloatBar {
+    _set_value(value) {
+        value = Math.round(value);
+        super._set_value(value);
+    }
+
+    constructor(range, defaultValue, supressFunctionGen) {
+        super(range, defaultValue, supressFunctionGen);
+        this.input.step = 1;
+    }
+}
+customElements.define('int-entry', IntEntry);
 
 class VecEntry extends Type {
     floats = []
