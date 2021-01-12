@@ -81,6 +81,7 @@ vec3 rgb_to_hsv(vec3 rgb) {
 #include "modules/picture.frag.c"
 #include "modules/reflector.frag.c"
 #include "modules/rotator.frag.c"
+#include "modules/superformula.frag.c"
 #include "modules/swirl.frag.c"
 #include "modules/threshold.frag.c"
 #include "modules/tile.frag.c"

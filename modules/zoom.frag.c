@@ -6,7 +6,8 @@ void zoom() {
     vec2 coords = gl_FragCoord.xy / u_dimensions;
 
     coords = coords - u_zoom_center;
-    coords /= u_zoom;
+    if (u_zoom > 0.)
+        coords /= u_zoom;
     coords += u_zoom_center;
 
     vec2 c = coords * u_tex_dimensions;
