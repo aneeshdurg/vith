@@ -1,4 +1,6 @@
 /// modulefn: swirl
+/// moduletag: space
+
 uniform float u_factor; /// { "start": 0, "end": "2 * math.pi", "default": 0 }
 
 void swirl() {

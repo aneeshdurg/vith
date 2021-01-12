@@ -1,4 +1,5 @@
 /// modulefn: superformula
+/// moduletag: generator
 
 uniform vec3 u_sf_color; /// { "start": [0, 0, 0], "end": [1, 1, 1], "default": [1, 0, 0], "names": ["r", "g", "b"] }
 uniform float u_sf_m; /// { "start": 1, "end": 10, "default": 1 }

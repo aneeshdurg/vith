@@ -1,4 +1,5 @@
 /// modulefn: threshold
+/// moduletag: color
 
 uniform bool u_theshold_high_r; /// { "default": true }
 uniform bool u_theshold_high_g; /// { "default": true }

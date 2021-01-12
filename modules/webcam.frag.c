@@ -1,4 +1,6 @@
 /// modulefn: webcam
+/// moduletag: generator
+
 uniform sampler2D u_webcam_texture; /// custom
 uniform vec2 u_webcam_dimensions; /// custom
 uniform bool u_webcam_invert_x; ///  { "default": true }

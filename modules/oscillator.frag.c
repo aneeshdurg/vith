@@ -1,4 +1,5 @@
 /// modulefn: oscillator
+/// moduletag: generator
 
 // sin(dot(f, x) + c) * color
 uniform vec2 u_osc_f; /// { "start": [0, 0], "end": [1, 1], "default": [0.25, 0], "names": ["x", "y"] }

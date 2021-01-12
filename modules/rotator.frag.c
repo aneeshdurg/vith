@@ -1,4 +1,6 @@
 /// modulefn: rotate
+/// moduletag: space
+
 uniform float u_rotation; /// { "start": 0, "end": "2 * math.pi", "default": 0 }
 
 void rotate() {

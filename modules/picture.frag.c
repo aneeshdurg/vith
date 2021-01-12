@@ -1,4 +1,6 @@
 /// modulefn: picture
+/// moduletag: generator
+
 uniform sampler2D u_picture_texture; /// custom
 uniform vec2 u_picture_dimensions; /// custom
 

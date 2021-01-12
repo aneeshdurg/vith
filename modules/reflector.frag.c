@@ -1,4 +1,6 @@
 /// modulefn: reflector
+/// moduletag: space
+
 uniform float u_reflect_theta; /// { "start": 0, "end": "2 * math.pi", "default": "math.pi / 2" }
 uniform float u_reflect_y; /// { "start": -1, "end": 1, "default": 0 }
 uniform float u_reflect_x; /// { "start": -1, "end": 1, "default": 0 }

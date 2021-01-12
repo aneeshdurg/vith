@@ -1,4 +1,5 @@
 /// modulefn: tile
+/// moduletag: space
 
 uniform int u_tile_x; /// { "start": 1, "end": 100, "default": 1 }
 uniform int u_tile_y; /// { "start": 1, "end": 100, "default": 1 }

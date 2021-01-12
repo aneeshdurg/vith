@@ -1,4 +1,6 @@
 /// modulefn: hue_shift
+/// moduletag: color
+
 uniform float u_hue_shift; /// { "start": 0, "end": 360, "default": 180 }
 uniform float u_saturate_shift; /// { "start": 0, "end": 1, "default": 0 }
 

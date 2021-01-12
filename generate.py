@@ -115,10 +115,13 @@ def process_module(filename, modules, output):
         lines = f.readlines()
     descriptor = {}
     module_name = None
+    module_tag = None
     for line in lines:
         if line.startswith("/// modulefn: "):
             module_name = line.split(':')[1].strip()
-        if line.startswith("uniform"):
+        elif line.startswith("/// moduletag: "):
+            module_tag = line.split(':')[1].strip()
+        elif line.startswith("uniform"):
             error_str = "Invalid line: {}".format(line)
 
             line = line.strip().replace(';', '')
@@ -139,7 +142,10 @@ def process_module(filename, modules, output):
                 assert validated_info, error_str
                 print("   ", name, type_, validated_info)
                 descriptor[name] = {'type': type_, 'info': validated_info}
+
     assert module_name, filename
+    assert module_tag, filename
+    descriptor['__module_tag'] = module_tag
     modules[module_name] = descriptor
     output += [line.replace('\n', '') for line in lines] + ['\n']
 
@@ -218,8 +224,9 @@ def create_module_library(modules, output):
         initalizer = ""
         args = ""
         for param in modules[module]:
-            initalizer += f'this.params.{param} = {param};\n'
-            args += f'{param}, '
+            if param != '__module_tag':
+                initalizer += f'this.params.{param} = {param};\n'
+                args += f'{param}, '
 
         class_name = ''
         uppercase_next = True
@@ -236,7 +243,7 @@ def create_module_library(modules, output):
         descriptor = modules[module]
         arg_list = [
             generate_initializer(name, descriptor[name], class_name)
-            for name in descriptor
+            for name in descriptor if name != '__module_tag'
         ]
         output.write(textwrap.dedent(
             f'''\
@@ -268,7 +275,10 @@ def create_module_library(modules, output):
         customElements.define('synth-{class_name.lower()}', {class_name}Element);
         '''
         ))
-        module_ids += f'"{human_name}": "{class_name}Element",'
+
+        tag = descriptor['__module_tag']
+        module_ids +=\
+            f'"{human_name}": {{class: "{class_name}Element", tag: "{tag}"}},'
 
     module_ids += '}\n'
     output.write(module_ids)

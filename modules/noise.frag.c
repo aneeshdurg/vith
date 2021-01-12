@@ -1,4 +1,6 @@
 /// modulefn: noise
+/// moduletag: generator
+
 uniform float u_noise_r; /// { "start": 0, "end": 10000, "default": 0 }
 uniform float u_noise_g; /// { "start": 0, "end": 10000, "default": 0 }
 uniform float u_noise_b; /// { "start": 0, "end": 10000, "default": 0 }
