@@ -7,7 +7,7 @@ uniform float u_sf_thickness; /// { "start": 0, "end": 1, "default": 0.5 }
 uniform bool u_sf_smooth_edges; /// { "default": true }
 
 void superformula() {
-    vec2 coords = gl_FragCoord.xy;
+    vec2 coords = t_coords.xy;
     vec2 c = coords / u_dimensions;
     c = 2. * c - 1.;
 

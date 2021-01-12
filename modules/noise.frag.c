@@ -13,7 +13,7 @@ float random (in vec2 st, float noise_param) {
 // 2D Noise based on Morgan McGuire @morgan3d
 // https://www.shadertoy.com/view/4dS3Wd
 float noise_1d (float noise_param) {
-    vec2 st = gl_FragCoord.xy / u_dimensions;
+    vec2 st = t_coords.xy / u_dimensions;
     st *= 5.;
 
     vec2 i = floor(st);

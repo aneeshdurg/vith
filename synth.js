@@ -4,6 +4,18 @@ class Synth {
     stages = [];
     stageModules = {};
 
+    transform = {
+        center: [ 0.5, 0.5 ],
+        scale: 1,
+    }
+
+    reset_transform() {
+        this.transform = {
+            center: [ 0.5, 0.5 ],
+            scale: 1,
+        }
+    }
+
     enable = true;
 
     constructor(canvas, fragShader) {
@@ -35,6 +47,14 @@ class Synth {
                     process_stages(fn_params_, stage + stage_);
                 });
                 return;
+            } else if (fn_params instanceof TransformElement) {
+                if (fn_params.params["clear transform"]) {
+                    this.reset_transform();
+                } else {
+                    this.transform.scale = fn_params.params.scale;
+                    this.transform.center = [...fn_params.params.center];
+                }
+                return;
             }
 
             this.fbs.bind_dst();
@@ -42,6 +62,8 @@ class Synth {
                 u_dimensions: this.dimensions,
                 u_tex_dimensions: this.dimensions,
                 u_texture: this.fbs.src(),
+                // u_transform_center: this.transform.center,
+                // u_transform_scale: this.transform.scale,
                 u_function: fn_params.id,
                 u_stage: stage,
                 u_feedback: fn_params.feedback,
@@ -116,6 +138,12 @@ function setup_add_new_stage(ui, synth) {
         opt.value = MODULE_IDS[module];
         add_new_select.appendChild(opt);
     }
+
+    const opt = document.createElement('option');
+    opt.innerText = 'transform';
+    opt.value = 'TransformElement';
+    add_new_select.appendChild(opt);
+
     document.getElementById("add_new").addEventListener('click', () => {
         const stageElem = eval(add_new_select.value);
         ui.appendChild(new stageElem(synth));

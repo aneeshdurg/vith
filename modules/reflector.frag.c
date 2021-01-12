@@ -4,7 +4,7 @@ uniform float u_reflect_y; /// { "start": -1, "end": 1, "default": 0 }
 uniform float u_reflect_x; /// { "start": -1, "end": 1, "default": 0 }
 
 void reflector() {
-    vec2 coords = gl_FragCoord.xy;
+    vec2 coords = t_coords.xy;
     vec2 c = coords / u_dimensions;
     c = 2. * c - 1.;
     c.y -= u_reflect_y;

@@ -4,7 +4,7 @@ uniform int u_tile_x; /// { "start": 1, "end": 100, "default": 1 }
 uniform int u_tile_y; /// { "start": 1, "end": 100, "default": 1 }
 
 void tile() {
-    vec2 coords = gl_FragCoord.xy;
+    vec2 coords = t_coords.xy;
     float tile_x_size = u_dimensions.x / float(u_tile_x);
     float tile_y_size = u_dimensions.y / float(u_tile_y);
 

@@ -165,9 +165,13 @@ class SynthElementBase extends SynthStageBase {
         globalCounters[this.get_title()] = counter + 1;
         this.name = `${this.get_title()}-${counter}`;
 
-        const constructor = this.get_type();
-        synth.add_stage(this.name, new constructor(...params, 1));
+        synth.add_stage(this.name, this.build_stage(...params));
 
+    }
+
+    build_stage(params) {
+        const constructor = this.get_type();
+        return new constructor(...params, 1);
     }
 
     onchange(arg, val) {
@@ -202,3 +206,35 @@ class SynthElementBase extends SynthStageBase {
         this.feedback_el.load(data.args.feedback);
     }
 }
+
+class TransformElement extends SynthElementBase {
+    get_title() {
+        return "Transform";
+    }
+
+    build_stage() {
+        return this;
+    }
+
+    get_args() {
+        // TODO clear transform should hide other inputs
+        // This can be done if we override onchange here and store the results of
+        // createElement in SynthElementBase
+        return {
+            "clear transform": new BoolEntry(false),
+            scale: new FloatBar([0,10], 1),
+            center: new VecEntry(2, ["x", "y"], [[0,0], [1,1]], [0.5, 0.5]),
+        }
+    }
+
+    constructor(synth) {
+        super(synth);
+        this.feedback_el.style.display = "none";
+        this.params = {
+            "clear transform": false,
+            scale: 1,
+            center: [0.5, 0.5],
+        };
+    }
+}
+customElements.define('transform-element', TransformElement);

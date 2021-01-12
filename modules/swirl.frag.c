@@ -2,7 +2,7 @@
 uniform float u_factor; /// { "start": 0, "end": "2 * math.pi", "default": 0 }
 
 void swirl() {
-    vec2 coords = gl_FragCoord.xy;
+    vec2 coords = t_coords.xy;
     vec2 c = coords / u_dimensions;
     c = 2. * c - 1.;
 

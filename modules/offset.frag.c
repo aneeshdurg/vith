@@ -14,7 +14,7 @@ vec2 offset_fix_range(vec2 c) {
 }
 
 void offset() {
-    vec2 coords = gl_FragCoord.xy;
+    vec2 coords = t_coords.xy;
     vec2 c = coords / u_dimensions;
 
     vec2 c_r = c + vec2(u_offsets_x.r, u_offsets_y.r);

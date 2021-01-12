@@ -5,7 +5,7 @@ uniform bool u_webcam_invert_x; ///  { "default": true }
 uniform bool u_webcam_invert_y; ///  { "default": true }
 
 void webcam() {
-    vec2 coords = gl_FragCoord.xy;
+    vec2 coords = t_coords.xy;
     vec2 c = coords / u_dimensions;
     if (u_webcam_invert_y)
         c.y = 1. - c.y;
