@@ -15,8 +15,8 @@ precision mediump int;
 uniform vec2 u_dimensions;
 uniform vec2 u_tex_dimensions;
 uniform sampler2D u_texture;
-// uniform float u_transform_scale;
-// uniform vec2 u_transform_center;
+uniform float u_transform_scale;
+uniform vec2 u_transform_center;
 uniform int u_function;
 uniform int u_stage;
 
@@ -97,7 +97,12 @@ void main() {
     vec2 c = coords * u_tex_dimensions / u_dimensions;
     color_out = vec4(u_feedback * texelFetch(u_texture, ivec2(c), 0).xyz, 1.);
 
-    t_coords = gl_FragCoord.xy / u_dimensions;// - vec2(0.5) + u_transform_center;
+    t_coords = gl_FragCoord.xy / u_dimensions - vec2(0.5) + u_transform_center;
+
+    t_coords -= vec2(0.5);
+    t_coords /= u_transform_scale;
+    t_coords += vec2(0.5);
+
     t_coords *= u_dimensions;
     // TODO u_transform_scale
 

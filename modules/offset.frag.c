@@ -10,6 +10,11 @@ vec2 offset_fix_range(vec2 c) {
     if (res.x < 0.)
         res.x = 1. + res.x;
 
+    if (res.y > 1.)
+        res.y = res.y - 1.;
+    if (res.y < 0.)
+        res.y = 1. + res.y;
+
     return res;
 }
 

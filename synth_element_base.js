@@ -165,7 +165,7 @@ class SynthElementBase extends SynthStageBase {
         globalCounters[this.get_title()] = counter + 1;
         this.name = `${this.get_title()}-${counter}`;
 
-        synth.add_stage(this.name, this.build_stage(...params));
+        synth.add_stage(this.name, this.build_stage(params));
 
     }
 
@@ -208,6 +208,8 @@ class SynthElementBase extends SynthStageBase {
 }
 
 class TransformElement extends SynthElementBase {
+    enable = true;
+
     get_title() {
         return "Transform";
     }
@@ -223,7 +225,7 @@ class TransformElement extends SynthElementBase {
         return {
             "clear transform": new BoolEntry(false),
             scale: new FloatBar([0,10], 1),
-            center: new VecEntry(2, ["x", "y"], [[0,0], [1,1]], [0.5, 0.5]),
+            center: new VecEntry(2, ["x", "y"], [[0,1], [0,1]], [0.5, 0.5]),
         }
     }
 

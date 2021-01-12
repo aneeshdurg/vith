@@ -41,10 +41,13 @@ class Synth {
                 return;
             }
 
+            if (stage == 0)
+                this.reset_transform();
+
             if (fn_params instanceof Synth || fn_params instanceof ModuleElement) {
                 fn_params.stages.forEach((name, stage_) => {
                     const fn_params_ = fn_params.stageModules[name];
-                    process_stages(fn_params_, stage + stage_);
+                    process_stages(fn_params_, stage + 1 + stage_);
                 });
                 return;
             } else if (fn_params instanceof TransformElement) {
@@ -62,8 +65,8 @@ class Synth {
                 u_dimensions: this.dimensions,
                 u_tex_dimensions: this.dimensions,
                 u_texture: this.fbs.src(),
-                // u_transform_center: this.transform.center,
-                // u_transform_scale: this.transform.scale,
+                u_transform_center: this.transform.center,
+                u_transform_scale: this.transform.scale,
                 u_function: fn_params.id,
                 u_stage: stage,
                 u_feedback: fn_params.feedback,
@@ -77,7 +80,7 @@ class Synth {
             this.fbs.flipflop();
         };
 
-        process_stages(this, 0);
+        process_stages(this, -1);
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         twgl.setUniforms(this.programInfo, {
