@@ -44,16 +44,16 @@ class BoolEntry extends Type {
     constructor(defaultValue) {
         super([0, 0], defaultValue);
 
-        const input = document.createElement('input');
-        input.id = "generate";
-        input.type = 'checkbox';
-        input.checked = defaultValue;
-        input.addEventListener('change', () => {
-            this.value = input.checked;
+        this.input = document.createElement('input');
+        this.input.id = "generate";
+        this.input.type = 'checkbox';
+        this.input.checked = defaultValue;
+        this.input.addEventListener('change', () => {
+            this.value = this.input.checked;
             this.dispatchEvent(new Event('change'));
         });
 
-        this.shadow.appendChild(input);
+        this.shadow.appendChild(this.input);
     }
 
     save() {
@@ -63,6 +63,7 @@ class BoolEntry extends Type {
     load(data) {
         // console.log("loading bool", data);
         this.value = data;
+        this.input.checked = data;
         this.dispatchEvent(new Event('change'));
     }
 }

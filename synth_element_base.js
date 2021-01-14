@@ -101,6 +101,7 @@ class SynthStageBase extends HTMLElement {
 
         this.enable_el.addEventListener('change', () => {
             this.synth.toggle_stage(this.name, this.enable_el.checked);
+            this.synth.toggle_stage(this.name, this.enable_el.checked);
         });
     }
 
@@ -154,6 +155,8 @@ class SynthElementBase extends SynthStageBase {
             this.container.appendChild(document.createElement('br'));
         };
 
+        this.constrain_el = new BoolEntry(false);
+        createElement('constrain to transform', this.constrain_el);
         for (let arg of Object.keys(args)) {
             params.push(args[arg].defaultValue);
             createElement(arg, args[arg]);
@@ -177,6 +180,8 @@ class SynthElementBase extends SynthStageBase {
     onchange(arg, val) {
         if (arg === "feedback")
             this.synth.stageModules[this.name].feedback = val;
+        else if (arg === "constrain to transform")
+            this.synth.stageModules[this.name].constrain = val;
         else
             this.synth.stageModules[this.name].params[arg] = val;
     }
@@ -187,6 +192,7 @@ class SynthElementBase extends SynthStageBase {
             saved_args[arg] = this.args[arg].save();
         }
         saved_args.feedback = this.feedback_el.save();
+        saved_args.constrain = this.constrain_el.save();
 
         return {
             title: this.get_title(),
@@ -203,7 +209,10 @@ class SynthElementBase extends SynthStageBase {
         }
 
         // console.log("Loading feedback", data.args.feedback);
-        this.feedback_el.load(data.args.feedback);
+        if (data.args.feedback)
+            this.feedback_el.load(data.args.feedback);
+        if (data.args.constrain)
+            this.constrain_el.load(data.args.constrain);
     }
 }
 
@@ -223,19 +232,20 @@ class TransformElement extends SynthElementBase {
         // This can be done if we override onchange here and store the results of
         // createElement in SynthElementBase
         return {
-            "clear transform": new BoolEntry(false),
             scale: new FloatBar([0,10], 1),
-            center: new VecEntry(2, ["x", "y"], [[0,1], [0,1]], [0.5, 0.5]),
+            center: new VecEntry(2, ["x", "y"], [[-0.5,1.5], [-0.5,1.5]], [0.5, 0.5]),
+            rotation: new FloatBar([0, 2 * Math.PI], 0),
         }
     }
 
     constructor(synth) {
         super(synth);
         this.feedback_el.style.display = "none";
+        this.constrain_el.style.display = "none";
         this.params = {
-            "clear transform": false,
             scale: 1,
             center: [0.5, 0.5],
+            rotation: 0,
         };
     }
 }

@@ -7,12 +7,14 @@ class Synth {
     transform = {
         center: [ 0.5, 0.5 ],
         scale: 1,
+        rotation: 0,
     }
 
     reset_transform() {
         this.transform = {
             center: [ 0.5, 0.5 ],
             scale: 1,
+            rotation: 0,
         }
     }
 
@@ -51,12 +53,13 @@ class Synth {
                 });
                 return;
             } else if (fn_params instanceof TransformElement) {
-                if (fn_params.params["clear transform"]) {
-                    this.reset_transform();
-                } else {
+                // if (fn_params.params["clear transform"]) {
+                //     this.reset_transform();
+                // } else {
                     this.transform.scale = fn_params.params.scale;
                     this.transform.center = [...fn_params.params.center];
-                }
+                    this.transform.rotation = fn_params.params.rotation;
+                // }
                 return;
             }
 
@@ -67,9 +70,11 @@ class Synth {
                 u_texture: this.fbs.src(),
                 u_transform_center: this.transform.center,
                 u_transform_scale: this.transform.scale,
+                u_transform_rotation: this.transform.rotation,
                 u_function: fn_params.id,
                 u_stage: stage,
                 u_feedback: fn_params.feedback,
+                u_constrain_to_transform: fn_params.constrain,
             };
             for (let key of Object.keys(fn_params.params)) {
                 params['u_' + key] = fn_params.params[key];

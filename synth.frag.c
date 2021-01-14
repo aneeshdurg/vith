@@ -17,10 +17,12 @@ uniform vec2 u_tex_dimensions;
 uniform sampler2D u_texture;
 uniform float u_transform_scale;
 uniform vec2 u_transform_center;
+uniform float u_transform_rotation;
 uniform int u_function;
 uniform int u_stage;
 
 uniform float u_feedback;
+uniform bool u_constrain_to_transform;
 
 out vec4 color_out;
 
@@ -78,11 +80,15 @@ vec3 rgb_to_hsv(vec3 rgb) {
 
 vec2 t_coords;
 
+#include "modules/enhance.frag.c"
+#include "modules/gamma_correct.frag.c"
 #include "modules/hue_shift.frag.c"
+#include "modules/invert_color.frag.c"
 #include "modules/noise.frag.c"
 #include "modules/offset.frag.c"
 #include "modules/oscillator.frag.c"
 #include "modules/picture.frag.c"
+#include "modules/recolor.frag.c"
 #include "modules/reflector.frag.c"
 #include "modules/rotator.frag.c"
 #include "modules/superformula.frag.c"
@@ -98,13 +104,23 @@ void main() {
     color_out = vec4(u_feedback * texelFetch(u_texture, ivec2(c), 0).xyz, 1.);
 
     t_coords = gl_FragCoord.xy / u_dimensions - vec2(0.5) + u_transform_center;
-
     t_coords -= vec2(0.5);
-    t_coords /= u_transform_scale;
-    t_coords += vec2(0.5);
 
+    t_coords /= u_transform_scale;
+    mat2 rot_mat = mat2(
+            cos(u_transform_rotation), sin(u_transform_rotation),
+            -sin(u_transform_rotation), cos(u_transform_rotation));
+    t_coords = rot_mat * t_coords;
+
+    t_coords += vec2(0.5);
     t_coords *= u_dimensions;
-    // TODO u_transform_scale
+
+    if (u_constrain_to_transform) {
+        if (t_coords.x < 0. || t_coords.x > u_dimensions.x ||
+                t_coords.y < 0. || t_coords.y > u_dimensions.y) {
+            return;
+        }
+    }
 
     switch(u_function) {
     case FN_RENDER:
@@ -115,4 +131,6 @@ void main() {
         color_out = vec4(1., 0., 1., 1.);
         break;
     }
+
+   color_out = clamp(color_out, -1., 1.);
 }
