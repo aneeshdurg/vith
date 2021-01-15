@@ -188,3 +188,100 @@ customElements.define('webcam-webcam-texture', Webcam_webcam_texture);
 
 class Webcam_webcam_dimensions extends Picture_picture_dimensions { }
 customElements.define('webcam-webcam-dimensions', Webcam_webcam_dimensions);
+
+class ReduceColors_reduce_colors_data extends Type {
+    customonchange(element) {
+        try {
+            this.synth.stageModules[element.name].params['reduce_colors_data'] = this.tex;
+            this.synth.stageModules[element.name].params['reduce_colors_count'] = this.count;
+        } catch (e) {
+            console.log("!!!", ...this.synth.stages);
+            // TODO custom elements break with meta modules
+        }
+
+        element.args.reduce_colors_count.set_value(this.dimensions);
+    }
+
+    constructor(synth) {
+        const limit = 256;
+        const img = new Image();
+        const tex = createTexture(synth.gl, [256, 1]);
+        super(undefined, tex);
+
+        this.tex = tex;
+        this.synth = synth;
+
+        // we waste 1 float for the alpha channel - TODO
+        this.data = new Float32Array(4 * 256);
+        // this.count = 100;
+        this.count = 100;
+        this.generate_colors();
+
+        updateTexture(synth.gl, [256, 1], this.tex, this.data);
+
+        this.el = document.createElement("div");
+        const btn = document.createElement("button");
+        btn.addEventListener('click', () => {
+            this.generate_colors();
+            this.dispatchEvent(new Event('change'));
+        });
+        btn.innerText = "Re-pick colors";
+        this.el.appendChild(btn);
+
+        this.el.appendChild(document.createElement('br'));
+        const label = document.createElement("label");
+        label.innerText = "Number of colors: ";
+        label.for = "num_colors";
+        const input = new IntEntry([1, 256], 100);
+        input.id = "num_colors";
+        input.addEventListener('change', () => {
+            this.count = input.value;
+            this.generate_colors();
+            // console.log("New count", input.value);
+            this.dispatchEvent(new Event('change'));
+        });
+        this.el.appendChild(label);
+        this.el.appendChild(input);
+
+        this.shadow.appendChild(this.el);
+    }
+
+    generate_colors() {
+        // console.log("Regenerating", this.count);
+        for (let i = 0; i < 4 * this.count; i++)
+            this.data[i] = Math.random();
+        updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
+    }
+
+    save() {
+        const data = [];
+        for (let i = 0; i < this.count; i++)
+            data.push(this.data[i])
+        return [...this.data];
+    }
+
+    load(data) {
+        this.data = new Float32Array(data);
+        // TODO on change?
+    }
+}
+customElements.define('reducecolors-reduce-colors-data', ReduceColors_reduce_colors_data);
+
+class ReduceColors_reduce_colors_count extends Type {
+    constructor(synth) {
+        super(undefined, 100);
+        this.data = document.createElement('code');
+        this.data.style = 'border: solid 1px; padding: 2px';
+        this.data.innerText = 100;
+        this.shadow.appendChild(this.data);
+    }
+
+    set_value(value) {
+        this.data.innerText = value;
+    }
+
+    save() {
+        return undefined;
+    }
+}
+customElements.define('reducecolors-reduce-colors-count', ReduceColors_reduce_colors_count);
