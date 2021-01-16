@@ -213,8 +213,8 @@ class FloatBar extends Type {
         container.appendChild(this.slider);
         container.appendChild(this.input);
         container.appendChild(document.createElement('br'));
-        container.appendChild(gen_label);
         if (!supressFunctionGen) {
+            container.appendChild(gen_label);
             container.appendChild(this.func_gen);
             container.appendChild(this.func_select);
             container.appendChild(func_modal);
