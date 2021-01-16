@@ -260,12 +260,15 @@ class ReduceColors_reduce_colors_data extends Type {
         const data = [];
         for (let i = 0; i < this.count; i++)
             data.push(this.data[i])
-        return [...this.data];
+        return [...data];
     }
 
     load(data) {
-        this.data = new Float32Array(data);
-        // TODO on change?
+        for (let i = 0; i < data.length; i++)
+            this.data[i] = data[i];
+        this.count = data.length;
+        updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
+        this.dispatchEvent(new Event('change'));
     }
 }
 customElements.define('reducecolors-reduce-colors-data', ReduceColors_reduce_colors_data);
