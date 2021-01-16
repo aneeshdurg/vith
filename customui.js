@@ -234,16 +234,19 @@ class ReduceColors_reduce_colors_data extends Type {
         label.for = "num_colors";
         const input = new IntEntry([1, 256], 100);
         input.id = "num_colors";
-        input.addEventListener('change', () => {
-            this.count = input.value;
-            this.generate_colors();
-            // console.log("New count", input.value);
-            this.dispatchEvent(new Event('change'));
-        });
+        input.addEventListener('change', () => { this.set_count(input.value); });
         this.el.appendChild(label);
         this.el.appendChild(input);
 
         this.shadow.appendChild(this.el);
+    }
+
+    set_count(value) {
+        this.count = value;
+        this.generate_colors();
+        // console.log("New count", input.value);
+        this.dispatchEvent(new Event('change'));
+
     }
 
     generate_colors() {
