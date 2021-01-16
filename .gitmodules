@@ -1,0 +1,3 @@
+[submodule "webgl-common"]
+	path = webgl-common
+	url = https://github.com/aneeshdurg/webgl-common

@@ -27,19 +27,44 @@ def copy_regular() -> None:
         if entry in ["build", "modules", "synth.frag.c"]:
             continue
 
-        files = [
-            "customui.js",
-            "function_generator.js",
-            "index.html",
-            "meta_module.js",
-            "saveload.js",
-            "style.css",
-            "synth.js",
-            "synth_element_base.js",
-            "ui.js",
-        ]
+        files = glob.glob('*.js') + glob.glob('*.css')
         for file_ in files:
             shutil.copy(file_, f"build/{file_}")
+        shutil.copy("webgl-common/common.js", f"build/common.js")
+
+def build_js() -> None:
+    with open("build/synth.build.js", "w") as output:
+        # TODO parse this from the debug file
+        # All js files in the right order excluding entrypoint.js
+        files = [
+            "webgl-common/common.js",
+            "ui.js",
+            "customui.js",
+            "function_generator.js",
+            "synth_element_base.js",
+            "build/module_lib.js",
+            "meta_module.js",
+            "saveload.js",
+            "synth.js",
+        ]
+
+        for file_ in files:
+            with open(file_) as input_:
+                output.write(f"// ---------- {file_} ----------\n")
+                output.write(input_.read())
+                output.write(f"// ---------- END {file_} ------\n\n")
+        # TODO compress?
+
+def generate_entrypoints() -> None:
+    with open("index.html") as index:
+        index_contents = index.read();
+        with open("head.html") as head:
+            with open("build/index.html", "w") as output:
+                output.write(head.read() + index_contents)
+
+        with open("head_debug.html") as head:
+            with open("build/debug.html", "w") as output:
+                output.write(head.read() + index_contents)
 
 def parse(data) -> None:
     if isinstance(data, bool):
@@ -285,6 +310,8 @@ def create_module_library(modules, output):
 
 setup_build_dir()
 copy_regular()
+generate_entrypoints()
 modules = create_fragshader()
 with open('build/module_lib.js', 'w') as f:
     create_module_library(modules, f)
+build_js()

@@ -1,3 +1,14 @@
+class Function {
+    id = 0;
+    feedback = 0;
+    params = {};
+    enable = true;
+
+    constructor(feedback) {
+        this.feedback = feedback;
+    }
+}
+
 function createModal(resolver) {
     const modal = document.createElement('div');
     modal.addEventListener('click', (e) => {

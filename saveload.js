@@ -6,6 +6,7 @@ function loaddata(savedata, ui, synth) {
             //     throw new Error("Unexpected module"); // TODO ui for this error
             const count = elem.module.selection.length;
             console.group(`ADD ${elem.module.name}`);
+            // TODO take in MetaModuleManager obj or smth
             append_meta_module(elem.module.name, elem.args, count, ui, synth);
             console.groupEnd(`ADD ${elem.module.name}`);
         } else {

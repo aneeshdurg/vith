@@ -1,4 +1,7 @@
 class Synth {
+    recording = [];
+    record_frames = 0;
+
     dimensions = [1000, 1000];
 
     stages = [];
@@ -35,6 +38,7 @@ class Synth {
         setupProgram(this.gl, this.programInfo, bufferInfo);
 
         this.fbs = new FrameBufferManager(this.gl, this.dimensions);
+        this.canvas = canvas;
     }
 
     async render(time) {
@@ -118,6 +122,18 @@ class Synth {
     toggle_stage(name, state) {
         this.stageModules[name].enable = state;
     }
+
+    run() {
+        const runner = async (time) => {
+            await this.render(time);
+            if (this.record_frames) {
+                this.recording.push(this.canvas.toDataURL());
+                this.record_frames--;
+            }
+            requestAnimationFrame(runner);
+        }
+        requestAnimationFrame(runner);
+    }
 }
 
 function setup_controler() {
@@ -192,18 +208,7 @@ async function synth_main(canvas, root) {
     const fragShader = await getFile(root + "/synth.frag.c");
     const synth = new Synth(canvas, fragShader);
     window.synth = synth;
-
-    window.recording = [];
-    window.record_frames = 0;
-    async function f(time) {
-        await synth.render(time);
-        if (window.record_frames) {
-            recording.push(canvas.toDataURL());
-            window.record_frames--;
-        }
-        requestAnimationFrame(f);
-    }
-    requestAnimationFrame(f);
+    synth.run();
 
     const ui = document.getElementById("ui-container");
 
@@ -211,4 +216,19 @@ async function synth_main(canvas, root) {
     setup_add_new_stage(ui, synth);
     setup_meta_module(ui, synth);
     setup_save_load(ui, synth);
+}
+
+async function loadStaticSynth(canvas, root, datapath) {
+    root = root || ".";
+    const fragShader = await getFile(root + "/synth.frag.c");
+
+    const data = JSON.parse(await getFile(root + datapath));
+    if (data.modules && Object.keys(data.modules).length) {
+        // TODO
+        throw new Error("Modules not supported");
+    }
+
+    const synth = new Synth(canvas, fragShader)
+    synth.run();
+    loaddata(data.stages, document.createElement('div'), synth);
 }
