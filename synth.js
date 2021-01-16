@@ -223,12 +223,9 @@ async function loadStaticSynth(canvas, root, datapath) {
     const fragShader = await getFile(root + "/synth.frag.c");
 
     const data = JSON.parse(await getFile(root + datapath));
-    if (data.modules && Object.keys(data.modules).length) {
-        // TODO
-        throw new Error("Modules not supported");
-    }
-
     const synth = new Synth(canvas, fragShader)
     synth.run();
+
+    // note that meta-modules don't need to be loaded
     loaddata(data.stages, document.createElement('div'), synth);
 }
