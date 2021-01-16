@@ -218,7 +218,7 @@ async function synth_main(canvas, root) {
     setup_save_load(ui, synth);
 }
 
-async function loadStaticSynth(canvas, root, datapath) {
+async function loadStaticSynth(canvas, root, datapath, cb) {
     root = root || ".";
     const fragShader = await getFile(root + "/synth.frag.c");
 
@@ -227,5 +227,9 @@ async function loadStaticSynth(canvas, root, datapath) {
     synth.run();
 
     // note that meta-modules don't need to be loaded
-    loaddata(data.stages, document.createElement('div'), synth);
+    const ui = document.createElement('div');
+    loaddata(data.stages, ui, synth);
+    if (cb) {
+        cb(ui);
+    }
 }
