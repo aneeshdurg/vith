@@ -266,7 +266,7 @@ class ReduceColors_reduce_colors_data extends Type {
     load(data) {
         for (let i = 0; i < data.length; i++)
             this.data[i] = data[i];
-        this.count = data.length;
+        this.count = data.length / 4;
         updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
         this.dispatchEvent(new Event('change'));
     }

@@ -210,6 +210,24 @@ async function synth_main(canvas, root) {
     window.synth = synth;
     synth.run();
 
+    const sidebar = document.getElementById("sidebar");
+    sidebar.style.display = "none";
+    const burgerbtn = document.getElementById("burgerbtn");
+    const title = document.getElementById("title");
+
+    const showmenu = () => {
+        sidebar.style.display = "";
+        burgerbtn.style.display = "none";
+    };
+    const hidemenu = () => {
+        sidebar.style.display = "none";
+        burgerbtn.style.display = "";
+    };
+
+    burgerbtn.addEventListener('click', showmenu);
+    title.addEventListener('click', hidemenu);
+    document.getElementById("display-container").addEventListener("click", hidemenu);
+
     const ui = document.getElementById("ui-container");
 
     setup_controler();

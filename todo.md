@@ -1,7 +1,3 @@
-# Embedding
-- Make it possible to "embed" a static synth somewhere else
-- Post of my experiements on my blog lol
-
 # FUNCTION GENERATOR
 - function generator resumes state
 - offset for step function
@@ -15,7 +11,6 @@
 # MAIN SYNTH UI/FEATURES
 - option to untransform coords for lookups - make filters apply over an area
 - fix custom elements don't work in meta modules
-- better main menu ui
 - keyboard controls / mouse on canvas controls?
 - multiple video "channels"
 - performance optimizations?

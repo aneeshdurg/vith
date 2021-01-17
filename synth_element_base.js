@@ -16,7 +16,7 @@ class SynthStageBase extends HTMLElement {
         this.shadow = shadow;
 
         const box = document.createElement('div');
-        box.style = "border: solid 1px; padding: 0.5em";
+        box.style = "border: solid 1px; padding: 0.5em; border-radius: 25px";
         const title = document.createElement('h2')
         title.innerText = this.get_title();
         box.appendChild(title);

@@ -1,13 +1,16 @@
 body {
     font-family: sans-serif;
+    background: #000000ff;
 }
 
 .sidebar {
-    float: left;
-    height: 100%;
-    width: 25%;
+    height: 98%;
+    width: 50%;
     overflow: auto;
     border: solid 2px;
+    position: absolute;
+    background: #2b2b2b70;
+    color: white
 }
 
 #ui {
@@ -16,7 +19,7 @@ body {
 
 .display-container {
     height: 100%;
-    width: 70%;
+    width: 100%;
     /*text-align: center;*/
     display: flex;
     align-items: center;
@@ -24,7 +27,8 @@ body {
 }
 
 .functiongen {
-    background: white;
+    background: #2b2b2b;
+    color: white;
 
     position: fixed;
     left: 25%;
@@ -46,12 +50,15 @@ body {
 }
 
 canvas {
-    height: 70%;
+    height: 100%;
     display: inline;
+    border: solid 1px white;
+    border-radius: 25px;
 }
 
 .functioncanvas {
     width: 80%;
+    height: 25%;
 }
 
 .controls-next {
@@ -74,4 +81,19 @@ canvas {
 
 .errors {
     color: red;
+}
+
+.burgermenu {
+  width: 35px;
+  height: 5px;
+  background-color: white;
+  margin: 6px 0;
+}
+
+.burgerbtn {
+    position: absolute;
+}
+
+div {
+    border-radius: 25px;
 }
