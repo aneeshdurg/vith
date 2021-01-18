@@ -23,7 +23,7 @@ class Synth {
 
     enable = true;
 
-    constructor(canvas, fragShader) {
+    constructor(canvas) {
         this.dimensions = [1000, 1000];
 
         canvas.width = this.dimensions[0];
@@ -33,7 +33,7 @@ class Synth {
             throw new Error("Could not initialize webgl2 context! Does your browser support webgl2?");
         enableGlExts(this.gl);
 
-        this.programInfo = twgl.createProgramInfo(this.gl, [vs, fragShader]);
+        this.programInfo = twgl.createProgramInfo(this.gl, [vs, SYNTHFRAGSHADER]);
         const bufferInfo = twgl.createBufferInfoFromArrays(this.gl, bufferArrays);
         setupProgram(this.gl, this.programInfo, bufferInfo);
 
@@ -41,7 +41,7 @@ class Synth {
         this.canvas = canvas;
     }
 
-    async render(time) {
+    render(time) {
         const process_stages = (fn_params, stage) => {
             if (!fn_params.enable) {
                 return;
@@ -101,7 +101,11 @@ class Synth {
         });
         render(this.gl);
 
-        await new Promise(r => setTimeout(r, 10));
+        if (this.record_frames) {
+            this.recording.push(this.canvas.toDataURL());
+            this.record_frames--;
+        }
+
     }
 
     add_stage(name, module) {
@@ -123,16 +127,34 @@ class Synth {
         this.stageModules[name].enable = state;
     }
 
+    running = null;
+    cancel = false;
     run() {
-        const runner = async (time) => {
-            await this.render(time);
-            if (this.record_frames) {
-                this.recording.push(this.canvas.toDataURL());
-                this.record_frames--;
+        if (this.running)
+            return;
+
+        this.running = new Promise(r => {
+            const runner = async (time) => {
+                this.render(time);
+                // TODO custom framerate?
+                await new Promise(r => setTimeout(r, 10));
+                if (!this.cancel)
+                    requestAnimationFrame(runner);
+                else
+                    r();
             }
             requestAnimationFrame(runner);
-        }
-        requestAnimationFrame(runner);
+        });
+    }
+
+    async stop() {
+        if (!this.running)
+            return;
+
+        this.cancel = true;
+        await this.running;
+        this.running = null;
+        this.cancel = false;
     }
 }
 
@@ -202,11 +224,8 @@ function setup_add_new_stage(ui, synth) {
     selectors['space'].appendChild(opt);
 }
 
-async function synth_main(canvas, root) {
-    root = root || ".";
-
-    const fragShader = await getFile(root + "/synth.frag.c");
-    const synth = new Synth(canvas, fragShader);
+async function synth_main(canvas) {
+    const synth = new Synth(canvas);
     window.synth = synth;
     synth.run();
 
@@ -236,12 +255,8 @@ async function synth_main(canvas, root) {
     setup_save_load(ui, synth);
 }
 
-async function loadStaticSynth(canvas, root, datapath, cb) {
-    root = root || ".";
-    const fragShader = await getFile(root + "/synth.frag.c");
-
-    const data = JSON.parse(await getFile(root + datapath));
-    const synth = new Synth(canvas, fragShader)
+function loadStaticSynth(canvas, data, cb) {
+    const synth = new Synth(canvas)
     synth.run();
 
     // note that meta-modules don't need to be loaded
@@ -250,4 +265,6 @@ async function loadStaticSynth(canvas, root, datapath, cb) {
     if (cb) {
         cb(ui);
     }
+
+    return synth;
 }

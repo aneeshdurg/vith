@@ -249,4 +249,4 @@ class TransformElement extends SynthElementBase {
         };
     }
 }
-customElements.define('transform-element', TransformElement);
+defineEl('transform-element', TransformElement);

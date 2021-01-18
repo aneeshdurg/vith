@@ -55,7 +55,7 @@ class Picture_picture_texture extends Type {
         this.img.src = data;
     }
 }
-customElements.define('picture-picture-texture', Picture_picture_texture);
+defineEl('picture-picture-texture', Picture_picture_texture);
 
 class Picture_picture_dimensions extends Type {
     validate() {
@@ -78,7 +78,7 @@ class Picture_picture_dimensions extends Type {
         return undefined;
     }
 }
-customElements.define('picture-picture-dimensions', Picture_picture_dimensions);
+defineEl('picture-picture-dimensions', Picture_picture_dimensions);
 
 class Webcam_webcam_texture extends Type {
     customonchange(element) {
@@ -184,10 +184,10 @@ class Webcam_webcam_texture extends Type {
         return undefined;
     }
 }
-customElements.define('webcam-webcam-texture', Webcam_webcam_texture);
+defineEl('webcam-webcam-texture', Webcam_webcam_texture);
 
 class Webcam_webcam_dimensions extends Picture_picture_dimensions { }
-customElements.define('webcam-webcam-dimensions', Webcam_webcam_dimensions);
+defineEl('webcam-webcam-dimensions', Webcam_webcam_dimensions);
 
 class ReduceColors_reduce_colors_data extends Type {
     customonchange(element) {
@@ -271,7 +271,7 @@ class ReduceColors_reduce_colors_data extends Type {
         this.dispatchEvent(new Event('change'));
     }
 }
-customElements.define('reducecolors-reduce-colors-data', ReduceColors_reduce_colors_data);
+defineEl('reducecolors-reduce-colors-data', ReduceColors_reduce_colors_data);
 
 class ReduceColors_reduce_colors_count extends Type {
     constructor(synth) {
@@ -290,4 +290,4 @@ class ReduceColors_reduce_colors_count extends Type {
         return undefined;
     }
 }
-customElements.define('reducecolors-reduce-colors-count', ReduceColors_reduce_colors_count);
+defineEl('reducecolors-reduce-colors-count', ReduceColors_reduce_colors_count);

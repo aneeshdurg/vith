@@ -61,7 +61,7 @@ class ModuleElement extends SynthStageBase {
         }
     }
 }
-customElements.define('module-element', ModuleElement);
+defineEl('module-element', ModuleElement);
 
 const meta_modules = { };
 

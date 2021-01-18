@@ -34,10 +34,12 @@ def copy_regular() -> None:
 
 def build_js() -> None:
     with open("build/synth.build.js", "w") as output:
+
         # TODO parse this from the debug file
         # All js files in the right order excluding entrypoint.js
         files = [
             "webgl-common/common.js",
+            "build/synth.frag.js",
             "ui.js",
             "customui.js",
             "function_generator.js",
@@ -208,6 +210,13 @@ def create_fragshader():
     with open("build/synth.frag.c", 'w') as f:
         f.write("\n".join(output))
 
+    with open("build/synth.frag.js", 'w') as output:
+        with open("build/synth.frag.c") as input_:
+            shader = input_.read()
+            output.write("const SYNTHFRAGSHADER = `\n")
+            output.write(shader);
+            output.write("\n`;\n")
+
     return modules
 
 
@@ -297,7 +306,7 @@ def create_module_library(modules, output):
                 }}
             }}
         }}
-        customElements.define('synth-{class_name.lower()}', {class_name}Element);
+        defineEl('synth-{class_name.lower()}', {class_name}Element);
         '''
         ))
 

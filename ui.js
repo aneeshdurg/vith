@@ -1,3 +1,7 @@
+function defineEl(name, class_) {
+    customElements.define(name + (window.globalprefix || ""), class_);
+}
+
 class Function {
     id = 0;
     feedback = 0;
@@ -78,7 +82,7 @@ class BoolEntry extends Type {
         this.dispatchEvent(new Event('change'));
     }
 }
-customElements.define('bool-entry', BoolEntry);
+defineEl('bool-entry', BoolEntry);
 
 class Slider extends Type {
     constructor(range, defaultValue) {
@@ -115,7 +119,7 @@ class Slider extends Type {
         this.slider.style.left = `${x * 10}em`;
     }
 }
-customElements.define('slider-elem', Slider);
+defineEl('slider-elem', Slider);
 
 class FloatBar extends Type {
     validate(entry) {
@@ -263,7 +267,7 @@ class FloatBar extends Type {
         }
     }
 }
-customElements.define('float-bar', FloatBar);
+defineEl('float-bar', FloatBar);
 
 class IntEntry extends FloatBar {
     _set_value(value) {
@@ -276,7 +280,7 @@ class IntEntry extends FloatBar {
         this.input.step = 1;
     }
 }
-customElements.define('int-entry', IntEntry);
+defineEl('int-entry', IntEntry);
 
 class VecEntry extends Type {
     floats = []
@@ -329,4 +333,4 @@ class VecEntry extends Type {
         }
     }
 }
-customElements.define('vec-entry', VecEntry);
+defineEl('vec-entry', VecEntry);
