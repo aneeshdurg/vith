@@ -31,14 +31,56 @@ function load_meta_modules(moduledata_descs) {
 
 const MAGIC = "SYN".split('').map(x => x.charCodeAt(0));
 MAGIC.push(255);
-const header = MAGIC.length + 4;
+const header_len = MAGIC.length + 4;
+
+function decode_stego(stegodata, LZString) {
+    console.log(stegodata);
+    // const stegodata = new Uint8Array(reader.result);
+    for (let i = 0; i < MAGIC.length; i++) {
+        if (stegodata[i] != MAGIC[i]) {
+            console.log(stegodata);
+            throw new Error("File is not synth data");
+        }
+    }
+
+    let length = 0;
+    for (let i = 2; i >= 0; i--) {
+        length *= 256;
+        const newdata = stegodata[MAGIC.length + i];
+        console.log(length, '*', 256, '+', newdata);
+        length += newdata;
+    }
+
+    console.log("len", length);
+    const data = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+        const idx = 4 * i;
+        if (i == 0) {
+            console.log(stegodata[header_len + idx + 0]);
+            console.log(stegodata[header_len + idx + 0] & 0x0f);
+            console.log(stegodata[header_len + idx + 1]);
+            console.log(stegodata[header_len + idx + 1] & 0x0f);
+        }
+        const entry = (stegodata[header_len + idx + 0] & 0x0f) * 16 +
+                        (stegodata[header_len + idx + 1] & 0x0f);
+        data[i] = entry;
+    }
+
+    console.log(data);
+
+    const result = LZString.decompressFromUint8Array(data);
+    console.log(result);
+
+    return result;
+}
+
 function setup_save_load(ui, synth) {
     // magic + 4 byte length + 1 byte per RGBA values
     // this is because we can't use the A channel because of premultiplied
     // stuff, TODO fix that
     const max_stego_size = Math.min(
         0xffffff,
-        (4 * synth.dimensions[0] * synth.dimensions[1] - header) / 4);
+        (4 * synth.dimensions[0] * synth.dimensions[1] - header_len) / 4);
 
     document.getElementById("save").addEventListener('click', () => {
         const saved = [];
@@ -96,11 +138,11 @@ function setup_save_load(ui, synth) {
             console.log("encoding data");
             for (let i = 0; i < compressed.length; i++) {
                 const idx = i * 4;
-                img.data[header + idx + 0] &= 0xf0;
-                img.data[header + idx + 0] += (0xf0 & compressed[i]) / 16;
+                img.data[header_len + idx + 0] &= 0xf0;
+                img.data[header_len + idx + 0] += (0xf0 & compressed[i]) / 16;
 
-                img.data[header + idx + 1] &= 0xf0;
-                img.data[header + idx + 1] += 0x0f & compressed[i];
+                img.data[header_len + idx + 1] &= 0xf0;
+                img.data[header_len + idx + 1] += 0x0f & compressed[i];
             }
 
             output_ctx.putImageData(img, 0, 0);
@@ -151,42 +193,7 @@ function setup_save_load(ui, synth) {
 
                 const ctxdata = ctx.getImageData(0, 0, ...synth.dimensions);
                 const stegodata = ctxdata.data;
-                console.log(stegodata);
-                // const stegodata = new Uint8Array(reader.result);
-                for (let i = 0; i < MAGIC.length; i++) {
-                    if (stegodata[i] != MAGIC[i]) {
-                        console.log(stegodata);
-                        throw new Error("File is not synth data");
-                    }
-                }
-
-                let length = 0;
-                for (let i = 2; i >= 0; i--) {
-                    length *= 256;
-                    const newdata = stegodata[MAGIC.length + i];
-                    console.log(length, '*', 256, '+', newdata);
-                    length += newdata;
-                }
-
-                console.log("len", length);
-                const data = new Uint8Array(length);
-                for (let i = 0; i < length; i++) {
-                    const idx = 4 * i;
-                    if (i == 0) {
-                        console.log(stegodata[header + idx + 0]);
-                        console.log(stegodata[header + idx + 0] & 0x0f);
-                        console.log(stegodata[header + idx + 1]);
-                        console.log(stegodata[header + idx + 1] & 0x0f);
-                    }
-                    const entry = (stegodata[header + idx + 0] & 0x0f) * 16 +
-                                    (stegodata[header + idx + 1] & 0x0f);
-                    data[i] = entry;
-                }
-
-                console.log(data);
-
-                const result = LZString.decompressFromUint8Array(data);
-                console.log(result);
+                const result = decode_stego(stegodata, LZString);
 
                 const savedata = JSON.parse(result);
                 load_meta_modules(savedata.modules, ui, synth);
@@ -206,3 +213,7 @@ function setup_save_load(ui, synth) {
         }
     });
 }
+
+try {
+    exports.decode_stego = decode_stego;
+} catch (e) { }

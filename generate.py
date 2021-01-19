@@ -35,10 +35,10 @@ def copy_regular() -> None:
 
 def build_js() -> None:
     with open("build/synth.build.js", "w") as output:
-
         # TODO parse this from the debug file
         # All js files in the right order excluding entrypoint.js
         files = [
+            "twgl-full.min.js",
             "lz-string/libs/lz-string.min.js",
             "webgl-common/common.js",
             "build/synth.frag.js",

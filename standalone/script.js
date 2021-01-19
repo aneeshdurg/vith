@@ -1,6 +1,7 @@
 const fs = require('fs')
 const LZString = require('lz-string');
 const PNG = require('pngjs').PNG;
+const decode_stego = require('../saveload.js').decode_stego;
 
 const input_file = process.argv[2];
 const output_name = process.argv[3];
@@ -38,37 +39,8 @@ if (input_file.endsWith(".png")) {
     fs.createReadStream(input_file)
         .pipe(new PNG())
         .on("parsed", function () {
-             for (let i = 0; i < MAGIC.length; i++) {
-               if (this.data[i] != MAGIC[i])
-                     throw new Error("File was not a valid savedata");
-             }
-
-             let length = 0;
-             for (let i = 2; i >= 0; i--) {
-                 length *= 256;
-                 const newdata = this.data[MAGIC.length + i];
-                 console.log(length, '*', 256, '+', newdata);
-                 length += newdata;
-             }
-
-             console.log("len", length);
-             const data = new Uint8Array(length);
-             for (let i = 0; i < length; i++) {
-                 const idx = 4 * i;
-                 if (i == 0) {
-                     console.log(this.data[header_len + idx + 0]);
-                     console.log(this.data[header_len + idx + 0] & 0x0f);
-                     console.log(this.data[header_len + idx + 1]);
-                     console.log(this.data[header_len + idx + 1] & 0x0f);
-                 }
-                 const entry = (this.data[header_len + idx + 0] & 0x0f) * 16 +
-                                 (this.data[header_len + idx + 1] & 0x0f);
-                 data[i] = entry;
-             }
-
-             console.log(data);
-
-             const result = LZString.decompressFromUint8Array(data);
+            console.log(decode_stego);
+             const result = decode_stego(this.data, LZString);
              generate(result);
         });
 } else {
