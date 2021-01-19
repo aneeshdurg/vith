@@ -108,6 +108,10 @@ class Synth {
 
     }
 
+    get_frame_data(array) {
+        this.gl.readPixels(0, 0, ...this.dimensions, this.gl.RGBA, this.gl.UNSIGNED_BYTE, array);
+    }
+
     add_stage(name, module) {
         if (this.stages.indexOf(name) != -1)
             throw new Error("name collision");

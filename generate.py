@@ -30,7 +30,8 @@ def copy_regular() -> None:
         files = glob.glob('*.js') + glob.glob('*.css')
         for file_ in files:
             shutil.copy(file_, f"build/{file_}")
-        shutil.copy("webgl-common/common.js", f"build/common.js")
+        shutil.copy("webgl-common/common.js", "build/common.js")
+        shutil.copy("lz-string/libs/lz-string.min.js", "build/lz-string.min.js")
 
 def build_js() -> None:
     with open("build/synth.build.js", "w") as output:
@@ -38,6 +39,7 @@ def build_js() -> None:
         # TODO parse this from the debug file
         # All js files in the right order excluding entrypoint.js
         files = [
+            "lz-string/libs/lz-string.min.js",
             "webgl-common/common.js",
             "build/synth.frag.js",
             "ui.js",
