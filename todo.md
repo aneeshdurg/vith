@@ -1,3 +1,9 @@
+# DEBT
+- make saveload code common for use in standalone builder
+- tests
+- refactor module definition syntax
+- refactor generator
+
 # FUNCTION GENERATOR
 - function generator resumes state
 - offset for step function
@@ -14,7 +20,3 @@
 - keyboard controls / mouse on canvas controls?
 - multiple video "channels"
 - performance optimizations?
-
-# DEBT
-- refactor module definition syntax
-- refactor generator

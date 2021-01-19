@@ -67,6 +67,20 @@ function setup_save_load(ui, synth) {
             const img = output_ctx.createImageData(...synth.dimensions);
             synth.get_frame_data(img.data);
 
+            for (let i = 0; i < (synth.dimensions[1] / 2); i++) {
+                //swap rows i and (synth.dimensions[1] - 1 -i)
+                // TODO why is this upside down in the first place?
+                const curr_row = 4 * i * synth.dimensions[0];
+                const other_row = 4 * (synth.dimensions[1] - 1 - i) * synth.dimensions[0];
+                for (let j = 0; j < 4 * synth.dimensions[0]; j++) {
+                    const curr_idx = curr_row + j
+                    const other_idx = other_row + j
+                    const temp = img.data[curr_idx];
+                    img.data[curr_idx] = img.data[other_idx];
+                    img.data[other_idx] = temp;
+                }
+            }
+
             console.log("encoding MAGIC");
             for (let i = 0; i < MAGIC.length; i++)
                 img.data[i] = MAGIC[i];

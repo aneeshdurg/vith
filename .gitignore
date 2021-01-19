@@ -1,2 +1,3 @@
 build/
 .live/
+node_modules/

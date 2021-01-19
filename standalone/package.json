@@ -1,0 +1,16 @@
+{
+  "name": "standalone",
+  "version": "1.0.0",
+  "description": "create a standalone synth file",
+  "main": "script.js",
+  "dependencies": {
+    "lz-string": "^1.4.4",
+    "pngjs": "^6.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aneesh Durg <aneeshdurg17@gmail.com>",
+  "license": "MIT"
+}
