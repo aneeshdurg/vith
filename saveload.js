@@ -98,7 +98,11 @@ function setup_save_load(ui, synth) {
         const compressed = LZString.compressToUint8Array(savestr)
         console.log(compressed.length);
         console.log(compressed);
-        const stego_possible = compressed.length < max_stego_size && compressed.length < 0xffffffff;
+        const stego_possible = compressed.length < max_stego_size;
+        if (compressed.length <= 0xffffff) {
+            const required_px = compressed.length + header_len / 4;
+            console.log("req scale factor", required_px / (synth.dimensions[0] * synth.dimensions[1]));
+        }
         console.log("sp", stego_possible);
         if (stego_possible) {
             const output_canvas = document.createElement("canvas");

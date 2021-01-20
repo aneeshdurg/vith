@@ -258,7 +258,7 @@ class ReduceColors_reduce_colors_data extends Type {
 
     save() {
         const data = [];
-        for (let i = 0; i < this.count; i++)
+        for (let i = 0; i < 4 * this.count; i++)
             data.push(this.data[i])
         return [...data];
     }
