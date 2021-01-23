@@ -51,6 +51,7 @@ def build_js() -> None:
             "meta_module.js",
             "recording.js",
             "saveload.js",
+            "settings.js",
             "synth.js",
         ]
 

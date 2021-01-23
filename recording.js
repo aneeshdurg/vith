@@ -48,7 +48,7 @@ function setup_recording(ui, synth) {
         record_info.innerText = "Exporting...";
         const zip = new JSZip();
         for (let i = 0; i < synth.recording.length; i++) {
-            zip.file(`synth-${i}.png`, synth.recording[i].substr("data:image/png;base64,".length), {base64: true});
+            zip.file(`recording-${i}.png`, synth.recording[i].substr("data:image/png;base64,".length), {base64: true});
             record_progress.value++;
         }
 
@@ -56,7 +56,7 @@ function setup_recording(ui, synth) {
         record_info.innerText = "Done!";
         record_progress.value = record_progress.max;
 
-        _download('data:application/zip;base64,' + zipped, 'synth_recording.zip');
+        _download('data:application/zip;base64,' + zipped, `${synth.name}.zip`);
         record_status.style.display = "none";
 
         if (started)

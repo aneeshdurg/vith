@@ -6,6 +6,8 @@ class Stage {
 }
 
 class Synth {
+    name = "synth";
+
     recording = [];
     record_frames = 0;
 
@@ -262,7 +264,29 @@ async function synth_main(canvas) {
     title.addEventListener('click', hidemenu);
     document.getElementById("display-container").addEventListener("click", hidemenu);
 
+    const rightsidebar = document.getElementById("rightsidebar");
+    rightsidebar.style.display = "none";
+    const gearbtn = document.getElementById("gearbtn");
+    const settingstitle = document.getElementById("settingstitle");
+
+    const showrightmenu = () => {
+        rightsidebar.style.display = "";
+        gearbtn.style.display = "none";
+    };
+    const hiderightmenu = () => {
+        rightsidebar.style.display = "none";
+        gearbtn.style.display = "";
+    };
+    gearbtn.addEventListener('click', showrightmenu);
+    settingstitle.addEventListener('click', hiderightmenu);
+    document.getElementById("display-container").addEventListener("click", hiderightmenu);
+
+
     const ui = document.getElementById("ui-container");
+    ui.addEventListener("namechange", () => {
+        title.innerText = synth.name;
+    });
+    setup_settings(ui, synth);
     setup_controler();
     setup_add_new_stage(ui, synth);
     setup_meta_module(ui, synth);

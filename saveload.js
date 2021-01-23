@@ -163,19 +163,10 @@ function setup_save_load(ui, synth) {
 
             output_ctx.putImageData(img, 0, 0);
             const out_data = output_ctx.canvas.toDataURL();
-
-            const downloader = document.createElement('a');
-            downloader.setAttribute('href', out_data);
-            downloader.setAttribute('download', 'synth.savedata.png');
-            downloader.style.display = "none";
-            document.body.appendChild(downloader);
-
-            downloader.click();
-
-            document.body.removeChild(downloader);
+            _download(out_data, `${synth.name}.savedata.png`);
         } else {
             const savedata = encodeURI(savestr);
-            _download('data:text/plain;charset=utf-8,' + savedata, 'videoSynth.savedata');
+            _download('data:text/plain;charset=utf-8,' + savedata, `${synth.name}.savedata`);
         }
     });
 
@@ -184,6 +175,7 @@ function setup_save_load(ui, synth) {
         let file = loadUpload.files[0];
         let reader = new FileReader();
         console.log(file, reader);
+        const name = file.name.split(".")[0];
         if (file.name.endsWith(".png")) {
             reader.readAsDataURL(file)
             reader.onloadend = async () => {
@@ -219,6 +211,9 @@ function setup_save_load(ui, synth) {
                 }
             };
         }
+
+        synth.name = name;
+        ui.dispatchEvent(new Event("namechange"));
     });
 }
 

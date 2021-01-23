@@ -5,7 +5,7 @@
         <div class="burgermenu"></div>
     </div>
     <div class="sidebar" id="sidebar">
-        <div id="ui">
+        <div id="ui" class="ui">
             <h1 id="title" class="title">Video Synthesizer</h1>
             <div id="controls">
                 <button id="controls-prev" class="controls-prev">prev</button>
@@ -97,5 +97,37 @@
     </div>
     <div class="display-container" id="display-container">
         <canvas id="glcanvas"></canvas>
+    </div>
+    <div class="gearbtn" id="gearbtn">
+        &#9881;
+    </div>
+    <div class="rightsidebar" id="rightsidebar">
+        <div id="ui" class="ui">
+            <h1 id="settingstitle" class="title">Settings</h1>
+            <hr>
+            <label for="name">Project Name: </label>
+            <input id="name"></input>
+            <br>
+            <!-- TODO -->
+            <label for="autosave_enable" style="display: none;">Autosave: </label>
+            <input id="autosave" type="checkbox" style="display: none;"></input>
+            <div id="autosave_opts" style="display: none;">
+                <label for="autosave_freq">Autosave Frequency (seconds): </label>
+                <input
+                    id="autosave_freq"
+                    min="1"
+                    value="5"
+                ></input>
+                <br>
+                <h2> WARNING THIS SETTING CAN DELETE AUTOSAVES!!! </h2>
+                <label for="global_autosave_limit">Global autosave limit: </label>
+                <input
+                    id="global_autosave_limit"
+                    min="1"
+                    value="10"
+                ></input>
+
+            </div>
+        </div>
     </div>
 </body>

@@ -13,7 +13,19 @@ body {
     color: white
 }
 
-#ui {
+.rightsidebar {
+    height: 98%;
+    width: 50%;
+    overflow: auto;
+    border: solid 2px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    background: #2b2b2b70;
+    color: white
+}
+
+.ui {
     padding: 0.5em;
 }
 
@@ -92,6 +104,14 @@ canvas {
 
 .burgerbtn {
     position: absolute;
+}
+
+.gearbtn {
+    color: white;
+    font-size: 3em;
+    position: absolute;
+    right: 1px;
+    top: 0px;
 }
 
 div {
