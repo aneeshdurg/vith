@@ -60,6 +60,11 @@ class ModuleElement extends SynthStageBase {
             args: saved,
         }
     }
+
+    step(time) {
+        for (let stage of this.stages)
+            this.stageModules[stage].step(time);
+    }
 }
 defineEl('module-element', ModuleElement);
 

@@ -4,8 +4,8 @@ class Picture_picture_texture extends Type {
     }
 
     customonchange(element) {
-        this.synth.stageModules[element.name].params['picture_texture'] = this.tex;
-        this.synth.stageModules[element.name].params['picture_dimensions'] = this.dimensions;
+        this.synth.stageModules[element.name].fn_params.params['picture_texture'] = this.tex;
+        this.synth.stageModules[element.name].fn_params.params['picture_dimensions'] = this.dimensions;
 
         element.args.picture_dimensions.set_value(this.dimensions);
     }
@@ -82,8 +82,8 @@ defineEl('picture-picture-dimensions', Picture_picture_dimensions);
 
 class Webcam_webcam_texture extends Type {
     customonchange(element) {
-        this.synth.stageModules[element.name].params['webcam_texture'] = this.tex;
-        this.synth.stageModules[element.name].params['webcam_dimensions'] = this.dimensions;
+        this.synth.stageModules[element.name].fn_params.params['webcam_texture'] = this.tex;
+        this.synth.stageModules[element.name].fn_params.params['webcam_dimensions'] = this.dimensions;
 
         element.args.webcam_dimensions.set_value(this.dimensions);
     }
@@ -192,8 +192,8 @@ defineEl('webcam-webcam-dimensions', Webcam_webcam_dimensions);
 class ReduceColors_reduce_colors_data extends Type {
     customonchange(element) {
         try {
-            this.synth.stageModules[element.name].params['reduce_colors_data'] = this.tex;
-            this.synth.stageModules[element.name].params['reduce_colors_count'] = this.count;
+            this.synth.stageModules[element.name].fn_params.params['reduce_colors_data'] = this.tex;
+            this.synth.stageModules[element.name].fn_params.params['reduce_colors_count'] = this.count;
         } catch (e) {
             console.log("!!!", ...this.synth.stages);
             // TODO custom elements break with meta modules

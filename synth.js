@@ -1,3 +1,10 @@
+class Stage {
+    constructor(fn_params, step) {
+        this.fn_params = fn_params;
+        this.step = step;
+    }
+}
+
 class Synth {
     recording = [];
     record_frames = 0;
@@ -42,27 +49,31 @@ class Synth {
     }
 
     render(time) {
-        const process_stages = (fn_params, stage) => {
+        const process_stages = (stage, stageid) => {
+            const fn_params = stage.fn_params;
+
             if (!fn_params.enable) {
                 return;
             }
+            stage.step(time);
 
-            if (stage == 0)
+            if (stageid == 0)
                 this.reset_transform();
 
             if (fn_params instanceof Synth || fn_params instanceof ModuleElement) {
-                fn_params.stages.forEach((name, stage_) => {
+                fn_params.stages.forEach((name, stageid_) => {
                     const fn_params_ = fn_params.stageModules[name];
-                    process_stages(fn_params_, stage + 1 + stage_);
+
+                    process_stages(fn_params_, stageid + 1 + stageid_);
                 });
                 return;
             } else if (fn_params instanceof TransformElement) {
                 // if (fn_params.params["clear transform"]) {
                 //     this.reset_transform();
                 // } else {
-                    this.transform.scale = fn_params.params.scale;
-                    this.transform.center = [...fn_params.params.center];
-                    this.transform.rotation = fn_params.params.rotation;
+                this.transform.scale = fn_params.params.scale;
+                this.transform.center = [...fn_params.params.center];
+                this.transform.rotation = fn_params.params.rotation;
                 // }
                 return;
             }
@@ -76,7 +87,7 @@ class Synth {
                 u_transform_scale: this.transform.scale,
                 u_transform_rotation: this.transform.rotation,
                 u_function: fn_params.id,
-                u_stage: stage,
+                u_stage: stageid,
                 u_feedback: fn_params.feedback,
                 u_constrain_to_transform: fn_params.constrain,
             };
@@ -89,7 +100,7 @@ class Synth {
             this.fbs.flipflop();
         };
 
-        process_stages(this, -1);
+        process_stages(new Stage(this, (t) => {}), -1);
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         twgl.setUniforms(this.programInfo, {
@@ -252,7 +263,6 @@ async function synth_main(canvas) {
     document.getElementById("display-container").addEventListener("click", hidemenu);
 
     const ui = document.getElementById("ui-container");
-
     setup_controler();
     setup_add_new_stage(ui, synth);
     setup_meta_module(ui, synth);
@@ -263,8 +273,8 @@ function loadStaticSynth(canvas, data, cb) {
     const synth = new Synth(canvas)
     synth.run();
 
-    // note that meta-modules don't need to be loaded
     const ui = document.createElement('div');
+    // note that meta-modules don't need to be loaded
     loaddata(data.stages, ui, synth);
     if (cb) {
         cb(ui);

@@ -110,6 +110,8 @@ class SynthStageBase extends HTMLElement {
         this.synth = module;
         // this.parentElement = module;
     }
+
+    step(time) { }
 }
 
 class SynthElementBase extends SynthStageBase {
@@ -174,16 +176,16 @@ class SynthElementBase extends SynthStageBase {
 
     build_stage(params) {
         const constructor = this.get_type();
-        return new constructor(...params, 1);
+        return new Stage(new constructor(...params, 1), (time) => { this.step(time); });
     }
 
     onchange(arg, val) {
         if (arg === "feedback")
-            this.synth.stageModules[this.name].feedback = val;
+            this.synth.stageModules[this.name].fn_params.feedback = val;
         else if (arg === "constrain to transform")
-            this.synth.stageModules[this.name].constrain = val;
+            this.synth.stageModules[this.name].fn_params.constrain = val;
         else
-            this.synth.stageModules[this.name].params[arg] = val;
+            this.synth.stageModules[this.name].fn_params.params[arg] = val;
     }
 
     save() {
@@ -214,6 +216,12 @@ class SynthElementBase extends SynthStageBase {
         if (data.args.constrain)
             this.constrain_el.load(data.args.constrain);
     }
+
+    step(time) {
+        for (let arg of Object.keys(this.args)) {
+            this.args[arg].step(time);
+        }
+    }
 }
 
 class TransformElement extends SynthElementBase {
@@ -224,7 +232,8 @@ class TransformElement extends SynthElementBase {
     }
 
     build_stage() {
-        return this;
+        // TODO DRY this
+        return new Stage(this, (t) => { this.step(t); });
     }
 
     get_args() {
