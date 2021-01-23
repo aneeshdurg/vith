@@ -58,17 +58,36 @@
                     <label for="load">Load: </label>
                     <input id="load" type="file" accept="image/*.png" accept="text/*"></text>
                 </div>
-                <!--
                 <div id="controls-3" style="display: none">
-                    <h2> Record </h2>
+                    <h2> Playback/recording </h2>
+                    <h3> playback </h3>
+                    <button id="startstop">Stop</button>
+                    <h3> recording </h3>
+                    <button id="screenshot">Screenshot</button>
+                    <br>
+                    <label for="record-duration">Number of frames: </label>
                     <input
                         type="number"
                         min="0"
                         value="100"
                         id="record-duration"></input>
-                    <button id="Record">Record</button>
+                    <br>
+                    <br>
+                    <label for="record-fps">Frames per second: </label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="120"
+                        value="30"
+                        id="record-fps"></input>
+                    <br>
+                    <button id="record">Record</button>
+                    <br>
+                    <div id="recordstatus" style="display: none;">
+                        <code id="recordinfo"></code>
+                        <progress id="recordprogress"></progress>
+                    </div>
                 </div>
-                -->
             </div>
             <br>
             <hr>

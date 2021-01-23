@@ -74,6 +74,18 @@ function decode_stego(stegodata, LZString) {
     return result;
 }
 
+function _download(data, filename) {
+    const downloader = document.createElement('a');
+    downloader.setAttribute('href', data);
+    downloader.setAttribute('download', filename);
+    downloader.style.display = "none";
+    document.body.appendChild(downloader);
+
+    downloader.click();
+
+    document.body.removeChild(downloader);
+}
+
 function setup_save_load(ui, synth) {
     // magic + 4 byte length + 1 byte per RGBA values
     // this is because we can't use the A channel because of premultiplied
@@ -163,15 +175,7 @@ function setup_save_load(ui, synth) {
             document.body.removeChild(downloader);
         } else {
             const savedata = encodeURI(savestr);
-            const downloader = document.createElement('a');
-            downloader.setAttribute('href', 'data:text/plain;charset=utf-8,' + savedata);
-            downloader.setAttribute('download', 'videoSynth.savedata');
-            downloader.style.display = "none";
-            document.body.appendChild(downloader);
-
-            downloader.click();
-
-            document.body.removeChild(downloader);
+            _download('data:text/plain;charset=utf-8,' + savedata, 'videoSynth.savedata');
         }
     });
 

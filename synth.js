@@ -175,7 +175,7 @@ class Synth {
 
 function setup_controler() {
     let current_controls = 0;
-    const num_controls = 3;
+    const num_controls = 4;
     document.getElementById("controls-next").addEventListener("click", () => {
         document.getElementById(`controls-${current_controls}`).style.display = "none";
         current_controls += 1;
@@ -267,6 +267,7 @@ async function synth_main(canvas) {
     setup_add_new_stage(ui, synth);
     setup_meta_module(ui, synth);
     setup_save_load(ui, synth);
+    setup_recording(ui, synth);
 }
 
 function loadStaticSynth(canvas, data, cb) {

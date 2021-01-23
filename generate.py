@@ -40,6 +40,7 @@ def build_js() -> None:
         files = [
             "twgl-full.min.js",
             "lz-string/libs/lz-string.min.js",
+            "jszip/jszip.min.js",
             "webgl-common/common.js",
             "build/synth.frag.js",
             "ui.js",
@@ -48,6 +49,7 @@ def build_js() -> None:
             "synth_element_base.js",
             "build/module_lib.js",
             "meta_module.js",
+            "recording.js",
             "saveload.js",
             "synth.js",
         ]
