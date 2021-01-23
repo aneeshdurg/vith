@@ -16,4 +16,14 @@ function setup_settings(ui, synth) {
     clock_inp.addEventListener("change", () => {
         synth.clock_speed = clock_inp.value;
     });
+
+    // TODO autosave to localstorage
+}
+
+function get_settings() {
+    // TODO for saving/loading
+}
+
+function load_settings() {
+    // TODO for saving/loading
 }

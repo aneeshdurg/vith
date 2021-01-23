@@ -22,7 +22,7 @@ class ModuleElement extends SynthStageBase {
         let old_name = synth.stages[module.selection[0]];
         synth.stages[module.selection[0]] = this.name;
         delete synth.stageModules[old_name];
-        synth.stageModules[this.name] = this;
+        synth.stageModules[this.name] = new Stage(this, (t) => { this.step(t); });
 
         console.log("removed stage", old_name, module.selection);
 

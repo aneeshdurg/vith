@@ -144,7 +144,7 @@ class Synth {
     }
 
     toggle_stage(name, state) {
-        this.stageModules[name].enable = state;
+        this.stageModules[name].fn_params.enable = state;
     }
 
     running = null;
