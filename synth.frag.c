@@ -93,6 +93,7 @@ vec2 t_coords;
 #include "modules/recolor.frag.c"
 #include "modules/reduce_colors.frag.c"
 #include "modules/reflector.frag.c"
+#include "modules/ripple.frag.c"
 #include "modules/rotator.frag.c"
 #include "modules/superformula.frag.c"
 #include "modules/swirl.frag.c"
