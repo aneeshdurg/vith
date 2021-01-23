@@ -7,6 +7,7 @@ class Stage {
 
 class Synth {
     name = "synth";
+    clock_speed = 1;
 
     recording = [];
     record_frames = 0;
@@ -50,7 +51,9 @@ class Synth {
         this.canvas = canvas;
     }
 
-    render(time) {
+    render(time_) {
+        let time = time_ * this.clock_speed;
+
         const process_stages = (stage, stageid) => {
             const fn_params = stage.fn_params;
 
