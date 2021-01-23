@@ -32,6 +32,7 @@ def copy_regular() -> None:
             shutil.copy(file_, f"build/{file_}")
         shutil.copy("webgl-common/common.js", "build/common.js")
         shutil.copy("lz-string/libs/lz-string.min.js", "build/lz-string.min.js")
+        shutil.copy("jszip/jszip.min.js", "build/jszip.min.js")
 
 def build_js() -> None:
     with open("build/synth.build.js", "w") as output:
