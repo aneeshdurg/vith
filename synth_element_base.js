@@ -1,3 +1,14 @@
+class Function {
+    id = 0;
+    feedback = 0;
+    params = {};
+    enable = true;
+
+    constructor(feedback) {
+        this.feedback = feedback;
+    }
+}
+
 const globalCounters = {};
 
 class SynthStageBase extends HTMLElement {
@@ -94,13 +105,12 @@ class SynthStageBase extends HTMLElement {
             this.synth.remove_stage(this.name);
             this.remove();
 
-            for (let arg of Object.keys(args))
-                args[arg].generate = false;
+            for (let arg of Object.keys(this.args))
+                this.args[arg].generate = false;
             this.feedback_el.generate = false;
         });
 
         this.enable_el.addEventListener('change', () => {
-            this.synth.toggle_stage(this.name, this.enable_el.checked);
             this.synth.toggle_stage(this.name, this.enable_el.checked);
         });
     }
@@ -108,7 +118,6 @@ class SynthStageBase extends HTMLElement {
     reparent_to_module(module) {
         this.remove_btn.style.display = "none";
         this.synth = module;
-        // this.parentElement = module;
     }
 
     step(time) { }
@@ -120,8 +129,8 @@ class SynthElementBase extends SynthStageBase {
         return {};
     }
 
-    get_type() {
-        return Type;
+    get_fn() {
+        return Function;
     }
 
     get_feedback() {
@@ -171,21 +180,21 @@ class SynthElementBase extends SynthStageBase {
         this.name = `${this.get_title()}-${counter}`;
 
         synth.add_stage(this.name, this.build_stage(params));
-
     }
 
     build_stage(params) {
-        const constructor = this.get_type();
-        return new Stage(new constructor(...params, 1), (time) => { this.step(time); });
+        const constructor = this.get_fn();
+        this.fn_params = new constructor(...params, 1);
+        return new Stage(this.fn_params, (time) => { this.step(time); });
     }
 
     onchange(arg, val) {
         if (arg === "feedback")
-            this.synth.stageModules[this.name].fn_params.feedback = val;
+            this.fn_params.feedback = val;
         else if (arg === "constrain to transform")
-            this.synth.stageModules[this.name].fn_params.constrain = val;
+            this.fn_params.constrain = val;
         else
-            this.synth.stageModules[this.name].fn_params.params[arg] = val;
+            this.fn_params.params[arg] = val;
     }
 
     save() {
@@ -205,12 +214,9 @@ class SynthElementBase extends SynthStageBase {
 
     load(data) {
         this.enable_el.checked = data.enabled;
-        for (let arg of Object.keys(this.args)) {
-            // console.log("Loading", arg, data.args[arg]);
+        for (let arg of Object.keys(this.args))
             this.args[arg].load(data.args[arg]);
-        }
 
-        // console.log("Loading feedback", data.args.feedback);
         if (data.args.feedback)
             this.feedback_el.load(data.args.feedback);
         if (data.args.constrain)
@@ -218,9 +224,8 @@ class SynthElementBase extends SynthStageBase {
     }
 
     step(time) {
-        for (let arg of Object.keys(this.args)) {
+        for (let arg of Object.keys(this.args))
             this.args[arg].step(time);
-        }
     }
 }
 
@@ -232,7 +237,6 @@ class TransformElement extends SynthElementBase {
     }
 
     build_stage() {
-        // TODO DRY this
         return new Stage(this, (t) => { this.step(t); });
     }
 

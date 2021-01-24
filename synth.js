@@ -14,8 +14,8 @@ class Synth {
 
     dimensions = [1000, 1000];
 
-    stages = [];
-    stageModules = {};
+    stages = []; // List[str]
+    stageModules = {}; // Map[str, Stage]
 
     transform = {
         center: [ 0.5, 0.5 ],
@@ -52,6 +52,7 @@ class Synth {
     }
 
     render(time_) {
+        this.dispatchEvent
         let time = time_ * this.clock_speed;
 
         const process_stages = (stage, stageid) => {

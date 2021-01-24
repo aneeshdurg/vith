@@ -302,7 +302,7 @@ def create_module_library(modules, output):
                 return "{class_name}";
             }}
 
-            get_type() {{
+            get_fn() {{
                 return {class_name};
             }}
 

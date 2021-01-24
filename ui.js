@@ -2,17 +2,6 @@ function defineEl(name, class_) {
     customElements.define(name + (window.globalprefix || ""), class_);
 }
 
-class Function {
-    id = 0;
-    feedback = 0;
-    params = {};
-    enable = true;
-
-    constructor(feedback) {
-        this.feedback = feedback;
-    }
-}
-
 function createModal(resolver) {
     const modal = document.createElement('div');
     modal.addEventListener('click', (e) => {
@@ -191,8 +180,6 @@ class FloatBar extends Type {
         });
         this.func_gen.addEventListener('change', () => {
             this.generate = this.func_gen.checked;
-            // if (this.generate)
-            //     this.start_generation(0);
         });
 
         func_modal.addEventListener('click', async () => {
@@ -207,14 +194,8 @@ class FloatBar extends Type {
                 return;
 
             this.params = params;
-            let needs_restart = false;
-            if (!this.generate)
-                needs_restart = true;
             this.generate = true;
             this.func_gen.checked = true;
-            // TODO remove needs restart?
-            // if (needs_restart)
-            //     this.start_generation(0);
         });
 
         container.appendChild(this.slider);
@@ -333,10 +314,8 @@ class VecEntry extends Type {
     load(data) {
         if (data === undefined)
             return;
-        // console.log("loading vec", data);
         for (let name of Object.keys(data)) {
             const i = this.names.indexOf(name);
-            // TODO validate i
             this.floats[i].load(data[name]);
         }
     }
