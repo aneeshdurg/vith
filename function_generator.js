@@ -9,18 +9,15 @@ class GenParams {
     }
 
     load(params) {
-        this.params = params;
+        for (let key of Object.keys(params))
+            this.params[key] = params[key];
     }
 }
 
-class DefaultSinParams extends GenParams {
+class DefaultParams extends GenParams {
     params = {freq: 1, c: 0};
 }
 
-
-class DefaultStepParams extends GenParams {
-    params = {freq: 1};
-}
 
 const sin_generator = (t, range, genparams) => {
     const params = genparams.get();
@@ -32,18 +29,24 @@ const sin_generator = (t, range, genparams) => {
 
 const step_generator = (t, range, genparams) => {
     const params = genparams.get();
-    return ((t / 1000 * params.freq) % (range[1] - range[0])) + range[0];
+    return ((t / 1000 * params.freq + params.c) % (range[1] - range[0])) + range[0];
+};
+
+const inv_step_generator = (t, range, genparams) => {
+    const step = step_generator(t, range, genparams);
+    return range[1] - step + range[0];
 };
 
 const generators = {
-    sin: { func: sin_generator, params: new DefaultSinParams() },
-    step: { func: step_generator, params: new DefaultStepParams() }
+    sin: { func: sin_generator, params: DefaultParams },
+    step: { func: step_generator, params: DefaultParams },
+    inv_step: { func: inv_step_generator, params: DefaultParams }
 }
 
 class FunctionGenerator{
     cancel = false;
 
-    constructor (parentEl, current, resolver) {
+    constructor (parentEl, current, current_params, resolver) {
         const container = document.createElement('div');
         container.className = "functiongen";
 
@@ -89,20 +92,11 @@ class FunctionGenerator{
         function_ui.appendChild(c_label);
         function_ui.appendChild(c_input);
 
-        if (current === "sin") {
-            this.func = sin_generator;
-            this.params = new DefaultSinParams();
-            c_label.style.display = "";
-            c_input.style.display = "";
-            c_input.value = 0;
-            freq_input.value = 1;
-        } else {
-            this.func = step_generator;
-            this.params = new DefaultStepParams();
-            c_label.style.display = "none";
-            c_input.style.display = "none";
-            freq_input.value = 1;
-        }
+        this.func = generators[current].func;
+        this.params = current_params || new generators[current].params();
+        console.log("Using params", this.params);
+        freq_input.set_value(this.params.params.freq);
+        c_input.set_value(this.params.params.c);
 
         freq_input.addEventListener('change', () => {
             this.params.params.freq = parseFloat(freq_input.value);
@@ -131,7 +125,6 @@ class FunctionGenerator{
 
         container.appendChild(function_ui);
         parentEl.appendChild(container);
-
     }
 
     draw_axes() {

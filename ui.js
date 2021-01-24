@@ -171,22 +171,26 @@ class FloatBar extends Type {
         });
 
         this.generate = false;
-        this.func = generators[this.func_select.value].func;
-        this.params = generators[this.func_select.value].params;
-
-        this.func_select.addEventListener('change', () => {
+        const set_func = () => {
             this.func = generators[this.func_select.value].func;
-            this.params = generators[this.func_select.value].params;
-        });
+            this.params = new generators[this.func_select.value].params();
+        };
+        set_func();
+
+        this.func_select.addEventListener('change', set_func);
         this.func_gen.addEventListener('change', () => {
             this.generate = this.func_gen.checked;
         });
 
         func_modal.addEventListener('click', async () => {
-            let resolver = null;
+            let resolver = undefined;
             const p = new Promise(r => { resolver = r; });
             const modal = createModal(resolver);
-            const generator = new FunctionGenerator(modal, this.func_select.value, resolver);
+            let curr_params = undefined;
+            if (this.generate)
+                curr_params = this.params;
+            const generator = new FunctionGenerator(
+                modal, this.func_select.value, curr_params, resolver);
             const params = await p;
             generator.remove();
             modal.remove();
@@ -215,13 +219,6 @@ class FloatBar extends Type {
             this.set_value(this.func(time, this.range, this.params));
     }
 
-    start_generation(time) {
-        if (this.generate) {
-            this.set_value(this.func(time, this.range, this.params));
-            requestAnimationFrame(this.start_generation.bind(this));
-        }
-    }
-
     save() {
         const savedata = {
             value: this.value,
@@ -244,7 +241,7 @@ class FloatBar extends Type {
         this.set_value(data.value);
 
         if (data.generate) {
-            this.params = new GenParams();
+            this.params = new generators[this.func_select.value].params();
             this.params.load(data.params);
 
             this.func_select.value = data.func;
@@ -252,7 +249,6 @@ class FloatBar extends Type {
             this.func_gen.checked = true;
 
             this.generate = true;
-            this.start_generation(0);
         }
     }
 }

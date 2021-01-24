@@ -237,6 +237,7 @@ class TransformElement extends SynthElementBase {
     }
 
     build_stage() {
+        this.fn_params = this;
         return new Stage(this, (t) => { this.step(t); });
     }
 

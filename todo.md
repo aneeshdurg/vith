@@ -1,12 +1,9 @@
 # DEBT
-- make saveload code common for use in standalone builder
 - tests
 - refactor module definition syntax
 - refactor generator
 
 # FUNCTION GENERATOR
-- function generator resumes state
-- offset for step function
 - int entry doesn't call onchange for step/sin function on non-int vals
 - triangle function
 - square function
