@@ -238,6 +238,8 @@ class ReduceColors_reduce_colors_data extends Type {
         this.el.appendChild(label);
         this.el.appendChild(input);
 
+        // TODO add a ui to edit colors individually
+
         this.shadow.appendChild(this.el);
     }
 

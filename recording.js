@@ -59,6 +59,8 @@ function setup_recording(ui, synth) {
         _download('data:application/zip;base64,' + zipped, `${synth.name}.zip`);
         record_status.style.display = "none";
 
+        // TODO re-download button
+
         if (started)
             synth.run();
     });
