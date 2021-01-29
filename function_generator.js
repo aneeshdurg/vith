@@ -15,26 +15,33 @@ class GenParams {
 }
 
 class DefaultParams extends GenParams {
-    params = {freq: 1, c: 0};
+    params = {freq: 1, c: 0, y: 0, a: 1};
 }
 
+const constrain = (range, value) => Math.min(Math.max(value, range[0]), range[1]);
 
 const sin_generator = (t, range, genparams) => {
     const params = genparams.get();
     let value = Math.sin(params.freq * 2 * Math.PI * t / 1000 + params.c);
     value = (value + 1) / 2;
     value = value * (range[1] - range[0]) + range[0];
+    value = constrain(range, params.a * value + params.y);
     return value;
 };
 
+const raw_step = (t, range, freq, c) => {
+    return ((t / 1000 * freq + c) % (range[1] - range[0])) + range[0];
+}
+
 const step_generator = (t, range, genparams) => {
     const params = genparams.get();
-    return ((t / 1000 * params.freq + params.c) % (range[1] - range[0])) + range[0];
+    return constrain(range, params.a * raw_step(t, range, params.freq, params.c) + params.y);
 };
 
 const inv_step_generator = (t, range, genparams) => {
-    const step = step_generator(t, range, genparams);
-    return range[1] - step + range[0];
+    const params = genparams.get();
+    const step = raw_step(t, range, params.freq, params.c);
+    return constrain(range, params.a * (range[1] - step + range[0]) + params.y);
 };
 
 const generators = {
@@ -74,6 +81,7 @@ class FunctionGenerator{
         const function_ui = document.createElement('div');
         function_ui.className = 'function-ui';
 
+        // TODO use templates
         function_ui.appendChild(document.createElement('br'));
         const freq_label = document.createElement('label');
         freq_label.for = "freq_input";
@@ -92,17 +100,43 @@ class FunctionGenerator{
         function_ui.appendChild(c_label);
         function_ui.appendChild(c_input);
 
+        function_ui.appendChild(document.createElement('br'));
+        const a_label = document.createElement('label');
+        a_label.for = "a_input";
+        a_label.innerText = "Amplitude factor: ";
+        const a_input = new FloatBar([0, 10], 1, true);
+        a_input.id = "a_input";
+        function_ui.appendChild(a_label);
+        function_ui.appendChild(a_input);
+
+        function_ui.appendChild(document.createElement('br'));
+        const y_label = document.createElement('label');
+        y_label.for = "y_input";
+        y_label.innerText = "Y offset: ";
+        const y_input = new FloatBar([-1, 1], 0, true);
+        y_input.id = "y_input";
+        function_ui.appendChild(y_label);
+        function_ui.appendChild(y_input);
+
         this.func = generators[current].func;
         this.params = current_params || new generators[current].params();
         console.log("Using params", this.params);
         freq_input.set_value(this.params.params.freq);
         c_input.set_value(this.params.params.c);
+        a_input.set_value(this.params.params.a);
+        y_input.set_value(this.params.params.y);
 
         freq_input.addEventListener('change', () => {
             this.params.params.freq = parseFloat(freq_input.value);
         });
         c_input.addEventListener('change', () => {
             this.params.params.c = parseFloat(c_input.value);
+        });
+        a_input.addEventListener('change', () => {
+            this.params.params.a = parseFloat(a_input.value);
+        });
+        y_input.addEventListener('change', () => {
+            this.params.params.y = parseFloat(y_input.value);
         });
 
         const f = () => {
