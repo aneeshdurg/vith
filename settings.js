@@ -1,29 +1,37 @@
-function setup_settings(ui, synth) {
-    const name_inp = document.getElementById("name");
-    const clock_inp = document.getElementById("clock_speed");
-    const autosave_btn = document.getElementById("autosave_enable");
-    const autosave_opts = document.getElementById("autosave_opts");
+class SettingsUI {
+    constructor(ui, synth) {
+        this.name_inp = document.getElementById("name");
+        this.clock_inp = document.getElementById("clock_speed");
+        const autosave_btn = document.getElementById("autosave_enable");
+        const autosave_opts = document.getElementById("autosave_opts");
 
-    name_inp.addEventListener("change", () => {
-        synth.name = name_inp.value;
-        ui.dispatchEvent(new Event("namechange"));
-    });
+        this.name_inp.addEventListener("change", () => {
+            synth.name = this.name_inp.value;
+            ui.dispatchEvent(new Event("namechange"));
+        });
 
-    ui.addEventListener("namechange", () => {
-        name_inp.value = synth.name;
-    });
+        ui.addEventListener("namechange", () => {
+            this.name_inp.value = synth.name;
+        });
 
-    clock_inp.addEventListener("change", () => {
-        synth.clock_speed = clock_inp.value;
-    });
+        this.clock_inp.addEventListener("change", () => {
+            synth.clock_speed = this.clock_inp.value;
+        });
 
-    // TODO autosave to localstorage
-}
+        // TODO autosave to localstorage
+    }
 
-function get_settings() {
-    // TODO for saving/loading
-}
+    save() {
+        return {
+            name: this.name_inp.value,
+            clock: this.clock_inp.value,
+        };
+    }
 
-function load_settings() {
-    // TODO for saving/loading
+    load(data) {
+        this.name_inp.value = data.name || this.name_inp.value;
+        this.name_inp.dispatchEvent(new Event("change"));
+        this.clock_inp.value = data.clock || 1;
+        this.clock_inp.dispatchEvent(new Event("change"));
+    }
 }

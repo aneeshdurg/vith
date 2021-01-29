@@ -6,7 +6,7 @@ class Stage {
 }
 
 class Synth {
-    name = "synth";
+    name = "";
     clock_speed = 1;
 
     recording = [];
@@ -290,11 +290,12 @@ async function synth_main(canvas) {
     ui.addEventListener("namechange", () => {
         title.innerText = synth.name;
     });
-    setup_settings(ui, synth);
+
+    const settings = new SettingsUI(ui, synth);
     setup_controler();
     setup_add_new_stage(ui, synth);
     setup_meta_module(ui, synth);
-    setup_save_load(ui, synth);
+    setup_save_load(ui, synth, settings);
     setup_recording(ui, synth);
 }
 

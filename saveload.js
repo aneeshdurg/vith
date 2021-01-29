@@ -86,7 +86,7 @@ function _download(data, filename) {
     document.body.removeChild(downloader);
 }
 
-function setup_save_load(ui, synth) {
+function setup_save_load(ui, synth, settingsui) {
     // magic + 4 byte length + 1 byte per RGBA values
     // this is because we can't use the A channel because of premultiplied
     // stuff, TODO fix that
@@ -103,6 +103,7 @@ function setup_save_load(ui, synth) {
         const saveobj = {
             stages: saved,
             modules: meta_modules,
+            settings: settingsui.save()
         };
 
         const savestr = JSON.stringify(saveobj);
@@ -170,6 +171,19 @@ function setup_save_load(ui, synth) {
         }
     });
 
+    const do_load = (name, savedata) => {
+        if (savedata.modules)
+            load_meta_modules(savedata.modules, ui, synth);
+        if (savedata.stages)
+            loaddata(savedata.stages, ui, synth);
+        if (savedata.settings)
+            settingsui.load(savedata.settings);
+        if (synth.name === "") {
+            synth.name = name;
+            ui.dispatchEvent(new Event("namechange"));
+        }
+    };
+
     const loadUpload = document.getElementById("load");
     loadUpload.addEventListener("change", () => {
         let file = loadUpload.files[0];
@@ -182,7 +196,6 @@ function setup_save_load(ui, synth) {
                 const img = new Image();
                 img.src = reader.result;
                 await new Promise(r => { img.onload = r; });
-                console.log(img);
 
                 const canvas = document.createElement("canvas");
                 canvas.width = img.width;
@@ -195,25 +208,14 @@ function setup_save_load(ui, synth) {
                 const stegodata = ctxdata.data;
                 const result = decode_stego(stegodata, LZString);
 
-                const savedata = JSON.parse(result);
-                load_meta_modules(savedata.modules, ui, synth);
-                loaddata(savedata.stages, ui, synth);
+                do_load(name, JSON.parse(result));
             }
         } else {
             reader.readAsText(file)
             reader.onloadend = () => {
-                const savedata = JSON.parse(reader.result);
-                if (savedata.stages) {
-                    load_meta_modules(savedata.modules, ui, synth);
-                    loaddata(savedata.stages, ui, synth);
-                } else { // older version for compat
-                    loaddata(savedata, ui, synth);
-                }
+                do_load(name, JSON.parse(reader.result));
             };
         }
-
-        synth.name = name;
-        ui.dispatchEvent(new Event("namechange"));
     });
 }
 
