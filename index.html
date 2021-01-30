@@ -105,6 +105,8 @@
         <div id="ui" class="ui">
             <h1 id="settingstitle" class="title">Settings</h1>
             <hr>
+            <h2> General </h2>
+            <br>
             <label for="name">Project Name: </label>
             <input id="name"></input>
             <br>
@@ -118,7 +120,42 @@
                 step="0.01"
             ></input>
             <br>
-            <!-- TODO -->
+            <br>
+            <h2> Render Dimensions </h2>
+            <!-- TODO
+            <br>
+            <label for="auto_dims_enable">Auto select resolution: </label>
+            <input id="auto_dims_enable" type="checkbox" checked></input>
+            <div id="target_fps_container">
+                <br>
+                <br>
+                <label for="target_fps">Target FPS: </label>
+                <input type="number" id="target_fps" min="1" step="1"></input>
+            </div>
+            -->
+            <div id="render_dims">
+                <br>
+                <br>
+                <label for="render_width">Width: </label>
+                <input
+                    type="number"
+                    id="render_width"
+                    min="1"
+                    value="1000"
+                    step="1"
+                ></input>
+                <br>
+                <br>
+                <label for="render_height">Height: </label>
+                <input
+                    type="number"
+                    id="render_height"
+                    min="1"
+                    value="1000"
+                    step="1"
+                ></input>
+            </div>
+            <!-- TODO
             <label for="autosave_enable" style="display: none;">Autosave: </label>
             <input id="autosave" type="checkbox" style="display: none;"></input>
             <div id="autosave_opts" style="display: none;">
@@ -140,6 +177,7 @@
                 ></input>
 
             </div>
+            -->
         </div>
     </div>
 </body>

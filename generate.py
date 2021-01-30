@@ -8,6 +8,7 @@ import shutil
 import textwrap
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable, Dict, Optional
 
 def setup_build_dir() -> None:
@@ -65,14 +66,14 @@ def build_js() -> None:
 
 def generate_entrypoints() -> None:
     with open("index.html") as index:
-        index_contents = index.read();
+        base = index.read();
         with open("head.html") as head:
             with open("build/index.html", "w") as output:
-                output.write(head.read() + index_contents)
+                output.write(head.read() + base)
 
         with open("head_debug.html") as head:
             with open("build/debug.html", "w") as output:
-                output.write(head.read() + index_contents)
+                output.write(head.read() + base)
 
 def parse(data) -> None:
     if isinstance(data, bool):

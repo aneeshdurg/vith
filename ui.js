@@ -1,3 +1,15 @@
+// defined for syntax highlighting purposes
+const html = String.raw;
+// https://medium.com/@trukrs/tagged-template-literal-for-html-templates-4820cf5538f9
+function createElement(markup) {
+    const temp = document.createElement('div')
+    temp.innerHTML = markup
+    const frag = document.createDocumentFragment()
+    const children = Array.prototype.slice.apply(temp.childNodes)
+    children.map(el => frag.appendChild(el))
+    return frag
+}
+
 function defineEl(name, class_) {
     customElements.define(name + (window.globalprefix || ""), class_);
 }
@@ -32,7 +44,11 @@ class Type extends HTMLElement {
     constructor(range, defaultValue) {
         super();
         this.range = range;
+        if (this.range === null || this.range === undefined)
+            this.range = eval(this.getAttribute("range"));
         this.defaultValue = defaultValue;
+        if (this.defaultValue === null || this.defaultValue === undefined)
+            this.defaultValue =  eval(this.getAttribute("defaultValue"))
         this.shadow = this.attachShadow({mode: 'open'});
     }
 
@@ -50,16 +66,15 @@ class BoolEntry extends Type {
     constructor(defaultValue) {
         super([0, 0], defaultValue);
 
-        this.input = document.createElement('input');
-        this.input.id = "generate";
-        this.input.type = 'checkbox';
+        this.shadow.appendChild(createElement(html`
+            <input type="checkbox"></input>
+        `));
+        this.input = this.shadow.querySelector("input");
         this.input.checked = defaultValue;
         this.input.addEventListener('change', () => {
             this.value = this.input.checked;
             this.dispatchEvent(new Event('change'));
         });
-
-        this.shadow.appendChild(this.input);
     }
 
     save() {
@@ -67,7 +82,6 @@ class BoolEntry extends Type {
     }
 
     load(data) {
-        // console.log("loading bool", data);
         this.value = data;
         this.input.checked = data;
         this.dispatchEvent(new Event('change'));
@@ -79,12 +93,19 @@ class Slider extends Type {
     constructor(range, defaultValue) {
         super(range, defaultValue);
 
-        const container = document.createElement('div');
-        container.style = "padding-bottom: 0.5em;"
-        const bar = document.createElement('div');
-        bar.style = "background: black; width: 10em; height: 1em;";
-        this.slider = document.createElement('div');
-        this.slider.style = "background: white; height: 1em; width: 1%; position: relative; left: 0em";
+        this.shadow.appendChild(createElement(html`
+            <div style="padding-bottom: 0.5em;"> <!-- TODO use template + <style> ? -->
+                <div id="bar" style="background: black; width: 10em; height: 1em;">
+                    <div
+                        id="slider"
+                        style="background: white; width: 1%; height: 1em; position: relative; left: 0em">
+                    </div>
+                </div>
+            </div>
+        `));
+
+        const bar = this.shadow.querySelector("#bar");
+        this.slider = this.shadow.querySelector("#slider");
 
         const handler = (e) => {
             if (e.target != bar)
@@ -99,10 +120,6 @@ class Slider extends Type {
         };
         bar.addEventListener('mousemove', (e) => { if (e.buttons & 1) handler(e); });
         bar.addEventListener('touchmove', handler);
-
-        bar.appendChild(this.slider);
-        container.appendChild(bar);
-        this.shadow.appendChild(container);
     }
 
     set_value(value) {
@@ -131,15 +148,27 @@ class FloatBar extends Type {
     constructor(range, defaultValue, supressFunctionGen) {
         super(range, defaultValue);
 
-        const container = document.createElement('div');
+        this.shadow.appendChild(createElement(html`
+            <div>
+                <slider-elem range="[${this.range}]" defaultValue="${this.defaultValue}"></slider-elem>
+                <input
+                    id="floatinp"
+                    style="box-shadow: none;"
+                    type="number"
+                    min="${this.range[0]}"
+                    max="${this.range[1]}"
+                    step="${(this.range[1] - this.range[0]) / 1000}"></input>
+                <div id="functiongen">
+                    <label for="generate">function: </label>
+                    <input id="generate" type="checkbox"></input>
+                    <select></select>
+                    <button>Edit function</button>
+                </div>
+            </div>
+        `));
 
-        this.slider = new Slider(range, defaultValue);
-        this.input = document.createElement('input');
-        this.input.style.boxShadow = "none";
-        this.input.type = "number";
-        this.input.min = this.range[0];
-        this.input.max = this.range[1];
-        this.input.step = (this.range[1] - this.range[0]) / 1000;
+        this.slider = this.shadow.querySelector("slider-elem");
+        this.input = this.shadow.querySelector("#floatinp");
 
         this._set_value(this.defaultValue);
 
@@ -154,16 +183,11 @@ class FloatBar extends Type {
         });
         this.slider.addEventListener('change', () => { this.set_value(this.slider.value); });
 
-        const gen_label = document.createElement('label');
-        gen_label.for = "generate";
-        gen_label.innerText = "function: ";
-        this.func_gen = document.createElement('input');
-        this.func_gen.id = "generate";
-        this.func_gen.type = 'checkbox';
-        this.func_select = document.createElement('select');
-        const func_modal = document.createElement('button');
-        func_modal.innerText = "Edit function";
-        Object.keys(generators).forEach((k, i) => {
+        const funcgen_container = this.shadow.querySelector("#functiongen");
+        this.func_gen = funcgen_container.querySelector("#generate");
+        const func_modal = funcgen_container.querySelector("button");
+        this.func_select = funcgen_container.querySelector("select");
+        Object.keys(generators).forEach(k => {
             const opt = document.createElement('option');
             opt.value = k;
             opt.innerText = k;
@@ -202,16 +226,8 @@ class FloatBar extends Type {
             this.func_gen.checked = true;
         });
 
-        container.appendChild(this.slider);
-        container.appendChild(this.input);
-        container.appendChild(document.createElement('br'));
-        if (!supressFunctionGen) {
-            container.appendChild(gen_label);
-            container.appendChild(this.func_gen);
-            container.appendChild(this.func_select);
-            container.appendChild(func_modal);
-        }
-        this.shadow.appendChild(container);
+        if (supressFunctionGen)
+            funcgen_container.style.display = "none";
     }
 
     step(time) {
@@ -237,7 +253,6 @@ class FloatBar extends Type {
     load(data) {
         if (data === undefined)
             return;
-        // console.log("loading float", data);
         this.set_value(data.value);
 
         if (data.generate) {
@@ -276,27 +291,26 @@ class VecEntry extends Type {
         this.names = names;
 
         for (let i = 0; i < this.nelem; i++) {
-            const entry = new FloatBar(this.range[i], this.defaultValue[i])
-            entry.addEventListener('change', () => {
+            this.shadow.appendChild(createElement(html`
+                <label for="${names[i]}">${names[i]}: </label>
+                <float-bar
+                    id="${names[i]}"
+                    range="[${this.range[i]}]"
+                    defaultValue="${this.defaultValue[i]}"></float-bar>
+            `));
+        }
+
+        this.value = this.defaultValue;
+
+        this.floats = Array.from(this.shadow.querySelectorAll("float-bar"));
+        for (let float of this.floats) {
+            float.addEventListener('change', () => {
                 for (let i = 0; i < this.nelem; i++) {
                     this.value[i] = this.floats[i].value;
                 }
                 this.dispatchEvent(new Event('change'));
             });
-            this.floats.push(entry);
-
-            const container = document.createElement('div');
-            const label = document.createElement('label');
-            label.for = names[i];
-            label.innerText = `${names[i]}: `;
-            entry.id = names[i];
-
-            container.appendChild(label);
-            container.appendChild(entry);
-            this.shadow.appendChild(container);
         }
-
-        this.value = this.defaultValue;
     }
 
     save() {
