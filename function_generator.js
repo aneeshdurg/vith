@@ -23,9 +23,10 @@ const constrain = (range, value) => Math.min(Math.max(value, range[0]), range[1]
 const sin_generator = (t, range, genparams) => {
     const params = genparams.get();
     let value = Math.sin(params.freq * 2 * Math.PI * t / 1000 + params.c);
+    value = params.a * value + params.y;
     value = (value + 1) / 2;
     value = value * (range[1] - range[0]) + range[0];
-    value = constrain(range, params.a * value + params.y);
+    value = constrain(range, value);
     return value;
 };
 
