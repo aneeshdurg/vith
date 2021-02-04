@@ -19,6 +19,8 @@ class SettingsUI {
         });
         this.clock_inp.value = 1;
 
+        // TODO default channel
+
         // this.auto_dims_btn = document.getElementById("auto_dims_enable");
         this.render_width_inp = document.getElementById("render_width");
         this.render_width_inp.value = 1000;

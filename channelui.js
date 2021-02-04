@@ -28,6 +28,8 @@ function setup_channels(ui_container, synth) {
         chan_select.appendChild(new_opt);
         chan_select.value = new_chan;
 
+        chan_select.dispatchEvent(new Event("change"));
+
         console.log("Appending to render_select", new_chan);
         const new_opt_1 = document.createElement('option');
         new_opt_1.innerText = new_chan;
@@ -35,7 +37,7 @@ function setup_channels(ui_container, synth) {
         render_select.appendChild(new_opt_1);
         render_select.value = new_chan;
 
-        chan_select.dispatchEvent(new Event("change"));
+        render_select.dispatchEvent(new Event("change"));
     }
 
     const add_chan_btn = document.getElementById("channel-add");
