@@ -28,12 +28,36 @@
                         <select id="add_new_color_select"></select>
                         <button id="add_new_color">Add</button>
                     </div>
+                    <div id="add_new_channels_container" style="display: none">
+                        <p> Channel Effects </p>
+                        <select id="add_new_channels_select"></select>
+                        <button id="add_new_channels">Add</button>
+                    </div>
                     <br>
                     <button id="add_new-prev" class="controls-prev">prev</button>
                     <button id="add_new-next" class="controls-next">next</button>
                     <br>
                 </div>
                 <div id="controls-1" style="display: none">
+                    <div>
+                        <h2> Manage Channels </h2>
+                        <label for="channel-select">Edit Channel: </label>
+                        <select id="channel-select">
+                            <option value="0">0</option>
+                        </select>
+                        <br>
+                        <br>
+                        <button id="channel-add">Add Channel</button>
+                        <label for="channel-render">Render Channel: </label>
+                        <select id="channel-render">
+                            <option value="0">0</option>
+                        </select>
+                        <br>
+                        <br>
+
+                    </div>
+                </div>
+                <div id="controls-2" style="display: none">
                     <div>
                         <h2> Add/create meta module </h2>
                         <p>
@@ -47,7 +71,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="controls-2" style="display: none">
+                <div id="controls-3" style="display: none">
                     <h2> Save / Load </h2>
                     <p>
                     Save the current synth or load a previous save
@@ -58,7 +82,7 @@
                     <label for="load">Load: </label>
                     <input id="load" type="file" accept="image/*.png" accept="text/*"></text>
                 </div>
-                <div id="controls-3" style="display: none">
+                <div id="controls-4" style="display: none">
                     <h2> Playback/recording </h2>
                     <h3> playback </h3>
                     <button id="startstop">Stop</button>
@@ -92,7 +116,9 @@
             <br>
             <hr>
             <br>
-            <div id="ui-container"></div>
+            <div id="ui-container">
+                <div id="ui-0"></div>
+            </div>
         </div>
     </div>
     <div class="display-container" id="display-container">

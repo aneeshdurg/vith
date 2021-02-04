@@ -1,4 +1,4 @@
-function setup_recording(ui, synth) {
+function setup_recording(synth) {
     const start_btn = document.getElementById("startstop");
     let started = true;
     start_btn.addEventListener("click", () => {

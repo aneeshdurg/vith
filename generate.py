@@ -52,6 +52,7 @@ def build_js() -> None:
             "build/module_lib.js",
             "meta_module.js",
             "recording.js",
+            "channelui.js",
             "saveload.js",
             "settings.js",
             "synth.js",
@@ -107,6 +108,7 @@ type_info: Dict[str, TypeInfo] = {
     'int': TypeInfo('IntEntry', lambda b: isinstance(b, int)),
     'vec2': TypeInfo('VecEntry', lambda b: isinstance(b, list) and len(b) == 2),
     'vec3': TypeInfo('VecEntry', lambda b: isinstance(b, list) and len(b) == 3),
+    'channel': TypeInfo('ChannelSelect', lambda _: True),
 }
 
 def validate_info(type_: str, info: Dict) -> Optional[Dict]:
@@ -169,6 +171,9 @@ def process_module(filename, modules, output):
             if "custom" in info:
                 print("   ", name, "CUSTOM")
                 descriptor[name] = {'type': "custom"}
+            elif "channel" in info:
+                print("   ", name, "CHANNEL")
+                descriptor[name] = {'type': "channel"}
             else:
                 assert type_ in type_info, error_str
                 info = json.loads(info)
@@ -231,9 +236,11 @@ def generate_initializer(name, arg, parent_class_name):
     if arg['type'] == 'custom':
         return f'{name}: new {parent_class_name}_{name}(this.synth)'
 
-    info = arg['info']
-
     class_name = type_info[arg['type']].constructor
+    if arg['type'] == 'channel':
+        return f'{name}: new {class_name}(this.synth)'
+
+    info = arg['info']
 
     initalizer = f"new {class_name}("
     if arg['type'] in ['float', 'int']:
@@ -242,7 +249,7 @@ def generate_initializer(name, arg, parent_class_name):
         )
     elif arg['type'] == 'bool':
         initalizer += '{}'.format(json.dumps(info['default']))
-    else:
+    elif 'vec' in arg['type']:
         count = int(arg['type'][len('vec'):])
         names = ','.join(['"{}"'.format(x) for x in info['names']])
         default = ','.join([str(x) for x in info['default']])
@@ -264,7 +271,8 @@ def create_module_library(modules, output):
     for id_, module in enumerate(module_names):
         initalizer = ""
         args = ""
-        for param in modules[module]:
+        descriptor = modules[module]
+        for param in descriptor:
             if param != '__module_tag':
                 initalizer += f'this.params.{param} = {param};\n'
                 args += f'{param}, '
@@ -281,7 +289,6 @@ def create_module_library(modules, output):
                 class_name += c
         human_name = module.replace('_', ' ')
 
-        descriptor = modules[module]
         arg_list = [
             generate_initializer(name, descriptor[name], class_name)
             for name in descriptor if name != '__module_tag'

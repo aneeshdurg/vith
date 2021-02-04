@@ -336,3 +336,53 @@ class VecEntry extends Type {
     }
 }
 defineEl('vec-entry', VecEntry);
+
+function add_new_channel_ui(ui_container, chanid) {
+    const new_ui = document.createElement("div");
+    new_ui.id = `ui-${chanid}`;
+    ui_container.appendChild(new_ui);
+}
+
+class ChannelId {
+    constructor(id) {
+        this.id = id;
+    }
+}
+
+class ChannelSelect extends Type {
+    constructor(synth) {
+        const value = new ChannelId(0);
+        super(undefined, value);
+
+        this.value = value;
+        this.shadow.appendChild(createElement(html`
+            <input type="number" min="0" step="1"></input>
+        `));
+        this.input = this.shadow.querySelector("input");
+        this.input.value = 0;
+        this.input.addEventListener('change', () => {
+            const value = this.input.value;
+            if (value >= synth.channels.length) {
+                this.input.style = "color: red";
+                return;
+            }
+
+            this.input.style = "";
+            this.value.id = parseInt(this.input.value);
+            console.log(parseInt(this.input.value), this.value);
+            this.dispatchEvent(new Event('change'));
+        });
+    }
+
+    save() {
+        return this.value.id;
+    }
+
+    load(data) {
+        this.value.id = data;
+        this.input.value = data;
+        this.dispatchEvent(new Event('change'));
+    }
+}
+defineEl('channel-select', ChannelSelect);
+

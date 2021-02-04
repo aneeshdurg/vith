@@ -4,8 +4,8 @@ class Picture_picture_texture extends Type {
     }
 
     customonchange(element) {
-        this.synth.stageModules[element.name].fn_params.params['picture_texture'] = this.tex;
-        this.synth.stageModules[element.name].fn_params.params['picture_dimensions'] = this.dimensions;
+        this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['picture_texture'] = this.tex;
+        this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['picture_dimensions'] = this.dimensions;
 
         element.args.picture_dimensions.set_value(this.dimensions);
     }
@@ -23,6 +23,8 @@ class Picture_picture_texture extends Type {
 
         this.tex = tex;
         this.synth = synth;
+        this.channelid = synth.active_channel;
+
         this.dimensions = [...synth.dimensions];
         this.img = img;
         this.img.addEventListener('load', () => { this.imgload(); });
@@ -82,8 +84,8 @@ defineEl('picture-picture-dimensions', Picture_picture_dimensions);
 
 class Webcam_webcam_texture extends Type {
     customonchange(element) {
-        this.synth.stageModules[element.name].fn_params.params['webcam_texture'] = this.tex;
-        this.synth.stageModules[element.name].fn_params.params['webcam_dimensions'] = this.dimensions;
+        this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['webcam_texture'] = this.tex;
+        this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['webcam_dimensions'] = this.dimensions;
 
         element.args.webcam_dimensions.set_value(this.dimensions);
     }
@@ -94,6 +96,7 @@ class Webcam_webcam_texture extends Type {
 
         this.tex = tex;
         this.synth = synth;
+        this.channelid = synth.active_channel;
         this.dimensions = synth.dimensions;
         this.setup();
     }
@@ -192,10 +195,9 @@ defineEl('webcam-webcam-dimensions', Webcam_webcam_dimensions);
 class ReduceColors_reduce_colors_data extends Type {
     customonchange(element) {
         try {
-            this.synth.stageModules[element.name].fn_params.params['reduce_colors_data'] = this.tex;
-            this.synth.stageModules[element.name].fn_params.params['reduce_colors_count'] = this.count;
+            this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['reduce_colors_data'] = this.tex;
+            this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['reduce_colors_count'] = this.count;
         } catch (e) {
-            console.log("!!!", ...this.synth.stages);
             // TODO custom elements break with meta modules
         }
 
@@ -210,6 +212,7 @@ class ReduceColors_reduce_colors_data extends Type {
 
         this.tex = tex;
         this.synth = synth;
+        this.channelid = synth.active_channel;
 
         // we waste 1 float for the alpha channel - TODO
         this.data = new Float32Array(4 * 256);

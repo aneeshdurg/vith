@@ -22,6 +22,7 @@ class SynthStageBase extends HTMLElement {
             pre_setup(this);
 
         this.synth = synth;
+        this.channelid = synth.active_channel;
 
         const shadow = this.attachShadow({mode: 'open'});
         this.shadow = shadow;
@@ -77,11 +78,11 @@ class SynthStageBase extends HTMLElement {
         shadow.appendChild(box);
 
         moveup.addEventListener('click', () => {
-            const idx = this.synth.stages.indexOf(this.name);
+            const idx = this.synth._get_stages(this.channelid).indexOf(this.name);
             if (idx != 0) {
-                const other = this.synth.stages[idx - 1];
-                this.synth.stages[idx] = other;
-                this.synth.stages[idx - 1] = this.name;
+                const other = this.synth._get_stages(this.channelid)[idx - 1];
+                this.synth._get_stages(this.channelid)[idx] = other;
+                this.synth._get_stages(this.channelid)[idx - 1] = this.name;
                 const parentEl =this.parentElement;
                 this.remove();
                 parentEl.insertBefore(this, parentEl.childNodes[idx - 1]);
@@ -89,11 +90,11 @@ class SynthStageBase extends HTMLElement {
         });
 
         movedn.addEventListener('click', () => {
-            const idx = this.synth.stages.indexOf(this.name);
-            if (idx != (this.synth.stages.length - 1)) {
-                const other = this.synth.stages[idx + 1];
-                this.synth.stages[idx] = other;
-                this.synth.stages[idx + 1] = this.name;
+            const idx = this.synth._get_stages(this.channelid).indexOf(this.name);
+            if (idx != (this.synth._get_stages(this.channelid).length - 1)) {
+                const other = this.synth._get_stages(this.channelid)[idx + 1];
+                this.synth._get_stages(this.channelid)[idx] = other;
+                this.synth._get_stages(this.channelid)[idx + 1] = this.name;
 
                 const parentEl =this.parentElement;
                 this.remove();
@@ -102,7 +103,7 @@ class SynthStageBase extends HTMLElement {
         });
 
         this.remove_btn.addEventListener('click', () => {
-            this.synth.remove_stage(this.name);
+            this.synth.remove_stage(this.channelid, this.name);
             this.remove();
 
             for (let arg of Object.keys(this.args))
@@ -111,7 +112,7 @@ class SynthStageBase extends HTMLElement {
         });
 
         this.enable_el.addEventListener('change', () => {
-            this.synth.toggle_stage(this.name, this.enable_el.checked);
+            this.synth.toggle_stage(this.channelid, this.name, this.enable_el.checked);
         });
     }
 
@@ -179,7 +180,7 @@ class SynthElementBase extends SynthStageBase {
         globalCounters[this.get_title()] = counter + 1;
         this.name = `${this.get_title()}-${counter}`;
 
-        synth.add_stage(this.name, this.build_stage(params));
+        synth.add_stage(this.channelid, this.name, this.build_stage(params));
     }
 
     build_stage(params) {

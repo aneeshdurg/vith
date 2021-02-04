@@ -1,5 +1,5 @@
 class SettingsUI {
-    constructor(ui, synth) {
+    constructor(ui_container, synth) {
         this.name_inp = document.getElementById("name");
         this.clock_inp = document.getElementById("clock_speed");
         // const autosave_btn = document.getElementById("autosave_enable");
@@ -7,20 +7,23 @@ class SettingsUI {
 
         this.name_inp.addEventListener("change", () => {
             synth.name = this.name_inp.value;
-            ui.dispatchEvent(new Event("namechange"));
+            ui_container.dispatchEvent(new Event("namechange"));
         });
 
-        ui.addEventListener("namechange", () => {
+        ui_container.addEventListener("namechange", () => {
             this.name_inp.value = synth.name;
         });
 
         this.clock_inp.addEventListener("change", () => {
             synth.clock_speed = this.clock_inp.value;
         });
+        this.clock_inp.value = 1;
 
         // this.auto_dims_btn = document.getElementById("auto_dims_enable");
         this.render_width_inp = document.getElementById("render_width");
+        this.render_width_inp.value = 1000;
         this.render_height_inp = document.getElementById("render_height");
+        this.render_height_inp.value = 1000;
         // this.render_dims = document.getElementById("render_dims");
         // this.target_fps_container = document.getElementById("target_fps_container");
         // this.target_fps = document.getElementById("target_fps");

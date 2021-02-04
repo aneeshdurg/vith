@@ -1,22 +1,44 @@
-function loaddata(savedata, ui, synth) {
+function loaddata(savedatas, ui_container, synth, into_current) {
     // TODO validation
-    for (let elem of savedata) {
-        if (elem.module) {
-            // if (!meta_modules[elem.module.name])
-            //     throw new Error("Unexpected module"); // TODO ui for this error
-            const count = elem.module.selection.length;
-            console.group(`ADD ${elem.module.name}`);
-            // TODO take in MetaModuleManager obj or smth
-            append_meta_module(elem.module.name, elem.args, count, ui, synth);
-            console.groupEnd(`ADD ${elem.module.name}`);
-        } else {
-            const moduleElem = eval(elem.title + 'Element');
-            const new_elem = new moduleElem(synth);
-            ui.appendChild(new_elem);
-            new_elem.load(elem);
-            console.log('ADD', new_elem.get_title());
-        }
+    const chan_count = synth.channels.length;
+
+    let start_chan = chan_count - 1;
+
+    if (into_current) {
+        start_chan = synth.active_channel;
+    } else {
+        // find last channel that's empty
+        while (start_chan >= 0 && synth.channels[start_chan].stages.length == 0)
+            start_chan--;
+        start_chan += 1;
     }
+
+    savedatas.forEach((savedata, chan_id) => {
+        let curr_chan = start_chan + chan_id;
+        if (curr_chan >= synth.channels.length) {
+            synth.add_channel();
+            ui_container.dispatchEvent(new Event("add_channel"));
+        }
+
+        synth.active_channel = curr_chan;
+        for (let elem of savedata) {
+            if (elem.module) {
+                // if (!meta_modules[elem.module.name])
+                //     throw new Error("Unexpected module"); // TODO ui for this error
+                const count = elem.module.selection.length;
+                console.group(`ADD ${elem.module.name}`);
+                // TODO take in MetaModuleManager obj or smth
+                append_meta_module(elem.module.name, elem.args, count, ui_container, synth);
+                console.groupEnd(`ADD ${elem.module.name}`);
+            } else {
+                const moduleElem = eval(elem.title + 'Element');
+                const new_elem = new moduleElem(synth);
+                ui_container.querySelector(`#ui-${curr_chan}`).appendChild(new_elem);
+                new_elem.load(elem);
+                console.log('ADD', new_elem.get_title());
+            }
+        }
+    });
 }
 
 function load_meta_modules(moduledata_descs) {
@@ -86,7 +108,7 @@ function _download(data, filename) {
     document.body.removeChild(downloader);
 }
 
-function setup_save_load(ui, synth, settingsui) {
+function setup_save_load(ui_container, synth, settingsui) {
     // magic + 4 byte length + 1 byte per RGBA values
     // this is because we can't use the A channel because of premultiplied
     // stuff, TODO fix that
@@ -95,13 +117,17 @@ function setup_save_load(ui, synth, settingsui) {
         (4 * synth.dimensions[0] * synth.dimensions[1] - header_len) / 4);
 
     document.getElementById("save").addEventListener('click', () => {
-        const saved = [];
-        for (let i = 0; i < ui.children.length; i++) {
-            saved.push(ui.children[i].save());
+        const channels = [];
+        for (let i = 0; i < ui_container.children.length; i++) {
+            const ui = ui_container.children[i];
+            const channel = [];
+            for (let j = 0; j < ui.children.length; j++)
+                channel.push(ui.children[j].save());
+            channels.push(channel);
         }
 
         const saveobj = {
-            stages: saved,
+            channels: channels,
             modules: meta_modules,
             settings: settingsui.save()
         };
@@ -173,9 +199,11 @@ function setup_save_load(ui, synth, settingsui) {
 
     const do_load = (name, savedata) => {
         if (savedata.modules)
-            load_meta_modules(savedata.modules, ui, synth);
+            load_meta_modules(savedata.modules);
         if (savedata.stages)
-            loaddata(savedata.stages, ui, synth);
+            loaddata([savedata.stages], ui_container, synth);
+        if (savedata.channels)
+            loaddata(savedata.channels, ui_container, synth);
         if (savedata.settings)
             settingsui.load(savedata.settings);
         if (synth.name === "") {

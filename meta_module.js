@@ -9,27 +9,30 @@ class ModuleElement extends SynthStageBase {
     }
 
     setup_synth_state(synth, module) {
+        const channelid = synth.active_channel;
         for (let idx of module.selection) {
-            const name = synth.stages[idx];
+            const name = synth._get_stages(channelid)[idx];
             this.stages.push(name);
-            this.stageModules[name] = synth.stageModules[name];
+            this.stageModules[name] = synth._get_stageModules(channelid)[name];
         }
 
         const counter = globalCounters[this.get_title()] || 0;
         globalCounters[this.get_title()] = counter + 1;
         this.name = `${this.get_title()}-${counter}`;
 
-        let old_name = synth.stages[module.selection[0]];
-        synth.stages[module.selection[0]] = this.name;
-        delete synth.stageModules[old_name];
-        synth.stageModules[this.name] = new Stage(this, (t) => { this.step(t); });
+        let old_name = synth._get_stages(channelid)[module.selection[0]];
+        synth._get_stages(channelid)[module.selection[0]] = this.name;
+        delete synth._get_stageModules(channelid)[old_name];
+        synth._get_stageModules(channelid)[this.name] = new Stage(this, (t) => { this.step(t); });
 
         console.log("removed stage", old_name, module.selection);
 
         for (let _i = 1; _i < module.selection.length; _i++) {
-            console.log("removing stage", synth.stages[module.selection[1]]);
-            synth.remove_stage(synth.stages[module.selection[1]]);
+            console.log("removing stage", synth._get_stages(channelid)[module.selection[1]]);
+            synth.remove_stage(channelid, synth._get_stages(channelid)[module.selection[1]]);
         }
+
+        // TODO find similar patterns?
     }
 
     constructor(synth, module) {
@@ -99,13 +102,14 @@ class ModuleCreator {
         this.container.appendChild(name);
         this.container.appendChild(document.createElement("br"));
 
-        if (synth.stages.length == 0) {
+        const channelid = synth.active_channel;
+        if (synth._get_stages(channelid).length == 0) {
             this.error.innerText = "No stages in synth! Please add some stages before creating a new module.";
         } else {
             const selection_container = document.createElement('div');
             selection_container.className = 'create-module-selection';
-            for (let i = 0; i < synth.stages.length; i++) {
-                const stage = synth.stages[i];
+            for (let i = 0; i < synth._get_stages(channelid).length; i++) {
+                const stage = synth._get_stages(channelid)[i];
                 const label = document.createElement('label');
                 label.for = stage;
                 label.innerText = stage;
@@ -172,7 +176,7 @@ class ModuleCreator {
         let seen_true = false;
         let expect_absent = false;
         let invalid = false;
-        for (let i = 0; i < synth.stages.length; i++) {
+        for (let i = 0; i < synth._get_stages(channelid).length; i++) {
             if (this.selection.has(i)) {
                 if (expect_absent) {
                     invalid = true;
@@ -196,13 +200,14 @@ class ModuleCreator {
     }
 }
 
-function append_meta_module(name, initializer, length, ui, synth) {
-    loaddata(initializer, ui, synth);
+function append_meta_module(name, initializer, length, ui_container, synth) {
+    const chan = synth.active_channel;
+    loaddata([initializer], ui_container, synth, true);
     const meta_module = {
         name: name,
-        selection: [...Array(length).keys()].map(x => synth.stages.length - length + x)
+        selection: [...Array(length).keys()].map(x => synth._get_stages(chan).length - length + x)
     };
-    add_meta_module(meta_module, ui, synth);
+    add_meta_module(meta_module, ui_container.querySelector(`#ui-${chan}`), synth);
 }
 
 function register_module(name, meta_module_desc) {
@@ -218,7 +223,7 @@ function register_module(name, meta_module_desc) {
 }
 
 function add_meta_module(module, ui, synth) {
-    console.log(...synth.stages);
+    console.log(...synth._get_stages(synth.active_channel));
     const synth_module = new ModuleElement(synth, module);
     for (let idx of module.selection)
         ui.children[idx].reparent_to_module(synth_module);
@@ -229,10 +234,9 @@ function add_meta_module(module, ui, synth) {
         child.remove();
         synth_module.appendChild(child);
     }
-    console.log(...synth.stages);
 }
 
-function setup_meta_module(ui, synth) {
+function setup_meta_module(ui_container, synth) {
     const createbtn = document.getElementById("create-module");
     createbtn.addEventListener('click', async () => {
         let resolver = null;
@@ -246,6 +250,7 @@ function setup_meta_module(ui, synth) {
         if (!meta_module_defn)
             return;
 
+        const ui = ui_container.querySelector(`#ui-${synth.active_channel}`);
         const module_initializer = [];
         for (let idx of meta_module_defn.selection) {
             module_initializer.push(ui.children[idx].save());

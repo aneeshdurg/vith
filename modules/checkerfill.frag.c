@@ -15,10 +15,8 @@ void checkerfill() {
     float lum = dot(color_out.rgb, lumc);
     float z = u_checkerfill_strength * lum;
 
-    // c = c - (u_ripple_center - 0.5);
     if (z > 0.)
         c /= z;
-    // c = c + (u_ripple_center - 0.5);
 
     c = (c + 1.) / 2.;
     c *= u_tex_dimensions;

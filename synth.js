@@ -5,6 +5,12 @@ class Stage {
     }
 }
 
+class Channel {
+    enable = true;
+    stages = []; // List[str]
+    stageModules = {}; // Map[str, Stage]
+}
+
 class Synth {
     name = "";
     clock_speed = 1;
@@ -14,8 +20,9 @@ class Synth {
 
     dimensions = [1000, 1000];
 
-    stages = []; // List[str]
-    stageModules = {}; // Map[str, Stage]
+    active_channel = 0; // TODO Synth should not track active channel! That belongs to the non-existant UI object.
+    render_channel = 0;
+    channels = [new Channel()];
 
     transform = {
         center: [ 0.5, 0.5 ],
@@ -47,8 +54,21 @@ class Synth {
         const bufferInfo = twgl.createBufferInfoFromArrays(this.gl, bufferArrays);
         setupProgram(this.gl, this.programInfo, bufferInfo);
 
-        this.fbs = new FrameBufferManager(this.gl, this.dimensions);
+        this.fbs = [new FrameBufferManager(this.gl, this.dimensions)];
         this.canvas = canvas;
+    }
+
+    add_channel() {
+        this.channels.push(new Channel());
+        this.fbs.push(new FrameBufferManager(this.gl, this.dimensions));
+    }
+
+    _get_stages(channelid) {
+        return this.channels[channelid].stages;
+    }
+
+    _get_stageModules(channelid) {
+        return this.channels[channelid].stageModules;
     }
 
     resize(new_dims) {
@@ -58,7 +78,8 @@ class Synth {
 
         this.gl.viewport(0, 0, ...this.dimensions);
 
-        this.fbs = new FrameBufferManager(this.gl, this.dimensions);
+        for (let i = 0; i < this.channels.length; i++)
+            this.fbs[i] = new FrameBufferManager(this.gl, this.dimensions);
     }
 
     last_render_time = 0;
@@ -69,65 +90,72 @@ class Synth {
         this.dispatchEvent
         let time = time_ * this.clock_speed;
 
-        const process_stages = (stage, stageid) => {
+        const process_stages = (fbs, stage, stageid) => {
             const fn_params = stage.fn_params;
 
-            if (!fn_params.enable) {
+            if (!fn_params.enable)
                 return;
-            }
             stage.step(time);
 
             if (stageid == 0)
                 this.reset_transform();
 
-            if (fn_params instanceof Synth || fn_params instanceof ModuleElement) {
+            if (fn_params instanceof Channel || fn_params instanceof ModuleElement) {
                 fn_params.stages.forEach((name, stageid_) => {
                     const fn_params_ = fn_params.stageModules[name];
 
-                    process_stages(fn_params_, stageid + 1 + stageid_);
+                    process_stages(fbs, fn_params_, stageid + 1 + stageid_);
                 });
                 return;
             } else if (fn_params instanceof TransformElement) {
-                // if (fn_params.params["clear transform"]) {
-                //     this.reset_transform();
-                // } else {
                 this.transform.scale = fn_params.params.scale;
                 this.transform.center = [...fn_params.params.center];
                 this.transform.rotation = fn_params.params.rotation;
-                // }
                 return;
             }
 
-            this.fbs.bind_dst();
+            fbs.bind_dst();
             const params = {
                 u_dimensions: this.dimensions,
                 u_tex_dimensions: this.dimensions,
-                u_texture: this.fbs.src(),
+                u_texture: fbs.src(),
                 u_transform_center: this.transform.center,
                 u_transform_scale: this.transform.scale,
                 u_transform_rotation: this.transform.rotation,
                 u_function: fn_params.id,
-                u_stage: stageid,
                 u_feedback: fn_params.feedback,
                 u_constrain_to_transform: fn_params.constrain,
             };
             for (let key of Object.keys(fn_params.params)) {
-                params['u_' + key] = fn_params.params[key];
+                let value = fn_params.params[key];
+                if (value instanceof ChannelId)
+                    value = this.fbs[value.id].src();
+                params['u_' + key] = value;
             }
 
             twgl.setUniforms(this.programInfo, params);
             render(this.gl);
-            this.fbs.flipflop();
+
+            // clear channel textures
+            for (let key of Object.keys(fn_params.params)) {
+                let value = fn_params.params[key];
+                if (value instanceof ChannelId) {
+                    params['u_' + key] = 0;
+                }
+            }
+            twgl.setUniforms(this.programInfo, params);
+
+            fbs.flipflop();
         };
 
-        process_stages(new Stage(this, (t) => {}), -1);
+        for (let i = 0; i < this.channels.length; i++)
+            process_stages(this.fbs[i], new Stage(this.channels[i], (t) => {}), -1);
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         twgl.setUniforms(this.programInfo, {
             u_tex_dimensions: this.dimensions,
-            u_texture: this.fbs.src(),
-            u_function: 0,
-            u_stage: this.stages.length + 1,
+            u_texture: this.fbs[this.render_channel].src(),
+            u_function: 0, // DRAW
             u_feedback: 1,
         });
         render(this.gl);
@@ -164,39 +192,39 @@ class Synth {
         // }
     }
 
-    set_target_fps(fps) {
-        this.target_time_ms = 1000 / fps;
-    }
+    // set_target_fps(fps) {
+    //     this.target_time_ms = 1000 / fps;
+    // }
 
-    begin_auto_scale() {
-        this.auto_scaling = true;
-    }
+    // begin_auto_scale() {
+    //     this.auto_scaling = true;
+    // }
 
-    stop_auto_scale() {
-        this.auto_scaling = false;
-    }
+    // stop_auto_scale() {
+    //     this.auto_scaling = false;
+    // }
 
     get_frame_data(array) {
         this.gl.readPixels(0, 0, ...this.dimensions, this.gl.RGBA, this.gl.UNSIGNED_BYTE, array);
     }
 
-    add_stage(name, module) {
-        if (this.stages.indexOf(name) != -1)
+    add_stage(chan, name, module) {
+        if (this.channels[chan].stages.indexOf(name) != -1)
             throw new Error("name collision");
-        this.stageModules[name] = module;
-        this.stages.push(name);
+        this.channels[chan].stageModules[name] = module;
+        this.channels[chan].stages.push(name);
     }
 
-    remove_stage(name) {
-        const idx = this.stages.indexOf(name);
+    remove_stage(chan, name) {
+        const idx = this.channels[chan].stages.indexOf(name);
         if (idx == -1)
             throw new Error("no such stage");
-        delete this.stageModules[name];
-        this.stages.splice(idx, 1);
+        delete this.channels[chan].stageModules[name];
+        this.channels[chan].stages.splice(idx, 1);
     }
 
-    toggle_stage(name, state) {
-        this.stageModules[name].fn_params.enable = state;
+    toggle_stage(chan, name, state) {
+        this.channels[chan].stageModules[name].fn_params.enable = state;
     }
 
     running = null;
@@ -232,7 +260,7 @@ class Synth {
 
 function setup_controler() {
     let current_controls = 0;
-    const num_controls = 4;
+    const num_controls = 5;
     document.getElementById("controls-next").addEventListener("click", () => {
         document.getElementById(`controls-${current_controls}`).style.display = "none";
         current_controls += 1;
@@ -248,9 +276,9 @@ function setup_controler() {
     });
 }
 
-const add_new_tags = ["generator", "space", "color"];
+const add_new_tags = ["generator", "space", "color", "channels"];
 let current_add_new_tag = 0;
-function setup_add_new_stage(ui, synth) {
+function setup_add_new_stage(ui_container, synth) {
     const update_add_new = (new_tag) => {
         new_tag = (new_tag + add_new_tags.length) % add_new_tags.length;
 
@@ -276,6 +304,7 @@ function setup_add_new_stage(ui, synth) {
         selectors[tag] = document.getElementById(`add_new_${tag}_select`);
         buttons[tag].addEventListener('click', () => {
             const stageElem = eval(selectors[tag].value);
+            const ui = ui_container.querySelector(`#ui-${synth.active_channel}`);
             ui.appendChild(new stageElem(synth));
         });
     }
@@ -337,28 +366,34 @@ async function synth_main(canvas) {
     document.getElementById("display-container").addEventListener("click", hiderightmenu);
 
 
-    const ui = document.getElementById("ui-container");
-    ui.addEventListener("namechange", () => {
+    const ui_container = document.getElementById("ui-container");
+    ui_container.addEventListener("namechange", () => {
         title.innerText = synth.name;
     });
 
-    const settings = new SettingsUI(ui, synth);
+    const settings = new SettingsUI(ui_container, synth);
     setup_controler();
-    setup_add_new_stage(ui, synth);
-    setup_meta_module(ui, synth);
-    setup_save_load(ui, synth, settings);
-    setup_recording(ui, synth);
+    setup_channels(ui_container, synth);
+
+    setup_add_new_stage(ui_container, synth);
+    setup_meta_module(ui_container, synth);
+    // TODO channelize saveload
+    setup_save_load(ui_container, synth, settings);
+    setup_recording(synth);
 }
 
 function loadStaticSynth(canvas, data, cb) {
     const synth = new Synth(canvas)
     synth.run();
 
-    const ui = document.createElement('div');
+    const ui_container = document.createElement('div');
+    const ui0 = document.createElement('div');
+    ui0.id = "ui-0";
+    ui_container.appendChild(ui0);
     // note that meta-modules don't need to be loaded
-    loaddata(data.stages, ui, synth);
+    loaddata(data.stages, ui_container, synth);
     if (cb) {
-        cb(ui);
+        cb(ui_container);
     }
 
     return synth;

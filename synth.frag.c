@@ -19,7 +19,6 @@ uniform float u_transform_scale;
 uniform vec2 u_transform_center;
 uniform float u_transform_rotation;
 uniform int u_function;
-uniform int u_stage;
 
 uniform float u_feedback;
 uniform bool u_constrain_to_transform;
@@ -81,6 +80,8 @@ vec3 rgb_to_hsv(vec3 rgb) {
 vec2 t_coords;
 
 #include "modules/blur.frag.c"
+#include "modules/condzoom.frag.c"
+#include "modules/copy.frag.c"
 #include "modules/checkerfill.frag.c"
 #include "modules/enhance.frag.c"
 #include "modules/gamma_correct.frag.c"
@@ -88,6 +89,7 @@ vec2 t_coords;
 #include "modules/halftone.frag.c"
 #include "modules/hue_shift.frag.c"
 #include "modules/invert_color.frag.c"
+#include "modules/multiply.frag.c"
 #include "modules/noise.frag.c"
 #include "modules/offset.frag.c"
 #include "modules/oscillator.frag.c"
