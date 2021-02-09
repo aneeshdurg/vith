@@ -33,7 +33,10 @@ function loaddata(savedatas, ui_container, synth, into_current) {
             } else {
                 const moduleElem = eval(elem.title + 'Element');
                 const new_elem = new moduleElem(synth);
-                ui_container.querySelector(`#ui-${curr_chan}`).appendChild(new_elem);
+                let container = ui_container.querySelector(`#ui-${curr_chan}`);
+                if (!container && __suffix) // standalone mode
+                    container = ui_container;
+                container.appendChild(new_elem);
                 new_elem.load(elem);
                 console.log('ADD', new_elem.get_title());
             }

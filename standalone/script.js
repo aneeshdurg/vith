@@ -10,10 +10,10 @@ if (!output_name || !input_file)
 
 const header = `
 const ${output_name} = (() => {
-    window.globalprefix = "${output_name}";
+    window.globalsuffix = "${output_name}";
 `
 const footer = `
-    window.globalprefix = "";
+    window.globalsuffix = "";
     return async (canvas, cb) => {
         await loadTwgl();
         return loadStaticSynth(canvas, data, cb);

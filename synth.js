@@ -391,7 +391,7 @@ function loadStaticSynth(canvas, data, cb) {
     ui0.id = "ui-0";
     ui_container.appendChild(ui0);
     // note that meta-modules don't need to be loaded
-    loaddata(data.stages, ui_container, synth);
+    loaddata(data.stages ? [data.stages] : data.channels, ui_container, synth);
     if (cb) {
         cb(ui_container);
     }

@@ -10,8 +10,12 @@ function createElement(markup) {
     return frag
 }
 
-function defineEl(name, class_) {
-    customElements.define(name + (window.globalprefix || ""), class_);
+const __suffix = window.globalsuffix;
+
+const getEl = (name) => name + (__suffix || "");
+
+const defineEl = (name, class_) => {
+    customElements.define(getEl(name), class_);
 }
 
 function createModal(resolver) {
@@ -150,7 +154,8 @@ class FloatBar extends Type {
 
         this.shadow.appendChild(createElement(html`
             <div>
-                <slider-elem range="[${this.range}]" defaultValue="${this.defaultValue}"></slider-elem>
+                <${getEl("slider-elem")} range="[${this.range}]" defaultValue="${this.defaultValue}">
+                </${getEl("slider-elem")}>
                 <input
                     id="floatinp"
                     style="box-shadow: none;"
@@ -167,7 +172,7 @@ class FloatBar extends Type {
             </div>
         `));
 
-        this.slider = this.shadow.querySelector("slider-elem");
+        this.slider = this.shadow.querySelector(getEl("slider-elem"));
         this.input = this.shadow.querySelector("#floatinp");
 
         this._set_value(this.defaultValue);
@@ -290,19 +295,22 @@ class VecEntry extends Type {
         this.nelem = nelem;
         this.names = names;
 
+        const suffix = window.globalsuffix;
+
         for (let i = 0; i < this.nelem; i++) {
             this.shadow.appendChild(createElement(html`
                 <label for="${names[i]}">${names[i]}: </label>
-                <float-bar
+                <${getEl("float-bar")}
                     id="${names[i]}"
                     range="[${this.range[i]}]"
-                    defaultValue="${this.defaultValue[i]}"></float-bar>
+                    defaultValue="${this.defaultValue[i]}">
+                </${getEl("float-bar")}>
             `));
         }
 
         this.value = this.defaultValue;
 
-        this.floats = Array.from(this.shadow.querySelectorAll("float-bar"));
+        this.floats = Array.from(this.shadow.querySelectorAll(getEl("float-bar")));
         for (let float of this.floats) {
             float.addEventListener('change', () => {
                 for (let i = 0; i < this.nelem; i++) {
