@@ -80,6 +80,7 @@ vec3 rgb_to_hsv(vec3 rgb) {
 vec2 t_coords;
 
 #include "modules/blur.frag.c"
+#include "modules/chromakey.frag.c"
 #include "modules/composite.frag.c"
 #include "modules/condzoom.frag.c"
 #include "modules/copy.frag.c"
@@ -96,6 +97,7 @@ vec2 t_coords;
 #include "modules/oscillator.frag.c"
 #include "modules/picture.frag.c"
 #include "modules/pixelate.frag.c"
+#include "modules/polygon.frag.c"
 #include "modules/recolor.frag.c"
 #include "modules/reduce_colors.frag.c"
 #include "modules/reflector.frag.c"
