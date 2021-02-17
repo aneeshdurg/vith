@@ -52,11 +52,13 @@ function setup_recording(synth) {
             record_progress.value++;
         }
 
-        const zipped = await zip.generateAsync({type: "base64"});
+        record_info.innerText = "Compressing...";
+        const zipped = await zip.generateAsync({type: "blob"});
         record_info.innerText = "Done!";
         record_progress.value = record_progress.max;
 
-        _download('data:application/zip;base64,' + zipped, `${synth.name}.zip`);
+        const name = synth.name || 'recording';
+        _download(URL.createObjectURL(zipped), `${name}.zip`);
         record_status.style.display = "none";
 
         // TODO re-download button
