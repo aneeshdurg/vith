@@ -107,6 +107,7 @@ vec2 t_coords;
 #include "modules/swirl.frag.c"
 #include "modules/threshold.frag.c"
 #include "modules/tile.frag.c"
+#include "modules/waveify.frag.c"
 #include "modules/wavy.frag.c"
 #include "modules/webcam.frag.c"
 #include "modules/zoom.frag.c"
