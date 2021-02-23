@@ -6,9 +6,7 @@
 # FUNCTION GENERATOR
 - int entry doesn't call onchange for step/sin function on non-int vals
 - triangle function
-- square function
 - audio input for function generator
-- amplitude limits for step function / y offset
 - better function generator ui
 
 # MAIN SYNTH UI/FEATURES

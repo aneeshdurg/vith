@@ -33,6 +33,7 @@ def copy_regular() -> None:
             shutil.copy(file_, f"build/{file_}")
         shutil.copy("webgl-common/common.js", "build/common.js")
         shutil.copy("lz-string/libs/lz-string.min.js", "build/lz-string.min.js")
+        shutil.copy("h264-mp4-encoder/web.js", "build/h264-mp4-encoder.web.js")
         shutil.copy("jszip/jszip.min.js", "build/jszip.min.js")
 
 def build_js() -> None:
@@ -42,6 +43,7 @@ def build_js() -> None:
         files = [
             "twgl-full.min.js",
             "lz-string/libs/lz-string.min.js",
+            "build/h264-mp4-encoder.web.js",
             "jszip/jszip.min.js",
             "webgl-common/common.js",
             "build/synth.frag.js",
@@ -295,7 +297,7 @@ def create_module_library(modules, output):
         ]
         output.write(textwrap.dedent(
             f'''\
-        class {class_name} extends Function {{
+        class {class_name} extends SynthFunction {{
             id = {id_ + 1}
             params = {{}}
 

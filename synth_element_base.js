@@ -1,4 +1,4 @@
-class Function {
+class SynthFunction {
     id = 0;
     feedback = 0;
     params = {};
@@ -131,7 +131,7 @@ class SynthElementBase extends SynthStageBase {
     }
 
     get_fn() {
-        return Function;
+        return SynthFunction;
     }
 
     get_feedback() {

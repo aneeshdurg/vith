@@ -15,9 +15,6 @@ class Synth {
     name = "";
     clock_speed = 1;
 
-    recording = [];
-    record_frames = 0;
-
     dimensions = [1000, 1000];
 
     active_channel = 0; // TODO Synth should not track active channel! That belongs to the non-existant UI object.
@@ -160,11 +157,6 @@ class Synth {
         });
         render(this.gl);
 
-        if (this.record_frames) {
-            this.recording.push(this.canvas.toDataURL());
-            this.record_frames--;
-        }
-
         // if (this.auto_scaling) {
         //     const delta = time_ - this.last_render_time;
 
@@ -190,6 +182,17 @@ class Synth {
         //     TODO resize might allocate memory, this is bad to call here.
         //     this.resize(new_dims);
         // }
+    }
+
+    get_url() {
+        return this.canvas.toDataURL();
+    }
+
+    get_img_data() {
+        // TODO this is flipped, see the code in saveload.js
+        const pixels = new Uint8Array(this.dimensions[0] * this.dimensions[1] * 4);
+        this.gl.readPixels(0, 0, ...this.dimensions, this.gl.RGBA, this.gl.UNSIGNED_BYTE, pixels);
+        return pixels;
     }
 
     // set_target_fps(fps) {

@@ -84,32 +84,70 @@
                 </div>
                 <div id="controls-4" style="display: none">
                     <h2> Playback/recording </h2>
-                    <h3> playback </h3>
-                    <button id="startstop">Stop</button>
-                    <h3> recording </h3>
-                    <button id="screenshot">Screenshot</button>
-                    <br>
-                    <label for="record-duration">Number of frames: </label>
-                    <input
-                        type="number"
-                        min="0"
-                        value="100"
-                        id="record-duration"></input>
-                    <br>
-                    <br>
-                    <label for="record-fps">Frames per second: </label>
-                    <input
-                        type="number"
-                        min="1"
-                        max="120"
-                        value="30"
-                        id="record-fps"></input>
-                    <br>
-                    <button id="record">Record</button>
-                    <br>
-                    <div id="recordstatus" style="display: none;">
-                        <code id="recordinfo"></code>
-                        <progress id="recordprogress"></progress>
+                    <div>
+                        <h3> playback </h3>
+                        <button id="startstop">Stop</button>
+                        <br>
+                        <h4> Render a specific frame </h3>
+                        <label for="render-fps">FPS: </label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="120"
+                            value="30"
+                            id="render-fps"></input>
+                        <br>
+                        <br>
+                        <label for="render-frame">Frame count: </label>
+                        <input
+                            type="number"
+                            min="0"
+                            value="0"
+                            id="render-frame"></input>
+                        <br>
+                        <br>
+                        <button id="render-specific">Render</button>
+                        <button id="render-next">Render next frame</button>
+                        <br>
+                    </div>
+                    <div>
+                        <h3> recording </h3>
+                        <button id="screenshot">Screenshot</button>
+                        <br>
+                        <label for="record-start">Starting frame: </label>
+                        <input
+                            type="number"
+                            min="0"
+                            value="0"
+                            id="record-start"></input>
+                        <br>
+                        <br>
+
+                        <label for="record-duration">Number of frames: </label>
+                        <input
+                            type="number"
+                            min="0"
+                            value="100"
+                            id="record-duration"></input>
+                        <br>
+                        <br>
+                        <label for="record-fps">Frames per second: </label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="120"
+                            value="30"
+                            id="record-fps"></input>
+                        <br>
+                        <br>
+                        <button id="record">Record Zip</button>
+                        <button id="record-mp4">Record MP4</button>
+                        <div id="recordstatus" style="display: none;">
+                            <br>
+                            <br>
+                            <code id="recordinfo"></code>
+                            <progress id="recordprogress"></progress>
+                        </div>
                     </div>
                 </div>
             </div>
