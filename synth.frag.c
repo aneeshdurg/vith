@@ -86,6 +86,7 @@ vec2 t_coords;
 #include "modules/copy.frag.c"
 #include "modules/checkerfill.frag.c"
 #include "modules/enhance.frag.c"
+#include "modules/fourierdraw.frag.c"
 #include "modules/gamma_correct.frag.c"
 #include "modules/greyscale.frag.c"
 #include "modules/halftone.frag.c"
