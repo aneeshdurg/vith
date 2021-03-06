@@ -152,6 +152,9 @@ class FloatBar extends Type {
     constructor(range, defaultValue, supressFunctionGen) {
         super(range, defaultValue);
 
+        if (supressFunctionGen === null || supressFunctionGen === undefined)
+            supressFunctionGen =  eval(this.getAttribute("supressFunctionGen"))
+
         this.shadow.appendChild(createElement(html`
             <div>
                 <${getEl("slider-elem")} range="[${this.range}]" defaultValue="${this.defaultValue}">
