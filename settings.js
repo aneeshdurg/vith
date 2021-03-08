@@ -9,8 +9,7 @@ class SettingsUI {
             synth.name = this.name_inp.value;
             ui_container.dispatchEvent(new Event("namechange"));
         });
-
-        ui_container.addEventListener("namechange", () => {
+ui_container.addEventListener("namechange", () => {
             this.name_inp.value = synth.name;
         });
 
@@ -52,11 +51,37 @@ class SettingsUI {
             synth.resize([Math.floor(this.render_width_inp.value), synth.dimensions[1]]);
         });
 
-
+        const startaudio = document.getElementById("startaudio");
         // TODO autosave to localstorage
+        startaudio.addEventListener("click", async () => {
+            try {
+                // https://stackoverflow.com/a/52952907
+                const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+                const audioContext = new AudioContext();
+                const analyzer = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(stream);
+                const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                analyzer.smoothingTimeConstant = 0.8;
+                analyzer.fftSize = 1024;
+
+                microphone.connect(analyzer);
+                analyzer.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+                javascriptNode.onaudioprocess = function() {
+                    if (synth.volume.length < analyzer.frequencyBinCount)
+                        synth.volume = new Uint8Array(analyzer.frequencyBinCount);
+                    analyzer.getByteFrequencyData(synth.volume);
+                }
+            } catch(err) {
+                console.log(err);
+                alert("Error getting audio: ", err);
+            }
+        });
     }
 
     save() {
+        // TODO save audio required?
         return {
             name: this.name_inp.value,
             clock: this.clock_inp.value,

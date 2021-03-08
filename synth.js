@@ -21,6 +21,9 @@ class Synth {
     render_channel = 0;
     channels = [new Channel()];
 
+    // Volume is read by functions requiring audio
+    volume = new Uint8Array(0);
+
     transform = {
         center: [ 0.5, 0.5 ],
         scale: 1,
@@ -92,7 +95,7 @@ class Synth {
 
             if (!fn_params.enable)
                 return;
-            stage.step(time);
+            stage.step(time, this);
 
             if (stageid == 0)
                 this.reset_transform();
@@ -146,7 +149,7 @@ class Synth {
         };
 
         for (let i = 0; i < this.channels.length; i++)
-            process_stages(this.fbs[i], new Stage(this.channels[i], (t) => {}), -1);
+            process_stages(this.fbs[i], new Stage(this.channels[i], (t, s) => {}), -1);
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         twgl.setUniforms(this.programInfo, {

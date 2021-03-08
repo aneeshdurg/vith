@@ -104,23 +104,131 @@ const defaultFnUI = (function_ui, params) => {
     y_input.addEventListener('change', () => {
         params.params.y = parseFloat(y_input.value);
     });
-}
+};
 
 class AudioDefaultParams extends GenParams {
-    params = {c: 0, y: 0, a: 1};
+    params = {
+        low: 20,
+        high: 100,
+        y: 0,
+        a: 1,
+        fr: 1,
+        fs: true,
+    };
 }
 
-const audio_generator = (t, range, genparams) => {
+const audio_generator = (t, range, genparams, synth) => {
+    if (synth.volume.length == 0)
+        return range[0];
+
     const params = genparams.get();
-    const step = raw_step(t, range, params.freq, params.c);
-    return constrain(range, params.a * (range[1] - step + range[0]) + params.y);
+
+    let volume = 0;
+    let start = params.fs ? 0 : Math.floor(params.fr * synth.volume.length);
+    let end = params.fs ? Math.floor(params.fr * synth.volume.length) : synth.volume.length;
+    for (let i = start; i < end; i++) {
+      volume += (synth.volume[i]);
+    }
+    volume = volume / (end - start);
+
+    let val = (volume - params.low) / params.high;
+    val = params.a * val + params.y;
+    return constrain(range, (range[1] - range[0]) * val + range[0]);
+};
+
+const audioUI = (function_ui, params) => {
+    console.log(params);
+    function_ui.appendChild(createElement(html`
+        <div>
+            <br>
+            <h3>Frequency</h3>
+            <br>
+            <label for="freqrange">Frequency Width: </label>
+            <${getEl("float-bar")}
+                id="freqrange"
+                range="[0, 1]"
+                defaultValue="1"
+                supressFunctionGen="true">
+            </${getEl("float-bar")}>
+            <br>
+            <label for="freqselect">Low pass filter: </label>
+            <input type="checkbox" checked id="freqselect"></input>
+            <br>
+            <h3>Intensity</h3>
+            <label for="low">Low: </label>
+            <${getEl("float-bar")}
+                id="low"
+                range="[0, 1000]"
+                defaultValue="20"
+                supressFunctionGen="true">
+            </${getEl("float-bar")}>
+            <br>
+            <label for="high">High: </label>
+            <${getEl("float-bar")}
+                id="high"
+                range="[0.01, 1000]"
+                defaultValue="100"
+                supressFunctionGen="true">
+            </${getEl("float-bar")}>
+            <br>
+            <h3> Function </h3>
+            <label for="a_input">Amplitude: </label>
+            <${getEl("float-bar")}
+                id="a_input"
+                range="[0, 100]"
+                defaultValue="1"
+                supressFunctionGen="true">
+            </${getEl("float-bar")}>
+            <br>
+            <label for="y_input">Y offset: </label>
+            <${getEl("float-bar")}
+                id="y_input"
+                range="[-1, 1]"
+                defaultValue="0"
+                supressFunctionGen="true">
+            </${getEl("float-bar")}>
+        </div>
+    `));
+    const freqrange = function_ui.querySelector("#freqrange");
+    const freqselect = function_ui.querySelector("#freqselect");
+    const a_input = function_ui.querySelector("#a_input");
+    const y_input = function_ui.querySelector("#y_input");
+    const low_input = function_ui.querySelector("#low");
+    const high_input = function_ui.querySelector("#high");
+
+    freqselect.checked = params.params.fs;
+    freqrange.set_value(params.params.fr);
+    freqselect.addEventListener('change', () => {
+        params.params.fs = freqselect.checked;
+    });
+    freqrange.addEventListener('change', () => {
+        params.params.fr = parseFloat(freqrange.value);
+    });
+
+    a_input.set_value(params.params.a);
+    y_input.set_value(params.params.y);
+    a_input.addEventListener('change', () => {
+        params.params.a = parseFloat(a_input.value);
+    });
+    y_input.addEventListener('change', () => {
+        params.params.y = parseFloat(y_input.value);
+    });
+
+    low_input.set_value(params.params.low);
+    high_input.set_value(params.params.high);
+    high_input.addEventListener('change', () => {
+        params.params.high = parseFloat(high.value);
+    });
+    low_input.addEventListener('change', () => {
+        params.params.low = parseFloat(low.value);
+    });
 };
 
 const generators = {
     sin: { func: sin_generator, params: DefaultParams, ui: defaultFnUI },
     step: { func: step_generator, params: DefaultParams, ui: defaultFnUI },
     inv_step: { func: inv_step_generator, params: DefaultParams, ui: defaultFnUI },
-    audio: { func: audio_generator, params: AudioDefaultParams, ui: defaultFnUI }
+    audio: { func: audio_generator, params: AudioDefaultParams, ui: audioUI }
 }
 
 class FunctionGenerator{
@@ -155,7 +263,7 @@ class FunctionGenerator{
         const function_ui = document.createElement('div');
         function_ui.className = 'function-ui';
 
-        defaultFnUI(function_ui, this.params);
+        generators[current].ui(function_ui, this.params);
 
         function_ui.appendChild(document.createElement('br'));
         function_ui.appendChild(document.createElement('br'));

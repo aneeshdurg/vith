@@ -63,7 +63,7 @@ class Type extends HTMLElement {
     load() {
     }
 
-    step(time) { }
+    step(time, synth) { }
 }
 
 class BoolEntry extends Type {
@@ -238,9 +238,9 @@ class FloatBar extends Type {
             funcgen_container.style.display = "none";
     }
 
-    step(time) {
+    step(time, synth) {
         if (this.generate)
-            this.set_value(this.func(time, this.range, this.params));
+            this.set_value(this.func(time, this.range, this.params, synth));
     }
 
     save() {
@@ -264,10 +264,10 @@ class FloatBar extends Type {
         this.set_value(data.value);
 
         if (data.generate) {
+            this.func_select.value = data.func;
             this.params = new generators[this.func_select.value].params();
             this.params.load(data.params);
 
-            this.func_select.value = data.func;
             this.func = generators[this.func_select.value].func;
             this.func_gen.checked = true;
 
@@ -341,9 +341,9 @@ class VecEntry extends Type {
         }
     }
 
-    step(time) {
+    step(time, synth) {
         for (let i = 0; i < this.nelem; i++)
-            this.floats[i].step(time);
+            this.floats[i].step(time, synth);
     }
 }
 defineEl('vec-entry', VecEntry);
