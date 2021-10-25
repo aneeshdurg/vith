@@ -47,6 +47,7 @@ class Type extends HTMLElement {
 
     constructor(range, defaultValue) {
         super();
+        this.synth = null;
         this.range = range;
         if (this.range === null || this.range === undefined)
             this.range = eval(this.getAttribute("range"));
@@ -222,7 +223,7 @@ class FloatBar extends Type {
             if (this.generate)
                 curr_params = this.params;
             const generator = new FunctionGenerator(
-                modal, this.func_select.value, curr_params, resolver);
+                modal, this.func_select.value, curr_params, resolver, this.synth);
             const params = await p;
             generator.remove();
             modal.remove();
@@ -239,6 +240,7 @@ class FloatBar extends Type {
     }
 
     step(time, synth) {
+        this.synth = synth;
         if (this.generate)
             this.set_value(this.func(time, this.range, this.params, synth));
     }
@@ -342,6 +344,7 @@ class VecEntry extends Type {
     }
 
     step(time, synth) {
+        this.synth = synth;
         for (let i = 0; i < this.nelem; i++)
             this.floats[i].step(time, synth);
     }

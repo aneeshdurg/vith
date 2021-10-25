@@ -77,8 +77,80 @@ vec3 rgb_to_hsv(vec3 rgb) {
     return vec3(h, s, v);
 }
 
+float isGEq(float a, float b) {
+    return sign(sign(a - b) + 1.0);
+}
+
+vec2 get_hex_origin(vec2 coords, float hex_size) {
+    float n = max(hex_size, 0.01);
+    float halfn = n / 2.0;
+
+    float sqrt3 = 1.732;
+
+    float W = sqrt3 * n;
+    float halfW = W/2.0;
+
+    float H = 3.0 * halfn;
+
+    float xidx = floor(coords.x / W);
+    float yidx = floor(coords.y / H);
+
+    // Get top left corner of bounding square
+    vec2 o = vec2(W * xidx, H * yidx);
+
+    // transform coordinates to make square begin at origin
+    vec2 t = coords - o;
+
+    // Hexagon targets in transformed space
+    vec2 vertA = vec2(0.0, 0.0);
+    vec2 vertB = vec2(W, 0.0);
+    vec2 vertC = vec2(halfW, H);
+
+    vec2 vertInvalid = vec2(-1.0, 0.0);
+
+    // pattern alternates every other row
+    if (mod(yidx, 2.0) != 0.0) {
+        t.y = H - t.y;
+    }
+
+    float xLeHalfW = isGEq(halfW, t.x);
+    float yLehalfN = isGEq(halfn, t.y);
+    float yGeN = isGEq(t.y, n);
+
+    float yt = t.y - halfn;
+    float xt = (t.x - halfW) / sqrt3;
+    float xnt = (halfW - t.x) / sqrt3;
+
+    float xntGeYt = isGEq(xnt, yt);
+    float xtGeYt = isGEq(xt, yt);
+
+    vec2 hex =
+        yLehalfN * (
+             xLeHalfW * vertA +
+             (1.0 - xLeHalfW) * vertB) +
+        yGeN * vertC +
+        (1.0 - yLehalfN) * (1.0 - yGeN) * (
+             xLeHalfW * (
+                xntGeYt * vertA +
+                (1.0 - xntGeYt) * vertC) +
+             (1.0 - xLeHalfW) * (
+                xtGeYt * vertB +
+                (1.0 - xtGeYt) * vertC));
+
+    if (mod(yidx, 2.0) != 0.0) {
+        hex.y = H - hex.y;
+    }
+
+   hex += o;
+
+   return hex;
+}
+
+
+
 vec2 t_coords;
 
+#include "modules/bitfield.frag.c"
 #include "modules/blur.frag.c"
 #include "modules/chromakey.frag.c"
 #include "modules/composite.frag.c"
@@ -90,6 +162,7 @@ vec2 t_coords;
 #include "modules/gamma_correct.frag.c"
 #include "modules/greyscale.frag.c"
 #include "modules/halftone.frag.c"
+#include "modules/hexswirl.frag.c"
 #include "modules/hue_shift.frag.c"
 #include "modules/invert_color.frag.c"
 #include "modules/invert_phase.frag.c"
@@ -110,6 +183,8 @@ vec2 t_coords;
 #include "modules/swirl.frag.c"
 #include "modules/threshold.frag.c"
 #include "modules/tile.frag.c"
+#include "modules/voronoi.frag.c"
+#include "modules/voronoiswirl.frag.c"
 #include "modules/waveify.frag.c"
 #include "modules/wavy.frag.c"
 #include "modules/webcam.frag.c"

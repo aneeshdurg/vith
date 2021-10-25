@@ -296,3 +296,236 @@ class ReduceColors_reduce_colors_count extends Type {
     }
 }
 defineEl('reducecolors-reduce-colors-count', ReduceColors_reduce_colors_count);
+
+class Voronoi_voronoi_data extends Type {
+    customonchange(element) {
+        try {
+            this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['voronoi_data'] = this.tex;
+            this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['voronoi_count'] = this.count;
+        } catch (e) {
+            // TODO custom elements break with meta modules
+        }
+
+        element.args.voronoi_count.set_value(this.dimensions);
+    }
+
+    constructor(synth) {
+        const limit = 1024;
+        const img = new Image();
+        const tex = createTexture(synth.gl, [limit / 2, 1]);
+        super(undefined, tex);
+
+        this.tex = tex;
+        this.synth = synth;
+        this.channelid = synth.active_channel;
+
+        // we waste 1 float for the alpha channel - TODO
+        this.data = new Float32Array(4 * limit / 2);
+        // this.count = 100;
+        this.count = 100;
+        this.generate_colors();
+
+        updateTexture(synth.gl, [limit / 2, 1], this.tex, this.data);
+
+        this.el = document.createElement("div");
+        const btn = document.createElement("button");
+        btn.addEventListener('click', () => {
+            this.generate_colors();
+            this.dispatchEvent(new Event('change'));
+        });
+        btn.innerText = "Re-pick points";
+        this.el.appendChild(btn);
+
+        this.el.appendChild(document.createElement('br'));
+        const label = document.createElement("label");
+        label.innerText = "Number of points: ";
+        label.for = "num_points";
+        this.input = new IntEntry([1, limit], 100);
+        this.input.id = "num_points";
+        this.input.addEventListener('change', () => { this.set_count(this.input.value); });
+        this.el.appendChild(label);
+        this.el.appendChild(this.input);
+
+        // TODO add a ui to edit colors individually
+
+        this.shadow.appendChild(this.el);
+
+        console.log(this);
+    }
+
+    step(time, synth) {
+        for (let i = 0; i < 4 * this.count / 2; i++) {
+            this.data[i] += 0.001 * (Math.random() - 0.5);
+            if (this.data[i] < 0) {
+                this.data[i] = 0;
+            }
+            if (this.data[i] > 1) {
+                this.data[i] = 1;
+            }
+        }
+        updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
+
+        this.input.step(time, synth);
+    }
+
+    set_count(value) {
+        this.count = value;
+        this.generate_colors();
+        // console.log("New count", input.value);
+        this.dispatchEvent(new Event('change'));
+
+    }
+
+    generate_colors() {
+        // console.log("Regenerating", this.count);
+        for (let i = 0; i < 4 * this.count / 2; i++)
+            this.data[i] = Math.random();
+        updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
+    }
+
+    save() {
+        const data = [];
+        for (let i = 0; i < 4 * this.count / 2; i++)
+            data.push(this.data[i])
+        return [...data];
+    }
+
+    load(data) {
+        for (let i = 0; i < data.length; i++)
+            this.data[i] = data[i];
+        this.count = 2 * data.length / 4;
+        updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
+        this.dispatchEvent(new Event('change'));
+    }
+}
+defineEl('voronoi-voronoi-data', Voronoi_voronoi_data);
+
+class Voronoi_voronoi_count extends Type {
+    constructor(synth) {
+        super(undefined, 100);
+        this.data = document.createElement('code');
+        this.data.style = 'border: solid 1px; padding: 2px';
+        this.data.innerText = 100;
+        this.shadow.appendChild(this.data);
+    }
+
+    set_value(value) {
+        this.data.innerText = value;
+    }
+
+    save() {
+        return undefined;
+    }
+}
+defineEl('voronoi-voronoi-count', Voronoi_voronoi_count);
+
+class Voronoiswirl_voronoiswirl_data extends Type {
+    customonchange(element) {
+        try {
+            this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['voronoiswirl_data'] = this.tex;
+            this.synth._get_stageModules(this.channelid)[element.name].fn_params.params['voronoiswirl_count'] = this.count;
+        } catch (e) {
+            // TODO custom elements break with meta modules
+        }
+
+        element.args.voronoiswirl_count.set_value(this.dimensions);
+    }
+
+    constructor(synth) {
+        const limit = 1024;
+        const img = new Image();
+        const tex = createTexture(synth.gl, [limit / 2, 1]);
+        super(undefined, tex);
+
+        this.tex = tex;
+        this.synth = synth;
+        this.channelid = synth.active_channel;
+
+        // we waste 1 float for the alpha channel - TODO
+        this.data = new Float32Array(4 * limit / 2);
+        // this.count = 100;
+        this.count = 100;
+        this.generate_colors();
+
+        updateTexture(synth.gl, [limit / 2, 1], this.tex, this.data);
+
+        this.el = document.createElement("div");
+        const btn = document.createElement("button");
+        btn.addEventListener('click', () => {
+            this.generate_colors();
+            this.dispatchEvent(new Event('change'));
+        });
+        btn.innerText = "Re-pick points";
+        this.el.appendChild(btn);
+
+        this.el.appendChild(document.createElement('br'));
+        const label = document.createElement("label");
+        label.innerText = "Number of points: ";
+        label.for = "num_points";
+        this.input = new IntEntry([1, limit], 100);
+        this.input.id = "num_points";
+        this.input.addEventListener('change', () => { this.set_count(this.input.value); });
+        this.el.appendChild(label);
+        this.el.appendChild(this.input);
+
+        // TODO add a ui to edit colors individually
+
+        this.shadow.appendChild(this.el);
+
+        console.log(this);
+    }
+
+    step(time, synth) {
+        this.input.step(time, synth);
+    }
+
+    set_count(value) {
+        this.count = value;
+        this.generate_colors();
+        // console.log("New count", input.value);
+        this.dispatchEvent(new Event('change'));
+
+    }
+
+    generate_colors() {
+        // console.log("Regenerating", this.count);
+        for (let i = 0; i < 4 * this.count / 2; i++)
+            this.data[i] = Math.random();
+        updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
+    }
+
+    save() {
+        const data = [];
+        for (let i = 0; i < 4 * this.count / 2; i++)
+            data.push(this.data[i])
+        return [...data];
+    }
+
+    load(data) {
+        for (let i = 0; i < data.length; i++)
+            this.data[i] = data[i];
+        this.count = 2 * data.length / 4;
+        updateTexture(this.synth.gl, [256, 1], this.tex, this.data);
+        this.dispatchEvent(new Event('change'));
+    }
+}
+defineEl('voronoiswirl-voronoiswirl-data', Voronoiswirl_voronoiswirl_data);
+
+class Voronoiswirl_voronoiswirl_count extends Type {
+    constructor(synth) {
+        super(undefined, 100);
+        this.data = document.createElement('code');
+        this.data.style = 'border: solid 1px; padding: 2px';
+        this.data.innerText = 100;
+        this.shadow.appendChild(this.data);
+    }
+
+    set_value(value) {
+        this.data.innerText = value;
+    }
+
+    save() {
+        return undefined;
+    }
+}
+defineEl('voronoiswirl-voronoiswirl-count', Voronoiswirl_voronoiswirl_count);

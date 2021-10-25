@@ -234,7 +234,7 @@ const generators = {
 class FunctionGenerator{
     cancel = false;
 
-    constructor (parentEl, current, current_params, resolver) {
+    constructor (parentEl, current, current_params, resolver, synth) {
         const container = document.createElement('div');
         container.className = "functiongen";
 
@@ -279,6 +279,7 @@ class FunctionGenerator{
         container.appendChild(function_ui);
         parentEl.appendChild(container);
 
+        this.synth = synth;
         const f = () => {
             this.draw_axes();
             this.draw_function();
@@ -316,7 +317,7 @@ class FunctionGenerator{
         const maxy = this.graph.height / 2;
         this.ctx.moveTo(0, maxy);
         for (let i = 0; i < this.graph.width; i++) {
-            this.ctx.lineTo(i, maxy - maxy * this.func(i, [-1, 1], this.params));
+            this.ctx.lineTo(i, maxy - maxy * this.func(i, [-1, 1], this.params, this.synth));
         }
         this.ctx.stroke();
     }
