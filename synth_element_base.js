@@ -7,6 +7,11 @@ class SynthFunction {
     constructor(feedback) {
         this.feedback = feedback;
     }
+
+    // By redefining this, elements can define an alternate render path
+    custom_render(gl, programInfo, fbs) {
+        return false;
+    }
 }
 
 const globalCounters = {};
@@ -224,9 +229,14 @@ class SynthElementBase extends SynthStageBase {
             this.constrain_el.load(data.args.constrain);
     }
 
+    // By redefining this elements with a custom render path can add addition
+    // step logic
+    custom_step(time, synth) { }
+
     step(time, synth) {
         for (let arg of Object.keys(this.args))
             this.args[arg].step(time, synth);
+        this.custom_step(time, synth);
     }
 }
 

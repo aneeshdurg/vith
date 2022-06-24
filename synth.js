@@ -114,7 +114,6 @@ class Synth {
                 return;
             }
 
-            fbs.bind_dst();
             const params = {
                 u_dimensions: this.dimensions,
                 u_tex_dimensions: this.dimensions,
@@ -125,6 +124,7 @@ class Synth {
                 u_function: fn_params.id,
                 u_feedback: fn_params.feedback,
                 u_constrain_to_transform: fn_params.constrain,
+                u_no_clamp: false,
             };
             for (let key of Object.keys(fn_params.params)) {
                 let value = fn_params.params[key];
@@ -134,7 +134,14 @@ class Synth {
             }
 
             twgl.setUniforms(this.programInfo, params);
-            render(this.gl);
+
+            // If the function defines a custom rendering function, do that
+            // instead
+            if (!fn_params.custom_render(this.gl, this.programInfo, params, fbs)) {
+              // default render path
+              fbs.bind_dst();
+              render(this.gl);
+            }
 
             // clear channel textures
             for (let key of Object.keys(fn_params.params)) {

@@ -52,6 +52,7 @@ def build_js() -> None:
             "function_generator.js",
             "synth_element_base.js",
             "build/module_lib.js",
+            "custommodule.js",
             "meta_module.js",
             "recording.js",
             "channelui.js",
@@ -173,6 +174,8 @@ def process_module(filename, modules, output):
             if "custom" in info:
                 print("   ", name, "CUSTOM")
                 descriptor[name] = {'type': "custom"}
+            elif "none" in info:
+                descriptor[name] = {'type': "none"}
             elif "channel" in info:
                 print("   ", name, "CHANNEL")
                 descriptor[name] = {'type': "channel"}
@@ -238,6 +241,9 @@ def generate_initializer(name, arg, parent_class_name):
     if arg['type'] == 'custom':
         return f'{name}: new {parent_class_name}_{name}(this.synth)'
 
+    if arg['type'] == 'none':
+        return ""
+
     class_name = type_info[arg['type']].constructor
     if arg['type'] == 'channel':
         return f'{name}: new {class_name}(this.synth)'
@@ -295,6 +301,7 @@ def create_module_library(modules, output):
             generate_initializer(name, descriptor[name], class_name)
             for name in descriptor if name != '__module_tag'
         ]
+        arg_list = [arg for arg in arg_list if arg != ""]
         output.write(textwrap.dedent(
             f'''\
         class {class_name} extends SynthFunction {{
@@ -318,7 +325,7 @@ def create_module_library(modules, output):
 
             get_args() {{
                 return {{
-                    {','.join(arg_list)}
+                    {', '.join(arg_list)}
                 }}
             }}
         }}
