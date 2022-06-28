@@ -1,14 +1,18 @@
 CirclePackingElement.prototype.custom_step = function(time, synth) {
+  let init = false;
   if (!this.random_buffer) {
     this.random_buffer = new Float32Array(4 * synth.dimensions[0] * synth.dimensions[1]);
     this.fn_params.random_buffer = new FrameBufferManager(synth.gl, synth.dimensions);
 
     this.fn_params.dimensions = synth.dimensions;
+    init = true;
   }
-  for (let i = 0; i < this.random_buffer.length; i++) {
-    this.random_buffer[i] = Math.random();
+  if (init || this.fn_params.params.cp_randomize) {
+    for (let i = 0; i < this.random_buffer.length; i++) {
+      this.random_buffer[i] = Math.random();
+    }
+    updateTexture(synth.gl, synth.dimensions, this.fn_params.random_buffer.src(), this.random_buffer);
   }
-  updateTexture(synth.gl, synth.dimensions, this.fn_params.random_buffer.src(), this.random_buffer);
 }
 
 CirclePacking.prototype.custom_render = function(gl, programInfo, params, fbs) {

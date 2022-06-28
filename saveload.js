@@ -1,3 +1,4 @@
+const saveload_script = document.currentScript;
 function loaddata(savedatas, ui_container, synth, into_current) {
     // TODO validation
     const chan_count = synth.channels.length;
@@ -119,27 +120,31 @@ function setup_save_load(ui_container, synth, settingsui) {
         0xffffff,
         (4 * synth.dimensions[0] * synth.dimensions[1] - header_len) / 4);
 
+  const getSaveData = () => {
+      const channels = [];
+      for (let i = 0; i < ui_container.children.length; i++) {
+          const ui = ui_container.children[i];
+          const channel = [];
+          for (let j = 0; j < ui.children.length; j++)
+              channel.push(ui.children[j].save());
+          channels.push(channel);
+      }
+
+      const saveobj = {
+          channels: channels,
+          modules: meta_modules,
+          settings: settingsui.save()
+      };
+
+      const savestr = JSON.stringify(saveobj);
+      return savestr;
+    };
+
     document.getElementById("save").addEventListener('click', () => {
-        const channels = [];
-        for (let i = 0; i < ui_container.children.length; i++) {
-            const ui = ui_container.children[i];
-            const channel = [];
-            for (let j = 0; j < ui.children.length; j++)
-                channel.push(ui.children[j].save());
-            channels.push(channel);
-        }
-
-        const saveobj = {
-            channels: channels,
-            modules: meta_modules,
-            settings: settingsui.save()
-        };
-
-        const savestr = JSON.stringify(saveobj);
-
-        const compressed = LZString.compressToUint8Array(savestr)
+        const compressed = LZString.compressToUint8Array(getSaveData())
         console.log(compressed.length);
         console.log(compressed);
+
         const stego_possible = compressed.length < max_stego_size;
         if (compressed.length <= 0xffffff) {
             const required_px = compressed.length + header_len / 4;
@@ -198,6 +203,20 @@ function setup_save_load(ui_container, synth, settingsui) {
             const savedata = encodeURI(savestr);
             _download('data:text/plain;charset=utf-8,' + savedata, `${synth.name}.savedata`);
         }
+    });
+
+    document.getElementById("savestandalone").addEventListener('click', async () => {
+      const script_base = await getFile(saveload_script.src);
+      let wrapper = "const load_synth = (canvas, cb) => {"
+      wrapper += script_base;
+      wrapper += "return loadStaticSynth(canvas, " + getSaveData() + ", cb); };"
+      const blob = new Blob([wrapper], {type: 'text/plan;charset=utf-8,'});
+      const elem = document.createElement('a');
+      elem.href = URL.createObjectURL(blob);
+      elem.download = `${synth.name}.standalone.js`;
+      document.body.appendChild(elem);
+      elem.click();
+      document.body.removeChild(elem);
     });
 
     const do_load = (name, savedata) => {

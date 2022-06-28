@@ -11,6 +11,7 @@ uniform int u_cp_max_radius; /// { "start": 1, "end": 100, "default": 8 }
 
 uniform sampler2D u_cp_data_texture; /// none
 uniform int u_cp_opcode; /// none
+uniform bool u_cp_randomize; /// { "default": true }
 
 vec4 circle_packing_getImgPx(vec2 coords_) {
   // vec2 coords = vec2(coords_);
@@ -71,7 +72,7 @@ void circle_packing() {
     break;
   }
   case OPCODE_RENDER: {
-    ivec2 icoords = ivec2(t_coords.x, t_coords.y);//float(u_dimensions.y) - t_coords.y);
+    ivec2 icoords = ivec2(coords.x, coords.y);//float(u_dimensions.y) - t_coords.y);
 
     bool found = false;
     for (int ix = -1 * u_cp_max_radius; ix <= u_cp_max_radius; ix++) {

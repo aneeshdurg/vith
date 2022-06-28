@@ -78,6 +78,8 @@ ui_container.addEventListener("namechange", () => {
                 alert("Error getting audio: ", err);
             }
         });
+
+        this.synth = synth;
     }
 
     save() {
@@ -85,6 +87,8 @@ ui_container.addEventListener("namechange", () => {
         return {
             name: this.name_inp.value,
             clock: this.clock_inp.value,
+            width: this.render_width_inp.value,
+            height: this.render_height_inp.value,
         };
     }
 
@@ -93,5 +97,9 @@ ui_container.addEventListener("namechange", () => {
         this.name_inp.dispatchEvent(new Event("change"));
         this.clock_inp.value = data.clock || 1;
         this.clock_inp.dispatchEvent(new Event("change"));
+        this.render_width_inp.value = data.width || this.render_width_inp.value;
+        this.render_width_inp.dispatchEvent(new Event("change"));
+        this.render_height_inp.value = data.height || this.render_height_inp.value;
+        this.render_height_inp.dispatchEvent(new Event("change"));
     }
 }
