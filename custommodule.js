@@ -1,6 +1,7 @@
 CirclePackingElement.prototype.custom_step = function(time, synth) {
   let init = false;
-  if (!this.random_buffer) {
+  if (!this.random_buffer ||
+      this.fn_params.dimensions[0] != synth.dimensions[0] || this.fn_params.dimensions[1] != synth.dimensions[1]) {
     this.random_buffer = new Float32Array(4 * synth.dimensions[0] * synth.dimensions[1]);
     this.fn_params.random_buffer = new FrameBufferManager(synth.gl, synth.dimensions);
 

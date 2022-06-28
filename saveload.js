@@ -100,9 +100,9 @@ function decode_stego(stegodata, LZString) {
     return result;
 }
 
-function _download(data, filename) {
+function _download(data_blob, filename) {
     const downloader = document.createElement('a');
-    downloader.setAttribute('href', data);
+    downloader.setAttribute('href', URL.createObjectURL(data));
     downloader.setAttribute('download', filename);
     downloader.style.display = "none";
     document.body.appendChild(downloader);
@@ -197,11 +197,12 @@ function setup_save_load(ui_container, synth, settingsui) {
             }
 
             output_ctx.putImageData(img, 0, 0);
-            const out_data = output_ctx.canvas.toDataURL();
-            _download(out_data, `${synth.name}.savedata.png`);
+            output_canvas.toBlob((b) => {
+              _download(b, `${synth.name}.savedata.png`);
+            });
         } else {
-            const savedata = encodeURI(savestr);
-            _download('data:text/plain;charset=utf-8,' + savedata, `${synth.name}.savedata`);
+            const blob = new Blob([savedata], {type: 'text/plan;charset=utf-8,'});
+            _download(blob, `${synth.name}.savedata`);
         }
     });
 
@@ -211,12 +212,7 @@ function setup_save_load(ui_container, synth, settingsui) {
       wrapper += script_base;
       wrapper += "return loadStaticSynth(canvas, " + getSaveData() + ", cb); };"
       const blob = new Blob([wrapper], {type: 'text/plan;charset=utf-8,'});
-      const elem = document.createElement('a');
-      elem.href = URL.createObjectURL(blob);
-      elem.download = `${synth.name}.standalone.js`;
-      document.body.appendChild(elem);
-      elem.click();
-      document.body.removeChild(elem);
+      _download(blob, `${synth.name}.standalone.js`);
     });
 
     const do_load = (name, savedata) => {
