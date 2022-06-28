@@ -180,6 +180,7 @@ class SynthElementBase extends SynthStageBase {
         }
         this.feedback_el = new FloatBar([0, 10], 1);
         createElement('feedback', this.feedback_el);
+        this.feedback_el.shadow.getElementById("functiongen").style.display = "none";
 
         const counter = globalCounters[this.get_title()] || 0;
         globalCounters[this.get_title()] = counter + 1;
