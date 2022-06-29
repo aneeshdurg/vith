@@ -102,7 +102,7 @@ function decode_stego(stegodata, LZString) {
 
 function _download(data_blob, filename) {
     const downloader = document.createElement('a');
-    downloader.setAttribute('href', URL.createObjectURL(data));
+    downloader.setAttribute('href', URL.createObjectURL(data_blob));
     downloader.setAttribute('download', filename);
     downloader.style.display = "none";
     document.body.appendChild(downloader);

@@ -166,32 +166,6 @@ class Synth {
             u_feedback: 1,
         });
         render(this.gl);
-
-        // if (this.auto_scaling) {
-        //     const delta = time_ - this.last_render_time;
-
-        //     const threshold = 100; // 100 ms threshold
-        //     const difference = this.target_time_ms - delta;
-        //     const adiff = Math.abs(difference);
-        //     if (this.last_render_time == 0 || adiff < 100) {
-        //         this.last_render_time = time_;
-        //         console.log(".", Math.floor(adiff));
-        //         return;
-        //     }
-        //     this.last_render_time = time_;
-        //     console.log("!", adiff);
-
-        //     const sdiff = Math.sign(difference);
-
-        //     const factor = Math.max(Math.min(Math.floor(adiff) / 2, 1), 50);
-        //     let new_dims = null;
-        //     if (Math.sign > 0)
-        //         new_dims = this.dimensions.map(x => Math.max(x + factor));
-        //     else
-        //         new_dims = this.dimensions.map(x => Math.max(x - factor));
-        //     TODO resize might allocate memory, this is bad to call here.
-        //     this.resize(new_dims);
-        // }
     }
 
     get_url() {
@@ -204,18 +178,6 @@ class Synth {
         this.gl.readPixels(0, 0, ...this.dimensions, this.gl.RGBA, this.gl.UNSIGNED_BYTE, pixels);
         return pixels;
     }
-
-    // set_target_fps(fps) {
-    //     this.target_time_ms = 1000 / fps;
-    // }
-
-    // begin_auto_scale() {
-    //     this.auto_scaling = true;
-    // }
-
-    // stop_auto_scale() {
-    //     this.auto_scaling = false;
-    // }
 
     get_frame_data(array) {
         this.gl.readPixels(0, 0, ...this.dimensions, this.gl.RGBA, this.gl.UNSIGNED_BYTE, array);
