@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import textwrap
+import urllib
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,7 +34,6 @@ def copy_regular() -> None:
             shutil.copy(file_, f"build/{file_}")
         shutil.copy("webgl-common/common.js", "build/common.js")
         shutil.copy("lz-string/libs/lz-string.min.js", "build/lz-string.min.js")
-        shutil.copy("h264-mp4-encoder/web.js", "build/h264-mp4-encoder.web.js")
         shutil.copy("jszip/jszip.min.js", "build/jszip.min.js")
 
 def build_js() -> None:
@@ -43,7 +43,6 @@ def build_js() -> None:
         files = [
             "twgl-full.min.js",
             "lz-string/libs/lz-string.min.js",
-            "build/h264-mp4-encoder.web.js",
             "jszip/jszip.min.js",
             "webgl-common/common.js",
             "build/synth.frag.js",
@@ -60,6 +59,18 @@ def build_js() -> None:
             "settings.js",
             "synth.js",
         ]
+
+        # source for webworker
+        workersrc = ""
+        with open("h264-mp4-encoder/web.js") as mp4src:
+            workersrc += mp4src.read()
+        workersrc += "\n";
+        with open('recording_worker.js') as workersrcfile:
+            workersrc += workersrcfile.read()
+        workersrc += "\n"
+        workersrc = urllib.parse.quote(workersrc)
+        output.write("const recording_worker_src = window.decodeURIComponent(")
+        output.write("`\n" + workersrc + "`);\n")
 
         for file_ in files:
             with open(file_) as input_:

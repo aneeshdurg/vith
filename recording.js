@@ -91,7 +91,7 @@ function setup_recording(synth) {
             (zip, synth, i) => {
                 zip.file(`recording-${i}.png`, synth.get_url().substr("data:image/png;base64,".length), {base64: true});
             },
-            async (zip) => URL.createObjectURL(await zip.generateAsync({type: "blob"})),
+            async (zip) => await zip.generateAsync({type: "blob"}),
         );
     });
 
@@ -99,21 +99,30 @@ function setup_recording(synth) {
         await do_record(
             "mp4",
             async () => {
-                const encoder = await HME.createH264MP4Encoder()
-                // TODO enforce even width/height
-                encoder.width = synth.dimensions[0];
-                encoder.height = synth.dimensions[1];
-                encoder.initialize();
-                return encoder;
+                const srcblob = new Blob([recording_worker_src]);
+                const srcblobURL = window.URL.createObjectURL(srcblob);
+                const worker = new Worker(srcblobURL);
+                worker.postMessage(synth.dimensions);
+                worker.finished = new Promise((r) => {
+                    worker.onmessage = (msg) => {
+                        worker.results = msg;
+                        r();
+                    };
+                });
+                return worker;
             },
-            (encoder, synth, _i) => {
-                encoder.addFrameRgba(synth.get_img_data());
+            (worker, synth, _i) => {
+                const data = synth.get_img_data();
+                worker.postMessage(data.buffer);
             },
-            async (encoder) => {
-                encoder.finalize();
-                const data = encoder.FS.readFile(encoder.outputFilename);
+            async (worker) => {
+                worker.postMessage(new ArrayBuffer(0));
+                await worker.finished;
+                worker.terminate();
+
+                const data = new Uint8Array(worker.results.data);
                 const blob = new Blob([data], { type: 'octet/stream' });
-                return window.URL.createObjectURL(blob);
+                return blob;
             },
         );
     });
