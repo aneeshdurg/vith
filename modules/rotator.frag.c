@@ -4,7 +4,7 @@
 uniform float u_rotation; /// { "start": 0, "end": "2 * math.pi", "default": 0 }
 
 void rotate() {
-    vec2 coords = t_coords.xy;
+    vec2 coords = gl_FragCoord.xy;
     vec2 c = coords / u_dimensions;
     c = 2. * c - 1.;
 
@@ -14,7 +14,7 @@ void rotate() {
     c = r * vec2(cos(theta), sin(theta));
 
     c  = (c + 1.) / 2.;
-    c *= u_tex_dimensions;
+    c *= u_dimensions;
 
     color_out = vec4(u_feedback * texelFetch(u_texture, ivec2(c), 0).xyz, 1.);
 }

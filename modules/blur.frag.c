@@ -5,7 +5,7 @@ uniform int u_blur_stride_x; /// { "start": 1, "end": 100, "default": 1 }
 uniform int u_blur_stride_y; /// { "start": 1, "end": 100, "default": 1 }
 
 void blur() {
-    ivec2 c = ivec2(t_coords.xy);
+    ivec2 c = ivec2(gl_FragCoord.xy);
     vec3 color = vec3(0);
     float size = float(u_blur_stride_y * u_blur_stride_x * 4);
     for (int y = -u_blur_stride_y + 1; y < u_blur_stride_y; y++) {

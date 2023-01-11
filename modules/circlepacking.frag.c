@@ -8,10 +8,13 @@ uniform float u_cp_radius_factor; /// { "start": 1, "end": 10, "default": 5 }
 // make sel thresh a fn of radius?
 uniform float u_cp_selection_threshold; /// { "start": 0, "end": 1, "default": 0.25 }
 uniform int u_cp_max_radius; /// { "start": 1, "end": 100, "default": 8 }
+uniform float u_cp_draw_radius; /// { "start": 0, "end": 5, "default": 1.5 }
 
 uniform sampler2D u_cp_data_texture; /// none
 uniform int u_cp_opcode; /// none
 uniform bool u_cp_randomize; /// { "default": true }
+                             ///
+uniform bool u_cp_smooth; /// { "default": true }
 
 vec4 circle_packing_getImgPx(vec2 coords_) {
   // vec2 coords = vec2(coords_);
@@ -82,9 +85,12 @@ void circle_packing() {
         float dist = length(vec2(ix, iy));
         float radius = circle_packing_getRadius(vec2(pcoords));
         if (selection_state.g > 0.0 && dist <= (selection_state.r + 0.5)) {
-          if (abs(dist - selection_state.r) <= 1.5) {
+          if (abs(dist - selection_state.r) <= u_cp_draw_radius) {
             vec4 color = circle_packing_getImgPx(vec2(pcoords));
             color_out.rgb = color.rgb - vec3(0.05, 0.05, 0.05);
+            if (u_cp_smooth) {
+              color_out.rgb *= 1. - abs(dist - selection_state.r) / u_cp_draw_radius;
+            }
             found = true;
           }
           break;

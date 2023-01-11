@@ -6,9 +6,9 @@ uniform float u_hexswirl_factor; /// { "start": 0, "end": "2 * math.pi", "defaul
 uniform float u_hexswirl_size; /// { "start": 0, "end": "100", "default": 5 }
 
 void hexswirl() {
-    vec2 hex_coords = get_hex_origin(t_coords.xy, u_hexswirl_size);
+    vec2 hex_coords = get_hex_origin(gl_FragCoord.xy, u_hexswirl_size);
     float hex_r = (u_hexswirl_size / 2.)/ cos(5. * PI / 12.);
-    vec2 c = (t_coords.xy - hex_coords) / hex_r;
+    vec2 c = (gl_FragCoord.xy - hex_coords) / hex_r;
     c = 2. * c - 1.;
 
     float r = length(c);

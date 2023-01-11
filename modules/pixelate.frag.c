@@ -4,7 +4,7 @@
 uniform int u_pixelate_factor; /// { "start": 0, "end": 500, "default": 10 }
 
 void pixelate() {
-    vec2 coords = t_coords.xy;
+    vec2 coords = gl_FragCoord.xy;
     float f = float(u_pixelate_factor);
     coords = floor(coords / f) * f;
     vec3 color = vec3(0);
