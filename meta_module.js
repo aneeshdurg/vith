@@ -23,7 +23,7 @@ class ModuleElement extends SynthStageBase {
         let old_name = synth._get_stages(channelid)[module.selection[0]];
         synth._get_stages(channelid)[module.selection[0]] = this.name;
         delete synth._get_stageModules(channelid)[old_name];
-        synth._get_stageModules(channelid)[this.name] = new Stage(this, (t, s) => { this.step(t, s); });
+        synth._get_stageModules(channelid)[this.name] = new Stage(this, (t, s) => { this.step(t, s); }, null);
 
         console.log("removed stage", old_name, module.selection);
 

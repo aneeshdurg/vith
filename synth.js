@@ -1,7 +1,8 @@
 class Stage {
-    constructor(fn_params, step) {
+    constructor(fn_params, step, controller) {
         this.fn_params = fn_params;
         this.step = step;
+        this.controller = controller;
     }
 }
 
@@ -156,7 +157,7 @@ class Synth {
         };
 
         for (let i = 0; i < this.channels.length; i++)
-            process_stages(this.fbs[i], new Stage(this.channels[i], (t, s) => {}), -1);
+            process_stages(this.fbs[i], new Stage(this.channels[i], (t, s) => {}, null), -1);
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         twgl.setUniforms(this.programInfo, {
@@ -186,6 +187,9 @@ class Synth {
     add_stage(chan, name, module) {
         if (this.channels[chan].stages.indexOf(name) != -1)
             throw new Error("name collision");
+        if (this.channels[chan].stages.length == 0)
+            if (module.controller)
+                module.controller.feedback_el.set_value(0);
         this.channels[chan].stageModules[name] = module;
         this.channels[chan].stages.push(name);
     }

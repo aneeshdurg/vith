@@ -192,7 +192,7 @@ class SynthElementBase extends SynthStageBase {
     build_stage(params) {
         const constructor = this.get_fn();
         this.fn_params = new constructor(...params, 1);
-        return new Stage(this.fn_params, (time, synth) => { this.step(time, synth); });
+        return new Stage(this.fn_params, (time, synth) => { this.step(time, synth); }, this);
     }
 
     onchange(arg, val) {
@@ -250,7 +250,7 @@ class TransformElement extends SynthElementBase {
 
     build_stage() {
         this.fn_params = this;
-        return new Stage(this, (t, s) => { this.step(t, s); });
+        return new Stage(this, (t, s) => { this.step(t, s); }, this);
     }
 
     get_args() {
