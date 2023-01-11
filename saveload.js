@@ -140,8 +140,10 @@ function setup_save_load(ui_container, synth, settingsui) {
       return savestr;
     };
 
-    document.getElementById("save").addEventListener('click', () => {
-        const compressed = LZString.compressToUint8Array(getSaveData())
+  document.getElementById("save").addEventListener('click', () => {
+        const savedata = getSaveData();
+        console.log("DATA", savedata);
+        const compressed = LZString.compressToUint8Array(savedata)
         console.log(compressed.length);
         console.log(compressed);
 
