@@ -1,6 +1,0 @@
-[submodule "webgl-common"]
-	path = webgl-common
-	url = https://github.com/aneeshdurg/webgl-common
-[submodule "lz-string"]
-	path = lz-string
-	url = https://github.com/pieroxy/lz-string/
