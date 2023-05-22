@@ -1,6 +1,6 @@
-uniform float STAGE_reflect_theta;
-uniform float STAGE_reflect_y;
-uniform float STAGE_reflect_x;
+uniform float STAGE_reflect_theta; /// { "start": 0, "end": "2 * math.pi", "default": "math.pi / 2" }
+uniform float STAGE_reflect_y; /// { "start": -1, "end": 1, "default": 0 }
+uniform float STAGE_reflect_x; /// { "start": -1, "end": 1, "default": 0 }
 
 vec4 STAGE(vec2 coords) {
     vec2 c = coords / u_dimensions;
@@ -19,7 +19,7 @@ vec4 STAGE(vec2 coords) {
     if (pos_theta > (STAGE_reflect_theta - PI) &&
             (pos_theta < STAGE_reflect_theta ||
              pos_theta > (STAGE_reflect_theta + PI))) {
-        color = INPUT(coords).xyz;
+        color = INPUT0(coords).xyz;
     } else {
         theta = -(theta - STAGE_reflect_theta) + STAGE_reflect_theta;
 
@@ -29,7 +29,7 @@ vec4 STAGE(vec2 coords) {
         c.x += STAGE_reflect_x;
         c = (c + 1.) / 2.;
         c *= u_dimensions;
-        color = INPUT(c).xyz;
+        color = INPUT0(c).xyz;
     }
 
     return vec4(color, 1.);

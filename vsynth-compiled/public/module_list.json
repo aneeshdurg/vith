@@ -1,0 +1,23 @@
+{
+  "blur": [
+    {"name": "stride_x", "type": "float", "default": 1},
+    {"name": "stride_y", "type": "float", "default": 1}
+  ],
+  "copy_prev_frame": [],
+  "mirror": [
+    {"name": STAGE_reflect_theta, "type": "float", "default": 0},
+    {"name": STAGE_reflect_y,     "type": "float", "default": 0},
+    {"name": STAGE_reflect_x,     "type": "float", "default": 0}
+  ],
+  "mix": [
+    {"name": "input0_strength", "type": "float", "default": 1},
+    {"name": "input1_strength", "type": "float", "default": 1}
+  ],
+  "offset": [
+    {"name": offsets_x, "type": "vec3", "default": /// { "start": [-1, -1, -1], "end": [1, 1, 1], "default": [0, 0, 0], "names": ["r", "g", "b"] }
+    {"name": offsets_y, "type": "vec3", "default": /// { "start": [-1, -1, -1], "end": [1, 1, 1], "default": [0, 0, 0], "names": ["r", "g", "b"] }
+  ],
+  "oscillator": [],
+  "polygon": [],
+  "zoom": []
+}

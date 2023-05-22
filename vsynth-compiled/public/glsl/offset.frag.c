@@ -1,6 +1,3 @@
-/// modulefn: offset
-/// moduletag: color
-
 uniform vec3 STAGE_offsets_x; /// { "start": [-1, -1, -1], "end": [1, 1, 1], "default": [0, 0, 0], "names": ["r", "g", "b"] }
 uniform vec3 STAGE_offsets_y; /// { "start": [-1, -1, -1], "end": [1, 1, 1], "default": [0, 0, 0], "names": ["r", "g", "b"] }
 
@@ -30,9 +27,9 @@ vec4 STAGE(vec2 coords) {
     c_b = STAGE_offset_fix_range(c_b);
 
     vec4 color;
-    color.r = INPUT(c_r * u_tex_dimensions).r;
-    color.g = INPUT(c_g * u_tex_dimensions).g;
-    color.b = INPUT(c_b * u_tex_dimensions).b;
+    color.r = INPUT0(c_r * u_tex_dimensions).r;
+    color.g = INPUT0(c_g * u_tex_dimensions).g;
+    color.b = INPUT0(c_b * u_tex_dimensions).b;
     color.a = 1.;
     return color;
 }

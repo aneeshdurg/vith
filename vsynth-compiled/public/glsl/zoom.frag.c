@@ -1,6 +1,6 @@
-uniform float STAGE_x;
-uniform float STAGE_y;
-uniform vec2 STAGE_center;
+uniform float STAGE_x; /// {"start": 0, "end": 100, "default": 1}
+uniform float STAGE_y; /// {"start": 0, "end": 100, "default": 1}
+uniform vec2 STAGE_center; /// {"start": [0, 0], "end": [1, 1], "default": [0.5, 0.5]}
 
 vec4 STAGE(vec2 coords) {
     coords = coords / u_dimensions;
@@ -13,5 +13,5 @@ vec4 STAGE(vec2 coords) {
     coords += STAGE_center;
 
     vec2 c = coords * u_tex_dimensions;
-    return vec4(INPUT(c).xyz, 1.);
+    return vec4(INPUT0(c).xyz, 1.);
 }

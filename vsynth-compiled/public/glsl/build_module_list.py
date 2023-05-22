@@ -1,0 +1,38 @@
+import os
+import json
+
+module_list = {}
+for f in os.listdir():
+    if not f.endswith(".frag.c") or f == "template.frag.c":
+        continue
+
+    inputs = set()
+    with open(f) as fh:
+        lines = fh.readlines()
+        param_lines = [l for l in lines if l.startswith('uniform')]
+        for l in lines:
+            cur_pos = 0
+            while (n := l.find("INPUT", cur_pos)) > 0:
+                cur_pos = n + 1
+                c = l[n + len("INPUT")]
+                if c == '(':
+                    inputs.add("INPUT0")
+                else:
+                    inputs.add("INPUT" + c)
+
+    params = []
+    for l in param_lines:
+        assert "///" in l, f"{f}, {l.strip()}"
+        [typedecl, info] = l.split("///")
+        [_, type_, name] = typedecl.split()
+        name = name.replace("STAGE_", "")
+        name = name.replace(";", "")
+
+        params.append({"name": name, "type": type_, "info": json.loads(info)})
+    module_list[f.split('.')[0]] = {
+        "inputs": sorted(list(inputs)),
+        "params": params,
+    }
+
+with open("module_list.json", "w") as out:
+    json.dump(module_list, out)
