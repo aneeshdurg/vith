@@ -73,5 +73,3 @@ export function setupUI(ui_manager: UIEventManager) {
     ui_manager.add_event(add_new_stage.value);
   };
 }
-
-

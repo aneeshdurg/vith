@@ -68,15 +68,30 @@ export class Pipeline {
     console.log(modules, fn);
     const input_cnt = modules[fn].inputs.length;
 
+    const rect_width = 100;
+    const rect_height = rect_width * 3 / 4;
+    const io_port_width = rect_width / 20;
+
+    this.last_pos.x = -Infinity;
+    if (!this.nodes.keys().length) {
+      this.last_pos.x = 0;
+    }
+    for (let node of this.nodes.keys()) {
+      const curr_node = this.nodes.get(node);
+      const new_value = curr_node.svg_el.transform.baseVal[0].matrix.e + rect_width + io_port_width + 50;
+      this.last_pos.x = Math.max(new_value, this.last_pos.x);
+      if (new_value > this.last_pos.x) {
+        this.last_pos.x = new_value;
+        this.last_pos.y = curr_node.svg_el.transform.baseVal[0].matrix.f;
+      }
+    }
+
+
     const svg_el = document.createElementNS("http://www.w3.org/2000/svg", "g");
     svg_el.classList.add("draggable");
     const translate = this.svg.createSVGTransform();
     translate.setTranslate(this.last_pos.x, this.last_pos.y);
     svg_el.transform.baseVal.insertItemBefore(translate, 0);
-
-    const rect_width = 100;
-    const rect_height = rect_width * 3 / 4;
-    const io_port_width = rect_width / 20;
 
     const main_rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     main_rect.setAttribute('width', rect_width);
@@ -92,7 +107,8 @@ export class Pipeline {
     const text_padding = 10;
     const text_el = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text_el.innerHTML = node_name;
-    // text_el.setAttribute("textLength", rect_width - 2 * text_padding);
+    text_el.setAttribute("textLength", rect_width - 2 * text_padding);
+    text_el.setAttribute("lengthAdjust", "spacingAndGlyphs");
     const text_translate = this.svg.createSVGTransform();
     text_translate.setTranslate(text_padding, rect_height / 2);
     text_el.transform.baseVal.insertItemBefore(text_translate, 0);
@@ -178,8 +194,6 @@ export class Pipeline {
 
     this.svg.appendChild(svg_el);
 
-    this.last_pos.x += rect_width + io_port_width + 50;
-
     this.nodes.set(node_name, {
       fn: fn,
       outputs: [],
@@ -256,5 +270,3 @@ export class Pipeline {
     this.svg.appendChild(edge);
   }
 }
-
-
