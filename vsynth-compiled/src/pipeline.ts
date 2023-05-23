@@ -100,7 +100,7 @@ export class Pipeline {
     main_rect.style.fill = "white";
     main_rect.style.fillOpacity = "0";
     main_rect.onclick = () => {
-      this.ui_events.show_details(node_name);
+      this.ui_events.show_details(node_name, fn);
     };
     svg_el.appendChild(main_rect);
 

@@ -1,5 +1,6 @@
 import os
 import json
+import math
 
 module_list = {}
 for f in os.listdir():
@@ -28,7 +29,19 @@ for f in os.listdir():
         name = name.replace("STAGE_", "")
         name = name.replace(";", "")
 
-        params.append({"name": name, "type": type_, "info": json.loads(info)})
+        true = True
+        false = False
+        param = {
+            "name": name,
+            "type": type_,
+            "info": json.loads(info)
+        }
+
+        for k, v in param["info"].items():
+            if isinstance(v, str):
+                param["info"][k] = eval(v)
+        params.append(param)
+
     module_list[f.split('.')[0]] = {
         "inputs": sorted(list(inputs)),
         "params": params,

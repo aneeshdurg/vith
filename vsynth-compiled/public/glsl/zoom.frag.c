@@ -1,6 +1,6 @@
 uniform float STAGE_x; /// {"start": 0, "end": 100, "default": 1}
 uniform float STAGE_y; /// {"start": 0, "end": 100, "default": 1}
-uniform vec2 STAGE_center; /// {"start": [0, 0], "end": [1, 1], "default": [0.5, 0.5]}
+uniform vec2 STAGE_center; /// {"start": [0, 0], "end": [1, 1], "default": [0.5, 0.5], "names": ["x", "y"]}
 
 vec4 STAGE(vec2 coords) {
     coords = coords / u_dimensions;

@@ -16,9 +16,9 @@ export class UIEventManager {
     this._add_event = cb;
   }
 
-  show_details(node: str) {
+  show_details(node: str, fn: string) {
     if (this._show_details) {
-      this._show_details(fn);
+      this._show_details(node, fn);
     }
   }
 

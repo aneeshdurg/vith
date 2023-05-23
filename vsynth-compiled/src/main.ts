@@ -4,6 +4,7 @@ import * as common from './common'
 import * as modules from './module_list.json'
 import {Pipeline} from './pipeline.ts'
 import {UIEventManager, setupUI} from './ui.ts'
+import {BoolEntry, FloatBar, IntEntry, VecEntry} from './input.js'
 
 document.addEventListener("DOMContentLoaded", async () => {
   const canvas = <HTMLCanvasElement>document.getElementById("glcanvas");
@@ -13,31 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const dimensions = [1000, 1000];
   canvas.width = dimensions[0];
   canvas.height = dimensions[1];
-
-  const vsynth = [
-    {
-      fn: "copy_prev_frame",
-      name: "c0",
-      params: {},
-    },
-    {
-      fn: "zoom",
-      name: "z0",
-      params: {"INPUT": "c0"},
-    },
-    {
-      fn: "polygon",
-      name: "p0",
-      params: {},
-    },
-    {
-      fn: "mix",
-      name: "m0",
-      params: {"INPUT0": "z0", "INPUT1": "p0"},
-    },
-  ];
-
-  // console.log(synth_prog);
 
   const gl = canvas.getContext("webgl2", {'preserveDrawingBuffer': true});
   if (!gl) {
@@ -142,7 +118,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     for (let param of modules[fn].params) {
       const pname = `${name}_${param.name}`;
-      console.log(pname, param);
       params[pname] = param.info.default;
     }
 
@@ -152,7 +127,85 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   ui_events.register_add_event(add_fn);
   ui_events.register_recompile(recompile);
+  ui_events.register_show_details((node_name, fn) => {
+    const container = document.getElementById("fn-details");
+    if (!container) {
+      throw new Error("!");
+    }
+    container.innerHTML = `<h2>${node_name}</h2>`;
 
+    const param_infos = modules[fn].params;
+    for (let param of param_infos) {
+      container.appendChild(document.createElement("br"));
+
+      const name = `${node_name}_${param.name}`;
+
+      const label = document.createElement("label");
+      label.innerText = `${param.name}:`;
+      label.setAttribute("for", name);
+      container.appendChild(label);
+
+      const setupElement = (el, container) => {
+        container.appendChild(el);
+        el.id = name;
+        el.addEventListener("change", () => {
+          params[name] = el.value;
+        });
+      };
+
+      const current_value = params[name];
+
+      switch (param.type) {
+        case "bool": {
+          const el = new BoolEntry(current_value);
+          setupElement(el, container);
+          break;
+        }
+        case "int": {
+          const el = new IntEntry([param.info.start, param.info.end], current_value);
+          setupElement(el, container);
+          break;
+        }
+        case "float": {
+          const el = new FloatBar([param.info.start, param.info.end], current_value);
+          setupElement(el, container);
+          break;
+        }
+        case "vec2":
+        case "vec3": {
+          const range = [];
+          for (let i = 0; i < param.info.start.length; i++) {
+            range.push([param.info.start[i], param.info.end[i]]);
+          }
+          const el = new VecEntry(
+            param.info.start.length,
+            param.info.names,
+            range,
+            [...current_value]
+          );
+          const subcontainer = document.createElement("div")
+          subcontainer.style.padding = "1em";
+          container.appendChild(subcontainer);
+
+          setupElement(el, subcontainer);
+          break;
+        }
+        default: {
+          throw new Error("!");
+        }
+      }
+    }
+
+    container.appendChild(document.createElement("br"));
+    container.appendChild(document.createElement("br"));
+    const remove_btn = document.createElement("button");
+    remove_btn.innerText = "delete";
+    container.appendChild(remove_btn);
+    container.appendChild(document.createElement("br"));
+    container.appendChild(document.createElement("br"));
+  });
+
+  // Add an initial pipeline so it doesn't look too empty
   const c0 = add_fn("copy_prev_frame");
   const z0 = add_fn("zoom");
   const p0 = add_fn("polygon");
