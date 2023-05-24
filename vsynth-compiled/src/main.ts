@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupUI(ui_events);
 
   const pipeline = new Pipeline(ui_events);
+  (window as any).pipeline = pipeline;
 
   const recompile = async (pipeline, node_to_render) => {
     // Implements a BFS starting from leaf nodes
@@ -80,11 +81,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    if (node_to_render) {
-      synth_prog += `vec4 synth(vec2 coords) { return ${node_to_render}(coords); }`;
-    } else {
-      synth_prog += `vec4 synth(vec2 coords) { return ${last_node_with_no_output}(coords); }`;
+    let target = node_to_render;
+    if (!node_to_render) {
+      target = last_node_with_no_output
     }
+    synth_prog += `vec4 synth(vec2 coords) { return ${target}(coords); }`;
 
     try {
       if (programInfo) {
@@ -94,7 +95,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       programInfo = twgl.createProgramInfo(gl, [common.vs, synth_prog]);
       common.setupProgram(twgl, gl, programInfo, bufferInfo);
 
-      console.log("compilation success!");
+      console.log("compilation success!", target);
+      console.log(synth_prog);
     } catch (e) {}
   }
 
@@ -200,19 +202,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     container.appendChild(document.createElement("br"));
     const remove_btn = document.createElement("button");
     remove_btn.innerText = "delete";
+    remove_btn.onclick = () => {
+      pipeline.remove_node(node_name);
+    };
     container.appendChild(remove_btn);
     container.appendChild(document.createElement("br"));
     container.appendChild(document.createElement("br"));
   });
 
   // Add an initial pipeline so it doesn't look too empty
-  const c0 = add_fn("copy_prev_frame");
-  const z0 = add_fn("zoom");
+  // const c0 = add_fn("copy_prev_frame");
+  // const z0 = add_fn("zoom");
+  // pipeline.create_edge(c0, z0, 0);
   const p0 = add_fn("polygon");
-  const m0 = add_fn("mix");
-  pipeline.create_edge(c0, z0, 0);
-  pipeline.create_edge(z0, m0, 0);
-  pipeline.create_edge(p0, m0, 1);
+  // const m0 = add_fn("mix");
+  // pipeline.create_edge(z0, m0, 0);
+  // pipeline.create_edge(p0, m0, 1);
+  const b0 = add_fn("blur");
+  pipeline.create_edge(p0, b0, 0);
 
   const run = () => {
     try {
