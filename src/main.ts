@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     throw new Error("!");
   }
   common.enableGlExts(gl);
-  let programInfo = null;
+  let programInfo: any = null;
   const bufferInfo = twgl.createBufferInfoFromArrays(gl, common.bufferArrays);
   const fbs = new common.FrameBufferManager(gl, dimensions);
 
@@ -30,11 +30,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const pipeline = new Pipeline(ui_events);
   (window as any).pipeline = pipeline;
 
+  ui_events.register_organize(() => { pipeline.organize(); });
+
   const recompile = async (pipeline, node_to_render) => {
     // Implements a BFS starting from leaf nodes
     let synth_prog = await common.getFile("./glsl/template.frag.c");
-    let last_node_with_no_output = null;
-    let frontier = [];
+    let last_node_with_no_output: string | null  = null;
+    let frontier: string[] = [];
     let visited = new Set<string>();
     for (let node of pipeline.get_nodes()) {
       if (pipeline.get_inputs(node).length == 0) {
@@ -44,6 +46,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     while (frontier.length) {
       const node = frontier.shift();
+      if (!node) {
+        throw new Error("Expected at least one node");
+      }
       if (visited.has(node)) {
         continue;
       }
@@ -112,7 +117,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const add_fn = (fn) => {
-    const count = module_to_counts.get(fn);
+    let count = module_to_counts.get(fn);
+    if (!count) {
+      count = 0;
+    }
     module_to_counts.set(fn, count + 1);
 
     const name = `${fn}${count}`
@@ -175,7 +183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         case "vec2":
         case "vec3": {
-          const range = [];
+          const range: [number, number][] = [];
           for (let i = 0; i < param.info.start.length; i++) {
             range.push([param.info.start[i], param.info.end[i]]);
           }

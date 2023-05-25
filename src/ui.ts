@@ -1,12 +1,12 @@
 import * as modules from './module_list.json'
 
 export class UIEventManager {
-  constructor() {
-    this._add_event = null;
-    this._recompile = null;
-  }
+  _add_event: ((fn: string) => null) | null = null;
+  _show_details: ((node: string, fn: string) => null) | null = null;
+  _recompile: ((ctx: any, node_to_render: string | null) => null) | null = null;
+  _organize: (() => null) | null = null;
 
-  add_event(fn: str) {
+  add_event(fn: string) {
     if (this._add_event) {
       this._add_event(fn);
     }
@@ -16,7 +16,7 @@ export class UIEventManager {
     this._add_event = cb;
   }
 
-  show_details(node: str, fn: string) {
+  show_details(node: string, fn: string) {
     if (this._show_details) {
       this._show_details(node, fn);
     }
@@ -26,14 +26,24 @@ export class UIEventManager {
     this._show_details = cb;
   }
 
-  recompile(node_name, node_to_render) {
+  recompile(ctx: any, node_to_render: string | null) {
     if (this._recompile) {
-      this._recompile(node_name, node_to_render);
+      this._recompile(ctx, node_to_render);
     }
   }
 
   register_recompile(cb) {
     this._recompile = cb;
+  }
+
+  organize() {
+    if (this._organize) {
+      this._organize();
+    }
+  }
+
+  register_organize(cb) {
+    this._organize = cb;
   }
 }
 
@@ -48,13 +58,13 @@ export function setupUI(ui_manager: UIEventManager) {
   if (!gearbtn){
     throw new Error("!");
   }
-  gearbtn.onclick = (e) => {
+  gearbtn.onclick = () => {
     if (settings.style.display) {
       settings.style.display = "";
     }
   };
 
-  const add_new_stage = document.getElementById("add_new_stage_select");
+  const add_new_stage = document.getElementById("add_new_stage_select") as HTMLSelectElement;
   if (!add_new_stage) {
     throw new Error("!");
   }
@@ -71,5 +81,13 @@ export function setupUI(ui_manager: UIEventManager) {
   }
   add_new_stage_btn.onclick = () => {
     ui_manager.add_event(add_new_stage.value);
+  };
+
+  const organize_btn = document.getElementById("organize");
+  if (!organize_btn) {
+    throw new Error("!");
+  }
+  organize_btn.onclick = () => {
+    ui_manager.organize();
   };
 }
