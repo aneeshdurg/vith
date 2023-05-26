@@ -52,7 +52,7 @@ export class Pipeline {
     return this.nodes.get(node_name)?.fn;
   }
 
-  get_inputs(node_name: string): Iterable<string | null> {
+  get_inputs(node_name: string): (string | null)[] {
     const node = this.nodes.get(node_name);
     if (!node) {
       throw new Error(`Could not find node with name ${node_name}`);
@@ -257,7 +257,7 @@ export class Pipeline {
     this.adding_edge_input = [null, null];
     this.adding_edge_output = null;
 
-    this.ui_events.recompile(this, null);
+    this.ui_events.recompile(null);
   }
 
   set_input(node_name: string, input_name: string, input_idx: number) {
@@ -354,7 +354,7 @@ export class Pipeline {
     node?.svg_el.remove();
     this.nodes.delete(node_name);
 
-    this.ui_events.recompile(this, null);
+    this.ui_events.recompile(null);
   }
 
   _organize() {

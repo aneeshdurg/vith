@@ -3,7 +3,7 @@ import * as modules from './module_list.json'
 export class UIEventManager {
   _add_event: ((fn: string) => Promise<string>) | null = null;
   _show_details: ((node: string, fn: string) => null) | null = null;
-  _recompile: ((ctx: any, node_to_render: string | null) => null) | null = null;
+  _recompile: ((node_to_render: string | null) => null) | null = null;
   _organize: (() => null) | null = null;
 
   add_event(fn: string) {
@@ -26,9 +26,9 @@ export class UIEventManager {
     this._show_details = cb;
   }
 
-  recompile(ctx: any, node_to_render: string | null) {
+  recompile(node_to_render: string | null) {
     if (this._recompile) {
-      this._recompile(ctx, node_to_render);
+      this._recompile(node_to_render);
     }
   }
 
