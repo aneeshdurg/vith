@@ -541,7 +541,7 @@ export class FloatBar extends Type {
 
         this.generate = false;
         const set_func = () => {
-            this.func = generators[this.func_select.value].func;
+            this.func = (t, params, ctx) => generators[this.func_select.value].func(t, this.range, params, ctx);
             this.params = new generators[this.func_select.value].params();
         };
         set_func();
@@ -549,6 +549,7 @@ export class FloatBar extends Type {
         this.func_select.addEventListener('change', set_func);
         this.func_gen.addEventListener('change', () => {
             this.generate = this.func_gen.checked;
+            this.dispatchEvent(new Event("function"));
         });
 
         func_modal.addEventListener('click', async () => {
@@ -569,6 +570,7 @@ export class FloatBar extends Type {
             this.params = params;
             this.generate = true;
             this.func_gen.checked = true;
+            this.dispatchEvent(new Event("function"));
         });
 
         if (supressFunctionGen)
@@ -606,7 +608,7 @@ export class FloatBar extends Type {
             this.params = new generators[this.func_select.value].params();
             this.params.load(data.params);
 
-            this.func = generators[this.func_select.value].func;
+            this.func = (t, params, ctx) => generators[this.func_select.value].func(t, this.range, params, ctx);
             this.func_gen.checked = true;
 
             this.generate = true;
@@ -630,6 +632,9 @@ defineEl('int-entry', IntEntry);
 
 export class VecEntry extends Type {
     floats = []
+    generate = []
+    func = []
+    params = []
 
     constructor(nelem, names, range, defaultValue) {
         super(range, defaultValue);
@@ -646,21 +651,35 @@ export class VecEntry extends Type {
                     range="[${this.range[i]}]"
                     defaultValue="${this.defaultValue[i]}">
                 </${getEl("float-bar")}>
-            `));
+              `));
+              this.generate.push(false);
+              this.func.push(null);
+              this.params.push(null);
         }
 
         this.value = this.defaultValue;
 
         this.floats = Array.from(this.shadow.querySelectorAll(getEl("float-bar")));
-        for (let float of this.floats) {
+        for (let i = 0; i < this.nelem; i++) {
+            let float = this.floats[i]
             float.addEventListener('change', () => {
-                for (let i = 0; i < this.nelem; i++) {
-                    this.value[i] = this.floats[i].value;
-                }
+                this.value[i] = float.value;
                 this.dispatchEvent(new Event('change'));
+            });
+
+            float.addEventListener("function", () => {
+                this.generate[i] = float.generate;
+                this.func[i] = float.func;
+                this.params[i] = float.params;
+                this.dispatchEvent(new Event("function"));
             });
         }
     }
+
+  set_value(value, idx) {
+      this.value[idx] = value;
+      this.floats[idx].set_value(value);
+  }
 
     save() {
         const values = {}

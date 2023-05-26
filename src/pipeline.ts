@@ -25,10 +25,10 @@ export class Pipeline {
    adding_edge_input: [string | null, number | null];
    adding_edge_output: string | null;
 
-  constructor(ui_events: UIEventManager) {
+  constructor(ui_events: UIEventManager, svg: SVGSVGElement) {
     this.ui_events = ui_events;
 
-    this.svg = document.getElementById("synth-pipeline") as unknown as SVGSVGElement;
+    this.svg = svg;
     this.nodes = new Map<string, PipelineNode>();
     this.last_pos = {x: 50, y: 50}
     this.adding_edge = false;
@@ -87,7 +87,7 @@ export class Pipeline {
   }
 
   add(node_name: string, fn: string) {
-    const input_cnt = modules[fn].inputs.length;
+    const input_cnt = modules.modules[fn].inputs.length;
 
     this.last_pos.x = -Infinity;
     if (!this.nodes.size) {
@@ -479,7 +479,7 @@ export class Pipeline {
         const old_vec = updates.get(k);
         const new_vec = new_updates.get(k);
         const diff = Math.pow(old_vec.x - new_vec.x, 2) + Math.pow(old_vec.y - new_vec.y, 2);
-        console.log(diff);
+        // console.log(diff);
         if (diff > 0.001) {
           any_updates = true;
           break;

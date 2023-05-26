@@ -6,8 +6,12 @@
     <title>Video Synth</title>
   </head>
   <body>
-    <script type="module" src="./src/main.ts"></script>
-    <script type="module" src="./src/svg.ts"></script>
+    <script type="module">
+      import {main} from "./src/main.ts";
+      document.addEventListener("DOMContentLoaded", async () => {
+        main();
+      });
+    </script>
       <div class="burgerbtn" id="burgerbtn">
           <div class="burgermenu"></div>
           <div class="burgermenu"></div>
@@ -62,6 +66,7 @@
               <input id="name"></input>
               <br>
               <br>
+              <!--
               <label for="clock_speed">Clock speed: </label>
               <input
                   type="number"
@@ -73,7 +78,8 @@
               <br>
               <br>
               <h2> Render Dimensions </h2>
-              <!-- TODO
+
+              TODO
               <br>
               <label for="auto_dims_enable">Auto select resolution: </label>
               <input id="auto_dims_enable" type="checkbox" checked></input>
@@ -83,7 +89,6 @@
                   <label for="target_fps">Target FPS: </label>
                   <input type="number" id="target_fps" min="1" step="1"></input>
               </div>
-              -->
               <div id="render_dims">
                   <br>
                   <br>
@@ -109,7 +114,8 @@
               <h2> Audio </h2>
               <br>
               <button id="startaudio">Start audio capture</button>
-              <!-- TODO
+
+              TODO
               <label for="autosave_enable" style="display: none;">Autosave: </label>
               <input id="autosave" type="checkbox" style="display: none;"></input>
               <div id="autosave_opts" style="display: none;">

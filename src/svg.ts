@@ -1,4 +1,4 @@
-function makeDraggable(svg) {
+export function makeDraggable(svg) {
   svg.addEventListener('mousedown', startDrag);
   svg.addEventListener('mousemove', drag);
   svg.addEventListener('mouseup', endDrag);
@@ -78,11 +78,3 @@ function makeDraggable(svg) {
     panning = false
   }
 }
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const svg = document.getElementById("synth-pipeline");
-  if (!svg) {
-    throw new Error("!");
-  }
-  makeDraggable(svg);
-});
