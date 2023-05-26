@@ -63,7 +63,7 @@ export class Synth {
 
     this.functions = { };
 
-    this.ui_events.register_add_event(this.add_fn);
+    this.ui_events.register_add_event((fn) => { this.add_fn(fn); });
 
     this.ui_events.register_show_details((node_name, fn) => this.show_details(node_name, fn));
   }
@@ -165,6 +165,7 @@ export class Synth {
   }
 
   async add_fn(fn) {
+    console.log(this, this.module_to_counts);
     let count = this.module_to_counts.get(fn);
     if (!count) {
       count = 0;
