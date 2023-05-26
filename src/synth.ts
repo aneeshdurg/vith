@@ -2,7 +2,7 @@ import * as twgl from 'twgl.js'
 import * as common from './common'
 import * as modules from './module_list.json'
 import {Pipeline} from './pipeline.ts'
-import {UIEventManager, setupUI} from './ui.ts'
+import {UIEventManager} from './ui.ts'
 import {BoolEntry, FloatBar, IntEntry, VecEntry} from './input.js'
 
 export class Synth {

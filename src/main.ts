@@ -1,4 +1,3 @@
-import './style.css'
 import {UIEventManager, setupUI} from './ui.ts'
 import {makeDraggable} from "./svg.ts";
 import {Synth} from "./synth.ts";
@@ -35,3 +34,5 @@ export async function main () {
   };
   requestAnimationFrame(run);
 }
+
+export { Synth, UIEventManager }
