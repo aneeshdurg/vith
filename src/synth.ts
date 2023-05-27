@@ -3,7 +3,7 @@ import * as common from './common'
 import * as modules from './module_list.json'
 import {Pipeline} from './pipeline.ts'
 import {UIEventManager} from './ui.ts'
-import {BoolEntry, FloatBar, IntEntry, VecEntry} from './input.js'
+import {BoolEntry, FloatBar, IntEntry, VecEntry, generators} from './input.js'
 
 export class Synth {
   canvas: HTMLCanvasElement
@@ -287,13 +287,13 @@ export class Synth {
         if (Array.isArray(generate)) {
           for (let i = 0; i < generate.length; i++) {
             if (generate[i]) {
-              const value = fn[i](t, fn_params[i], null);
+              const value = generators[fn[i]].func(t, fn_params[i].range, fn_params[i]);
               new_param[i] = value;
               element?.set_value(value, i);
             }
           }
         } else if (generate) {
-          new_param = fn(t, fn_params, null);
+          new_param = generators[fn].func(t, fn_params.range, fn_params);
           element?.set_value(new_param);
         }
 

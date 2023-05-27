@@ -1,5 +1,11 @@
 class GenParams {
     params = {}
+    range = null
+
+    constructor(range) {
+      this.range = range;
+    }
+
     get() {
         return this.params;
     }
@@ -224,7 +230,7 @@ const audioUI = (function_ui, params) => {
     });
 };
 
-const generators = {
+export const generators = {
     sin: { func: sin_generator, params: DefaultParams, ui: defaultFnUI },
     step: { func: step_generator, params: DefaultParams, ui: defaultFnUI },
     inv_step: { func: inv_step_generator, params: DefaultParams, ui: defaultFnUI },
@@ -257,7 +263,7 @@ export class FunctionGenerator{
         this.draw_axes();
 
         this.func = generators[current].func;
-        this.params = current_params || new generators[current].params();
+        this.params = current_params || new generators[current].params([0, 1]);
         console.log("Using params", this.params);
 
         const function_ui = document.createElement('div');
@@ -541,8 +547,8 @@ export class FloatBar extends Type {
 
         this.generate = false;
         const set_func = () => {
-            this.func = (t, params, ctx) => generators[this.func_select.value].func(t, this.range, params, ctx);
-            this.params = new generators[this.func_select.value].params();
+            this.func = this.func_select.value;
+            this.params = new generators[this.func_select.value].params(this.range);
         };
         set_func();
 
@@ -605,7 +611,7 @@ export class FloatBar extends Type {
 
         if (data.generate) {
             this.func_select.value = data.func;
-            this.params = new generators[this.func_select.value].params();
+            this.params = new generators[this.func_select.value].params(this.range);
             this.params.load(data.params);
 
             this.func = (t, params, ctx) => generators[this.func_select.value].func(t, this.range, params, ctx);
