@@ -63,7 +63,7 @@ export class Synth {
 
     this.functions = { };
 
-    this.ui_events.register_add_event((fn) => { this.add_fn(fn); });
+    this.ui_events.register_add_event((fn) => { this.add_fn(fn, null); });
 
     this.ui_events.register_show_details((node_name, fn) => this.show_details(node_name, fn));
   }
@@ -164,7 +164,7 @@ export class Synth {
     } catch (e) {}
   }
 
-  async add_fn(fn) {
+  async add_fn(fn, name) {
     console.log(this, this.module_to_counts);
     let count = this.module_to_counts.get(fn);
     if (!count) {
@@ -172,7 +172,9 @@ export class Synth {
     }
     this.module_to_counts.set(fn, count + 1);
 
-    const name = `${fn}${count}`
+    if (!name) {
+      name = `${fn}${count}`
+    }
     this.pipeline.add(name, fn);
 
     for (let param of modules.modules[fn].params) {
@@ -211,6 +213,10 @@ export class Synth {
         el.addEventListener("function", () => {
           this.functions[name] = [el.generate, el.func, el.params];
         });
+
+        if (this.functions[name]) {
+          el.set_generated(this.functions[name][0]);
+        }
 
         this.active_params.set(name, el);
       };
@@ -299,5 +305,49 @@ export class Synth {
 
         this.params[name] = new_param;
       }
+  }
+
+  save() {
+    const state = {
+      params: this.params,
+      functions: this.functions,
+      stages: {},
+      module_to_counts: {},
+    };
+    for (let node of this.pipeline.get_nodes()) {
+      const fn = this.pipeline.get_fn(node);
+      const inputs = this.pipeline.get_inputs(node);
+      state.stages[node] = { "module": fn, "inputs": inputs };
+    }
+
+    this.module_to_counts.forEach((v, k) => {
+      if (v > 0) {
+        state.module_to_counts[k] = v;
+      }
+    });
+
+    return JSON.stringify(state);
+  }
+
+  async load(state) {
+    // TODO fix dimensions and clear out existing pipeline
+    for (let node of Object.getOwnPropertyNames(state.stages)) {
+      const fn = state.stages[node].module;
+      await this.add_fn(fn, node);
+    }
+
+    for (let node of Object.getOwnPropertyNames(state.stages)) {
+      const inputs = state.stages[node].inputs;
+      for (let i = 0; i < inputs.length; i++) {
+        if (inputs[i]) {
+          this.pipeline.create_edge(inputs[i], node, i);
+        }
+      }
+    }
+
+    this.params = state.params
+    // Need to turn params back into GenParams
+    this.functions = state.functions
+    await this.pipeline.organize();
   }
 }

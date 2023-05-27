@@ -234,7 +234,7 @@ export const generators = {
     sin: { func: sin_generator, params: DefaultParams, ui: defaultFnUI },
     step: { func: step_generator, params: DefaultParams, ui: defaultFnUI },
     inv_step: { func: inv_step_generator, params: DefaultParams, ui: defaultFnUI },
-    audio: { func: audio_generator, params: AudioDefaultParams, ui: audioUI }
+  // audio: { func: audio_generator, params: AudioDefaultParams, ui: audioUI }
 }
 
 export class FunctionGenerator{
@@ -263,7 +263,7 @@ export class FunctionGenerator{
         this.draw_axes();
 
         this.func = generators[current].func;
-        this.params = current_params || new generators[current].params([0, 1]);
+        this.params = current_params || new generators[current].params();
         console.log("Using params", this.params);
 
         const function_ui = document.createElement('div');
@@ -397,15 +397,6 @@ export class Type extends HTMLElement {
             this.defaultValue =  eval(this.getAttribute("defaultValue"))
         this.shadow = this.attachShadow({mode: 'open'});
     }
-
-    save() {
-        return undefined;
-    }
-
-    load() {
-    }
-
-    step(time, synth) { }
 }
 
 export class BoolEntry extends Type {
@@ -426,12 +417,6 @@ export class BoolEntry extends Type {
 
     save() {
         return this.value;
-    }
-
-    load(data) {
-        this.value = data;
-        this.input.checked = data;
-        this.dispatchEvent(new Event('change'));
     }
 }
 defineEl('bool-entry', BoolEntry);
@@ -492,6 +477,11 @@ export class FloatBar extends Type {
         this.dispatchEvent(new Event('change'));
     }
 
+    set_generated() {
+      this.generated = true;
+      this.func_gen.checked = true;
+    }
+
     constructor(range, defaultValue, supressFunctionGen) {
         super(range, defaultValue);
 
@@ -549,6 +539,7 @@ export class FloatBar extends Type {
         const set_func = () => {
             this.func = this.func_select.value;
             this.params = new generators[this.func_select.value].params(this.range);
+            this.dispatchEvent(new Event("function"));
         };
         set_func();
 
@@ -581,44 +572,6 @@ export class FloatBar extends Type {
 
         if (supressFunctionGen)
             funcgen_container.style.display = "none";
-    }
-
-    step(time, synth) {
-        this.synth = synth;
-        if (this.generate)
-            this.set_value(this.func(time, this.range, this.params, synth));
-    }
-
-    save() {
-        const savedata = {
-            value: this.value,
-        }
-
-        if (this.generate) {
-            savedata.generate = this.generate;
-            savedata.func = this.func_select.value;
-            savedata.params = this.params.save();
-        } else {
-            savedata.generate = false;
-        }
-        return savedata;
-    }
-
-    load(data) {
-        if (data === undefined)
-            return;
-        this.set_value(data.value);
-
-        if (data.generate) {
-            this.func_select.value = data.func;
-            this.params = new generators[this.func_select.value].params(this.range);
-            this.params.load(data.params);
-
-            this.func = (t, params, ctx) => generators[this.func_select.value].func(t, this.range, params, ctx);
-            this.func_gen.checked = true;
-
-            this.generate = true;
-        }
     }
 }
 defineEl('float-bar', FloatBar);
@@ -682,32 +635,16 @@ export class VecEntry extends Type {
         }
     }
 
-  set_value(value, idx) {
-      this.value[idx] = value;
-      this.floats[idx].set_value(value);
-  }
-
-    save() {
-        const values = {}
-        for (let i = 0; i < this.nelem; i++) {
-            values[this.names[i]] = this.floats[i].save();
-        }
-        return values;
+    set_value(value, idx) {
+        this.value[idx] = value;
+        this.floats[idx].set_value(value);
     }
 
-    load(data) {
-        if (data === undefined)
-            return;
-        for (let name of Object.keys(data)) {
-            const i = this.names.indexOf(name);
-            this.floats[i].load(data[name]);
-        }
-    }
-
-    step(time, synth) {
-        this.synth = synth;
-        for (let i = 0; i < this.nelem; i++)
-            this.floats[i].step(time, synth);
+    set_generated(generated) {
+      for (let i = 0; i < this.nelem; i++) {
+        this.generated = generated[i];
+        this.func_gen.checked = generated[i];
+      }
     }
 }
 defineEl('vec-entry', VecEntry);

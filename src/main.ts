@@ -21,18 +21,22 @@ export async function main () {
   const m0 = await synth.add_fn("mix");
   synth.pipeline.create_edge(z0, m0, 0);
   synth.pipeline.create_edge(p0, m0, 1);
+  const r0 = await synth.add_fn("rotate");
+  synth.pipeline.create_edge(m0, r0, 0);
   await synth.pipeline.organize();
   synth.params["polygon0_color"] = [1, 1, 1];
   synth.params["zoom0_x"] = 0.75;
   synth.params["zoom0_y"] = 0.75;
-  ui_events.recompile("mix0")
-  ui_events.show_details("polygon0", "polygon");
+  ui_events.recompile(r0)
+  ui_events.show_details(r0, "rotate");
 
   const run = (t) => {
     synth.step(t);
     requestAnimationFrame(run);
   };
   requestAnimationFrame(run);
+
+  (window as any).synth = synth;
 }
 
 export { Synth, UIEventManager }
