@@ -492,4 +492,14 @@ export class Pipeline {
       await new Promise((r) => { setTimeout(r, 1); });
     }
   }
+
+  clear() {
+    this.nodes = new Map<string, PipelineNode>();
+    this.last_pos = {x: 50, y: 50}
+    this.adding_edge = false;
+    this.adding_edge_input = [null, null];
+    this.adding_edge_output = null;
+
+    this.svg.innerHTML = "";
+  }
 }

@@ -30,13 +30,26 @@ export async function main () {
   ui_events.recompile(r0)
   ui_events.show_details(r0, "rotate");
 
+  let stop = null;
   const run = (t) => {
     synth.step(t);
+    if (stop) {
+      stop();
+      return;
+    }
     requestAnimationFrame(run);
   };
   requestAnimationFrame(run);
 
   (window as any).synth = synth;
+  (window as any).stop_synth = () => {
+    return new Promise(r => {
+      stop = r;
+    });
+  };
+  (window as any).start_synth = () => {
+    requestAnimationFrame(run);
+  };
 }
 
 export { Synth, UIEventManager }

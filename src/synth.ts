@@ -3,7 +3,7 @@ import * as common from './common'
 import * as modules from './module_list.json'
 import {Pipeline} from './pipeline.ts'
 import {UIEventManager} from './ui.ts'
-import {BoolEntry, FloatBar, IntEntry, VecEntry, generators} from './input.js'
+import {BoolEntry, FloatBar, IntEntry, VecEntry, generators, GenParams} from './input.js'
 
 export class Synth {
   canvas: HTMLCanvasElement
@@ -330,7 +330,13 @@ export class Synth {
   }
 
   async load(state) {
-    // TODO fix dimensions and clear out existing pipeline
+    this.pipeline.clear();
+
+    this.module_to_counts.forEach((_v, k) => {
+      this.module_to_counts.set(k, 0);
+    });
+
+    // TODO fix dimensions if changed
     for (let node of Object.getOwnPropertyNames(state.stages)) {
       const fn = state.stages[node].module;
       await this.add_fn(fn, node);
@@ -346,8 +352,18 @@ export class Synth {
     }
 
     this.params = state.params
-    // Need to turn params back into GenParams
     this.functions = state.functions
+    for (let fn of Object.getOwnPropertyNames(this.functions)) {
+      const fn_desc = this.functions[fn];
+      if (fn_desc) {
+        const gen_params = fn_desc[2];
+        this.functions[fn][2] = new GenParams(gen_params.range);
+        this.functions[fn][2].load(gen_params.params);
+      }
+    }
+
     await this.pipeline.organize();
+    const container = <HTMLElement>document.getElementById("fn-details");
+    container.innerHTML = "";
   }
 }

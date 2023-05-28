@@ -1,4 +1,4 @@
-class GenParams {
+export class GenParams {
     params = {}
     range = null
 
