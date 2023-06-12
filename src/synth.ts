@@ -4,6 +4,7 @@ import * as modules from './module_list.json'
 import {Pipeline} from './pipeline.ts'
 import {UIEventManager} from './ui.ts'
 import {BoolEntry, FloatBar, IntEntry, VecEntry, generators, GenParams} from './input.js'
+import * as custom from './customElements.js'
 
 export class Synth {
   canvas: HTMLCanvasElement
@@ -179,7 +180,11 @@ export class Synth {
 
     for (let param of modules.modules[fn].params) {
       const pname = `${name}_${param.name}`;
-      this.params[pname] = param.info.default;
+      if (param.info) {
+        this.params[pname] = param.info.default;
+      } else {
+        this.params[pname] = custom.elements[`${fn}-${param.name}`].default(this.gl);
+      }
       this.functions[pname] = null;
     }
 
@@ -256,6 +261,11 @@ export class Synth {
           container.appendChild(subcontainer);
 
           setupElement(el, subcontainer);
+          break;
+        }
+        case null: {
+          const el = new custom.elements[`${fn}-${param.name}`](current_value, this.gl);
+          setupElement(el, container);
           break;
         }
         default: {

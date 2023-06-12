@@ -355,7 +355,7 @@ const __suffix = window.globalsuffix;
 
 const getEl = (name) => name + (__suffix || "");
 
-const defineEl = (name, class_) => {
+export function defineEl(name, class_) {
     customElements.define(getEl(name), class_);
 }
 
@@ -697,4 +697,3 @@ export class ChannelSelect extends Type {
     }
 }
 defineEl('channel-select', ChannelSelect);
-

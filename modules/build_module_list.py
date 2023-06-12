@@ -33,15 +33,17 @@ for f in os.listdir():
 
         true = True
         false = False
+        custom_type = info.strip() == "custom"
         param = {
             "name": name,
-            "type": type_,
-            "info": json.loads(info)
+            "type": type_ if not custom_type else None,
+            "info": json.loads(info) if not custom_type else None
         }
 
-        for k, v in param["info"].items():
-            if isinstance(v, str):
-                param["info"][k] = eval(v)
+        if not custom_type:
+            for k, v in param["info"].items():
+                if isinstance(v, str):
+                    param["info"][k] = eval(v)
         params.append(param)
 
     module_list[f.split('.')[0]] = {
