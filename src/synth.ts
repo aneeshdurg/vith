@@ -21,6 +21,9 @@ export class Synth {
   functions: object
   active_params: Map<string, any>;
 
+  webcam_sources: Map<string, HTMLVideoElement>;
+  webcam_listeners: Map<string, string>;
+
   constructor(
     canvas: HTMLCanvasElement,
     dimensions: [number, number],
@@ -64,9 +67,15 @@ export class Synth {
 
     this.functions = { };
 
-    this.ui_events.register_add_event((fn) => { this.add_fn(fn, null); });
+    this.webcam_sources = new Map<string, HTMLVideoElement>();
+    this.webcam_listeners = new Map<string, string>();
 
-    this.ui_events.register_show_details((node_name, fn) => this.show_details(node_name, fn));
+    this.ui_events.register_add_event((fn) => { this.add_fn(fn, null); });
+    this.ui_events.register_show_details(this.show_details.bind(this));
+    this.ui_events.register_get_webcam_feed(this.get_webcam_feed.bind(this));
+    this.ui_events.register_list_webcam_sources(this.list_webcam_sources.bind(this));
+    this.ui_events.register_add_webcam_feed(this.add_webcam_feed.bind(this));
+    this.ui_events.register_remove_webcam_feed(this.remove_webcam_feed.bind(this));
   }
 
   step(t: number) {
@@ -178,6 +187,10 @@ export class Synth {
     }
     this.pipeline.add(name, fn);
 
+    if (modules.modules[fn].custom_module) {
+      // custom initialization routine?
+    }
+
     for (let param of modules.modules[fn].params) {
       const pname = `${name}_${param.name}`;
       if (param.info) {
@@ -217,6 +230,10 @@ export class Synth {
 
         el.addEventListener("function", () => {
           this.functions[name] = [el.generate, el.func, el.params];
+        });
+
+        el.addEventListener("webcam", () => {
+          this.webcam_listeners.set(name, el.source);
         });
 
         if (this.functions[name]) {
@@ -264,7 +281,7 @@ export class Synth {
           break;
         }
         case null: {
-          const el = new custom.elements[`${fn}-${param.name}`](current_value, this.gl);
+          const el = new custom.elements[`${fn}-${param.name}`](current_value, this.gl, this.ui_events);
           setupElement(el, container);
           break;
         }
@@ -314,7 +331,17 @@ export class Synth {
         }
 
         this.params[name] = new_param;
+    }
+
+    for (let name of this.webcam_listeners.keys()) {
+      const feed = this.get_webcam_feed(this.webcam_listeners.get(name));
+      const dimensions = [feed.videoWidth, feed.videoHeight];
+      if (this.params[name] == null) {
+        const tex = common.createTexture(this.gl, dimensions)
+        this.params[name] = tex;
       }
+      common.updateTexture(this.gl, dimensions, this.params[name], feed);
+    }
   }
 
   save() {
@@ -376,4 +403,22 @@ export class Synth {
     const container = <HTMLElement>document.getElementById("fn-details");
     container.innerHTML = "";
   }
+
+  get_webcam_feed(feedname: string) {
+    return this.webcam_sources.get(feedname);
+  }
+
+  list_webcam_sources() {
+    return this.webcam_sources.keys();
+  }
+
+  add_webcam_feed(feedname: string, feedsource: HTMLVideoElement) {
+    console.log("!!!");
+    return this.webcam_sources.set(feedname, feedsource);
+  }
+
+  remove_webcam_feed(feedname: string) {
+    return this.webcam_sources.remove(feedname);
+  }
+
 }

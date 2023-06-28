@@ -5,6 +5,10 @@ export class UIEventManager {
   _show_details: ((node: string, fn: string) => null) | null = null;
   _recompile: ((node_to_render: string | null) => null) | null = null;
   _organize: (() => null) | null = null;
+  _get_webcam_feed: ((id: string) => any) | null = null;
+  _list_webcam_sources: ((id: string) => any) | null = null;
+  _add_webcam_feed: ((id: string, feed: HTMLVideoElement) => null) | null = null;
+  _remove_webcam_feed: ((id: string) => null) | null = null;
 
   add_event(fn: string) {
     if (this._add_event) {
@@ -45,6 +49,46 @@ export class UIEventManager {
   register_organize(cb) {
     this._organize = cb;
   }
+
+  register_get_webcam_feed(cb) {
+    this._get_webcam_feed = cb;
+  }
+
+  register_list_webcam_sources(cb) {
+    this._list_webcam_sources = cb;
+  }
+
+  register_add_webcam_feed(cb) {
+    this._add_webcam_feed = cb;
+  }
+
+  register_remove_webcam_feed(cb) {
+    this._remove_webcam_feed = cb;
+  }
+
+  get_webcam_feed(feedname: string) {
+    if (this._get_webcam_feed) {
+      this._get_webcam_feed(feedname);
+    }
+  }
+
+  list_webcam_sources() {
+    if (this._list_webcam_sources) {
+      return this._list_webcam_sources();
+    }
+  }
+
+  add_webcam_feed(feedname: string, feedsource: HTMLVideoElement) {
+    if (this._add_webcam_feed) {
+      this._add_webcam_feed(feedname, feedsource);
+    }
+  }
+
+  remove_webcam_feed(feedname: string) {
+    if (this._remove_webcam_feed) {
+      this._remove_webcam_feed(feedname);
+    }
+  }
 }
 
 function setupSidebars() {
@@ -84,6 +128,92 @@ function setupSidebars() {
 
 }
 
+async function setupWebcamInput(ui_manager: UIEventManager) {
+  const sources = document.getElementById("webcamsources") as HTMLElement;
+  let devices = undefined;
+  try {
+      devices = await navigator.mediaDevices.enumerateDevices();
+  } catch (err) {
+      alert("Error initializing webcam!");
+      throw err;
+  }
+
+
+  devices = devices.filter(d => d.kind === "videoinput");
+  console.log(devices);
+
+  const container = document.createElement("div");
+
+  container.innerHTML = `<label for="webcamSelector">Choose a webcam: </label>`
+  const selector = document.createElement("select");
+  selector.id = "webcamSelector";
+  devices.forEach(device => {
+      const entry = document.createElement("option");
+      entry.value = device.deviceId;
+      entry.innerHTML = device.label || device.deviceId.substr(0, 10);
+      selector.appendChild(entry)
+  });
+  container.appendChild(selector);
+  sources.appendChild(container);
+
+  const feeds = document.getElementById("webcamfeeds") as HTMLElement;
+  const button = document.getElementById("startwebcam") as HTMLButtonElement;
+  async function setup() {
+    const container = document.createElement("div");
+
+    const video = document.createElement("video");
+
+    let needsUpdate = false;
+    const deviceId = selector.value;
+    video.id = deviceId;
+
+    if (ui_manager.get_webcam_feed(deviceId)) {
+      alert(`Webcam feed for ${deviceId} already exists`);
+      return;
+    }
+
+    const constraints = {
+        video: { deviceId: deviceId }
+    }
+
+    try {
+        if (video.srcObject) {
+            const stream = video.srcObject;
+            stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+            video.srcObject = null;
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+        video.play();
+        needsUpdate = true;
+    } catch (err) {
+        alert("Error initializing webcam! " + err);
+        console.log(err);
+    }
+
+    video.style.width = "25%";
+    container.appendChild(document.createElement("br"));
+    container.appendChild(video);
+    container.appendChild(document.createElement("br"));
+    container.appendChild(document.createElement("br"));
+    ui_manager.add_webcam_feed(deviceId, video);
+
+    const removeFeed = document.createElement("button");
+    removeFeed.innerText = "Remove feed";
+    removeFeed.onclick = () => {
+      container.remove();
+      ui_manager.remove_webcam_feed(deviceId);
+    };
+    container.appendChild(removeFeed);
+
+    feeds.appendChild(container);
+  }
+  button.onclick = setup;
+}
+
 function setupControls(ui_manager: UIEventManager) {
   const add_new_stage = document.getElementById("add_new_stage_select") as HTMLSelectElement;
   if (!add_new_stage) {
@@ -116,4 +246,5 @@ function setupControls(ui_manager: UIEventManager) {
 export function setupUI(ui_manager: UIEventManager) {
   setupSidebars();
   setupControls(ui_manager);
+  setupWebcamInput(ui_manager);
 }
