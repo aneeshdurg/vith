@@ -6,7 +6,7 @@ export class UIEventManager {
   _recompile: ((node_to_render: string | null) => null) | null = null;
   _organize: (() => null) | null = null;
   _get_webcam_feed: ((id: string) => any) | null = null;
-  _list_webcam_sources: ((id: string) => any) | null = null;
+  _list_webcam_sources: (() => any) | null = null;
   _add_webcam_feed: ((id: string, feed: HTMLVideoElement) => null) | null = null;
   _remove_webcam_feed: ((id: string) => null) | null = null;
 
@@ -66,10 +66,11 @@ export class UIEventManager {
     this._remove_webcam_feed = cb;
   }
 
-  get_webcam_feed(feedname: string) {
+  get_webcam_feed(feedname: string): HTMLVideoElement | null {
     if (this._get_webcam_feed) {
-      this._get_webcam_feed(feedname);
+      return this._get_webcam_feed(feedname);
     }
+    return null;
   }
 
   list_webcam_sources() {
@@ -130,7 +131,7 @@ function setupSidebars() {
 
 async function setupWebcamInput(ui_manager: UIEventManager) {
   const sources = document.getElementById("webcamsources") as HTMLElement;
-  let devices = undefined;
+  let devices: MediaDeviceInfo[];
   try {
       devices = await navigator.mediaDevices.enumerateDevices();
   } catch (err) {
@@ -163,7 +164,6 @@ async function setupWebcamInput(ui_manager: UIEventManager) {
 
     const video = document.createElement("video");
 
-    let needsUpdate = false;
     const deviceId = selector.value;
     video.id = deviceId;
 
@@ -177,18 +177,9 @@ async function setupWebcamInput(ui_manager: UIEventManager) {
     }
 
     try {
-        if (video.srcObject) {
-            const stream = video.srcObject;
-            stream.getTracks().forEach(function(track) {
-                track.stop();
-            });
-            video.srcObject = null;
-        }
-
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
         video.play();
-        needsUpdate = true;
     } catch (err) {
         alert("Error initializing webcam! " + err);
         console.log(err);

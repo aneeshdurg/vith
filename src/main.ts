@@ -34,7 +34,7 @@ export async function main () {
   };
   await setup_initial_state();
 
-  let stop = null;
+  let stop: (() => void) | null = null;
   const run = (t) => {
     synth.step(t);
     if (stop) {
@@ -48,7 +48,7 @@ export async function main () {
   (window as any).synth = synth;
   (window as any).stop_synth = () => {
     return new Promise(r => {
-      stop = r;
+      stop = () => { r(null); };
     });
   };
   (window as any).start_synth = () => {

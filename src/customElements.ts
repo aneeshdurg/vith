@@ -1,7 +1,28 @@
 import * as common from './common'
-import {defineEl, Type} from './input.js'
+import {defineEl} from './input.js'
+
+class Type extends HTMLElement {
+    name = ""
+    range = []
+    defaultValue: any = 0
+    shadow: ShadowRoot;
+    value: any = 0
+
+    constructor(range, defaultValue) {
+        super();
+        this.range = range;
+        if (this.range === null || this.range === undefined)
+            this.range = eval(this.getAttribute("range") || "null");
+        this.defaultValue = defaultValue;
+        if (this.defaultValue === null || this.defaultValue === undefined)
+            this.defaultValue =  eval(this.getAttribute("defaultValue") || "null")
+        this.shadow = this.attachShadow({mode: 'open'});
+    }
+}
 
 class ReduceColorsData extends Type {
+  gl: any
+
   static generate_colors(tex: any, gl: any) {
     const data = new Float32Array(4 * 256);
     // console.log("Regenerating", this.count);
@@ -17,29 +38,32 @@ class ReduceColorsData extends Type {
     return tex;
   }
 
-  constructor(value, gl, ui_manager) {
+  constructor(value, gl, _ui_manager) {
     super([], value);
     this.value = value;
     this.gl = gl;
 
-    this.el = document.createElement("div");
+    const el = document.createElement("div");
     const btn = document.createElement("button");
     btn.addEventListener('click', () => {
         ReduceColorsData.generate_colors(this.value, this.gl);
         this.dispatchEvent(new Event('change'));
     });
     btn.innerText = "Re-pick colors";
-    this.el.appendChild(btn);
+    el.appendChild(btn);
 
     // TODO add a ui to edit colors individually
 
-    this.shadow.appendChild(this.el);
+    this.shadow.appendChild(el);
   }
 }
 defineEl('reduce_colors-data', ReduceColorsData);
 
 class WebcamSource extends Type {
-  static default(gl: any) {
+  gl: any;
+  source: string | null = null;
+
+  static default(_gl: any) {
     return null;
   }
 
@@ -51,8 +75,8 @@ class WebcamSource extends Type {
     const devices = ui_manager.list_webcam_sources();
     console.log(devices, ui_manager);
 
-    this.el = document.createElement("div");
-    this.el.innerHTML = `<label for="webcamSelector">Choose a webcam: </label>`
+    const el = document.createElement("div");
+    el.innerHTML = `<label for="webcamSelector">Choose a webcam: </label>`
     const selector = document.createElement("select");
     selector.id = "webcamSelector";
     for (let deviceId of devices) {
@@ -61,7 +85,7 @@ class WebcamSource extends Type {
         entry.innerHTML = deviceId.substr(0, 10);
         selector.appendChild(entry)
     }
-    this.el.appendChild(selector);
+    el.appendChild(selector);
 
     const btn = document.createElement("button");
     btn.innerText = "Select";
@@ -70,9 +94,9 @@ class WebcamSource extends Type {
       this.dispatchEvent(new Event('change'));
       this.dispatchEvent(new Event('webcam'));
     };
-    this.el.appendChild(btn);
+    el.appendChild(btn);
 
-    this.shadow.appendChild(this.el);
+    this.shadow.appendChild(el);
   }
 }
 defineEl('webcam-src', WebcamSource);

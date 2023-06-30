@@ -174,7 +174,7 @@ export class Synth {
     } catch (e) {}
   }
 
-  async add_fn(fn, name) {
+  async add_fn(fn, name?) {
     console.log(this, this.module_to_counts);
     let count = this.module_to_counts.get(fn);
     if (!count) {
@@ -333,15 +333,15 @@ export class Synth {
         this.params[name] = new_param;
     }
 
-    for (let name of this.webcam_listeners.keys()) {
-      const feed = this.get_webcam_feed(this.webcam_listeners.get(name));
+    this.webcam_listeners.forEach((listener, name) => {
+      const feed = <HTMLVideoElement>this.get_webcam_feed(listener);
       const dimensions = [feed.videoWidth, feed.videoHeight];
       if (this.params[name] == null) {
         const tex = common.createTexture(this.gl, dimensions)
         this.params[name] = tex;
       }
       common.updateTexture(this.gl, dimensions, this.params[name], feed);
-    }
+    });
   }
 
   save() {
@@ -418,7 +418,7 @@ export class Synth {
   }
 
   remove_webcam_feed(feedname: string) {
-    return this.webcam_sources.remove(feedname);
+    return this.webcam_sources.delete(feedname);
   }
 
 }
