@@ -5,7 +5,7 @@ import math
 
 module_list = {}
 for f in os.listdir():
-    if not f.endswith(".frag.c") or f == "template.frag.c":
+    if not f.endswith(".glsl") or f == "template.glsl":
         continue
 
     inputs = set()
@@ -53,4 +53,4 @@ for f in os.listdir():
     }
 
 with open("module_list.json", "w") as out:
-    json.dump({"modules": module_list, "template": open("template.frag.c").read()}, out)
+    json.dump({"modules": module_list, "template": open("template.glsl").read()}, out)
