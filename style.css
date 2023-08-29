@@ -1,0 +1,119 @@
+body {
+    font-family: sans-serif;
+    background: #000000ff;
+}
+
+.sidebar {
+    height: 98%;
+    width: 50%;
+    overflow: auto;
+    border: solid 2px;
+    position: absolute;
+    background: #2b2b2b70;
+    color: white
+}
+
+.rightsidebar {
+    height: 98%;
+    width: 50%;
+    overflow: auto;
+    border: solid 2px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    background: #2b2b2b70;
+    color: white
+}
+
+.ui {
+    padding: 0.5em;
+}
+
+.display-container {
+    height: 100%;
+    width: 100%;
+    /*text-align: center;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.functiongen {
+    background: #2b2b2b;
+    color: white;
+
+    position: fixed;
+    left: 25%;
+    width: 50%;
+    top: 10%;
+    height: 80%;
+
+    border: solid 1px;
+    padding: 0.5em;
+    text-align: center;
+
+    overflow: auto;
+}
+
+.function-ui {
+    text-align: left;
+    width: 80%;
+    display: inline-block;
+}
+
+canvas {
+    height: 100%;
+    display: inline;
+    border: solid 1px white;
+    border-radius: 25px;
+}
+
+.functioncanvas {
+    width: 80%;
+    height: 25%;
+}
+
+.controls-next {
+    float: right;
+}
+
+.controls-prev {
+    float: left;
+}
+
+.create-module-ui {
+    border: solid 1px;
+    padding: 1em;
+}
+
+.create-module-selection {
+    border: solid 1px;
+    padding: 1em;
+}
+
+.errors {
+    color: red;
+}
+
+.burgermenu {
+  width: 35px;
+  height: 5px;
+  background-color: white;
+  margin: 6px 0;
+}
+
+.burgerbtn {
+    position: absolute;
+}
+
+.gearbtn {
+    color: white;
+    font-size: 3em;
+    position: absolute;
+    right: 1px;
+    top: 0px;
+}
+
+div {
+    border-radius: 25px;
+}

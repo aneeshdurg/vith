@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Synth</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="manifest" href="vith.webmanifest" />
+    <link rel="icon" href="icons/icon512x512.png" />
+  </head>
+  <body>
+    <script type="module">
+      import {main} from "./video-synth.js";
+      document.addEventListener("DOMContentLoaded", main);
+    </script>
+      <div class="burgerbtn" id="burgerbtn">
+          <div class="burgermenu"></div>
+          <div class="burgermenu"></div>
+          <div class="burgermenu"></div>
+      </div>
+      <div class="sidebar" id="sidebar">
+          <div id="ui" class="ui">
+              <h1 id="title" class="title">Video Synthesizer</h1>
+              <div id="controls">
+                  <button id="hide-controls">hide</button>
+                  <br>
+                  <div id ="controls-0">
+                      <h2> Add new stage </h2>
+                      <div>
+                          <select id="add_new_stage_select"></select>
+                          <button id="add_new_stage">Add</button>
+                          <br>
+                          <button id="organize">Fix Layout</button>
+                      </div>
+                      <br>
+                  </div>
+              </div>
+              <br>
+              <hr>
+              <br>
+              <div id="ui-container">
+                  <div id="ui-0">
+                    <svg
+                        id="synth-pipeline"
+                        viewBox="0 0 1000 250"
+                        style="background: rgba(255, 255, 255, 0.5)">
+                    </svg>
+                  </div>
+                  <div id="fn-details" style="padding: 1em">
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="display-container" id="display-container">
+          <canvas id="glcanvas"></canvas>
+      </div>
+      <div class="gearbtn" id="gearbtn">
+          &#9881;
+      </div>
+      <div class="rightsidebar" id="rightsidebar">
+          <div id="ui" class="ui">
+              <h1 id="settingstitle" class="title">Settings</h1>
+              <hr>
+              <h2> General </h2>
+              <br>
+              <label for="name">Project Name: </label>
+              <input id="name"></input>
+              <br>
+              <br>
+              <h2> Webcam </h2>
+              <br>
+              <div id="webcamsources"></div>
+              <button id="startwebcam">Add Webcam source</button>
+              <br>
+              <div id="webcamfeeds"></div>
+
+              <!--
+              <label for="clock_speed">Clock speed: </label>
+              <input
+                  type="number"
+                  id="clock_speed"
+                  min="0"
+                  value="1"
+                  step="0.01"
+              ></input>
+              <br>
+              <br>
+              <h2> Render Dimensions </h2>
+
+              TODO
+              <br>
+              <label for="auto_dims_enable">Auto select resolution: </label>
+              <input id="auto_dims_enable" type="checkbox" checked></input>
+              <div id="target_fps_container">
+                  <br>
+                  <br>
+                  <label for="target_fps">Target FPS: </label>
+                  <input type="number" id="target_fps" min="1" step="1"></input>
+              </div>
+              <div id="render_dims">
+                  <br>
+                  <br>
+                  <label for="render_width">Width: </label>
+                  <input
+                      type="number"
+                      id="render_width"
+                      min="1"
+                      value="1000"
+                      step="1"
+                  ></input>
+                  <br>
+                  <br>
+                  <label for="render_height">Height: </label>
+                  <input
+                      type="number"
+                      id="render_height"
+                      min="1"
+                      value="1000"
+                      step="1"
+                  ></input>
+              </div>
+              <h2> Audio </h2>
+              <br>
+              <button id="startaudio">Start audio capture</button>
+
+              TODO
+              <label for="autosave_enable" style="display: none;">Autosave: </label>
+              <input id="autosave" type="checkbox" style="display: none;"></input>
+              <div id="autosave_opts" style="display: none;">
+                  <label for="autosave_freq">Autosave Frequency (seconds): </label>
+                  <input
+                      type="number"
+                      id="autosave_freq"
+                      min="1"
+                      value="5"
+                  ></input>
+                  <br>
+                  <h2> WARNING THIS SETTING CAN DELETE AUTOSAVES!!! </h2>
+                  <label for="global_autosave_limit">Global autosave limit: </label>
+                  <input
+                      type="number"
+                      id="global_autosave_limit"
+                      min="1"
+                      value="10"
+                  ></input>
+
+              </div>
+              -->
+          </div>
+      </div>
+  </body>
+</html>

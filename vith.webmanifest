@@ -1,0 +1,53 @@
+{
+  "name": "VITH - VIdeo synTHesizer",
+  "short_name": "VITH",
+  "description": "Video Synthesizer App",
+  "theme_color": "#2b2b2b",
+  "background_color": "#2b2b2b",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "scope": "/vith",
+  "start_url": "/vith/index.html",
+  "icons": [
+    {
+      "src": "/vith/icons/icon144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/vith/icons/icon72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/vith/icons/icon192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/vith/icons/icon128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/vith/icons/icon96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/vith/icons/icon152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/vith/icons/icon512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/vith/icons/icon384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    }
+  ]
+}
