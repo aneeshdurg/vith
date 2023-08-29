@@ -1,5 +1,5 @@
 import * as modules from './module_list.json'
-import {UIEventManager} from './ui.ts'
+import { UIEventManager } from './ui.ts'
 
 type PipelineNode = {
   fn: string,
@@ -17,20 +17,20 @@ const rect_height = rect_width * 3 / 4;
 const io_port_width = rect_width / 20;
 
 export class Pipeline {
-   ui_events: UIEventManager;
-   svg: SVGSVGElement;
-   nodes: Map<string, PipelineNode>;
-   last_pos: Point
-   adding_edge: boolean;
-   adding_edge_input: [string | null, number | null];
-   adding_edge_output: string | null;
+  ui_events: UIEventManager;
+  svg: SVGSVGElement;
+  nodes: Map<string, PipelineNode>;
+  last_pos: Point
+  adding_edge: boolean;
+  adding_edge_input: [string | null, number | null];
+  adding_edge_output: string | null;
 
   constructor(ui_events: UIEventManager, svg: SVGSVGElement) {
     this.ui_events = ui_events;
 
     this.svg = svg;
     this.nodes = new Map<string, PipelineNode>();
-    this.last_pos = {x: 50, y: 50}
+    this.last_pos = { x: 50, y: 50 }
     this.adding_edge = false;
     this.adding_edge_input = [null, null];
     this.adding_edge_output = null;
@@ -147,7 +147,7 @@ export class Pipeline {
     output_rect.onclick = (e) => {
       if (this.adding_edge_output) {
         return;
-      } else  {
+      } else {
         this.adding_edge = true;
         this.adding_edge_output = node_name;
         if (this.adding_edge_input[0]) {
@@ -202,6 +202,58 @@ export class Pipeline {
       if (!node) {
         throw new Error(`Could not find node with name ${node_name}`);
       }
+
+      const x_offset = svg_el.transform.baseVal[0].matrix.e;
+      const y_offset = svg_el.transform.baseVal[0].matrix.f;
+
+      const outp_start_x = x_offset + node.output_el.transform.baseVal[0].matrix.e;
+      const outp_end_x = outp_start_x + node.output_el.width.baseVal.value;
+      const outp_start_y = y_offset + node.output_el.transform.baseVal[0].matrix.f;
+      const outp_end_y = outp_start_y + node.output_el.width.baseVal.value;
+
+      const inRange = (start: number, end: number, test: number) => {
+        return test >= start && test <= end;
+      };
+
+      this.nodes.forEach((other_node, other_node_name) => {
+        const other_x_offset = other_node.svg_el.transform.baseVal[0].matrix.e;
+        const other_y_offset = other_node.svg_el.transform.baseVal[0].matrix.f;
+        const other_outp_start_x = other_x_offset + other_node.output_el.transform.baseVal[0].matrix.e;
+        const other_outp_end_x = other_outp_start_x + other_node.output_el.width.baseVal.value;
+        const other_outp_start_y = other_y_offset + other_node.output_el.transform.baseVal[0].matrix.f;
+        const other_outp_end_y = other_outp_start_y + other_node.output_el.width.baseVal.value;
+        for (let port = 0; port < input_els.length; port++) {
+          const inp = input_els[port];
+          const start_x = x_offset + inp.transform.baseVal[0].matrix.e;
+          const end_x = start_x + inp.width.baseVal.value;
+          const start_y = y_offset + inp.transform.baseVal[0].matrix.f;
+          const end_y = start_y + inp.height.baseVal.value;
+
+          const x_overlap = inRange(start_x, end_x, other_outp_start_x) || inRange(start_x, end_x, other_outp_end_x);
+          const y_overlap = inRange(start_y, end_y, other_outp_start_y) || inRange(start_y, end_y, other_outp_end_y);
+          if (x_overlap && y_overlap) {
+            this.create_edge(other_node_name, node_name, port);
+          }
+        }
+
+
+        for (let port = 0; port < other_node.input_els.length; port++) {
+          const inp = other_node.input_els[port];
+          const other_start_x = other_x_offset + inp.transform.baseVal[0].matrix.e;
+          const other_end_x = other_start_x + inp.width.baseVal.value;
+          const other_start_y = other_y_offset + inp.transform.baseVal[0].matrix.f;
+          const other_end_y = other_start_y + inp.height.baseVal.value;
+
+          const x_overlap = inRange(outp_start_x, outp_end_x, other_start_x) || inRange(outp_start_x, outp_end_x, other_end_x);
+          const y_overlap = inRange(outp_start_y, outp_end_y, other_start_y) || inRange(outp_start_y, outp_end_y, other_end_y);
+          if (x_overlap && y_overlap) {
+            this.create_edge(node_name, other_node_name, port);
+          }
+        }
+        //   console.log("    ", output_rect.id, x_offset + output_rect.transform.baseVal[0].matrix.e, y_offset + output_rect.transform.baseVal[0].matrix.f);
+      });
+
+
       for (let i = 0; i < input_cnt; i++) {
         if (node.inputs[i]) {
           this.draw_edge(node_name, i);
@@ -209,7 +261,7 @@ export class Pipeline {
       }
 
       for (let output of node.outputs) {
-          this.draw_edge(...output);
+        this.draw_edge(...output);
       }
     });
 
@@ -243,7 +295,7 @@ export class Pipeline {
       }
       for (let i = 0; i < old_src.outputs.length; i++) {
         if (old_src.outputs[i][0] == dst_node &&
-            old_src.outputs[i][1] == dst_input_port){
+          old_src.outputs[i][1] == dst_input_port) {
           old_src.outputs.splice(i, 1);
         }
       }
@@ -327,7 +379,7 @@ export class Pipeline {
     }
     for (let i = 0; i < node.outputs.length; i++) {
       if (node.outputs[i][0] == output_name &&
-          node.outputs[i][1] == index) {
+        node.outputs[i][1] == index) {
         node.outputs.splice(i, 1);
         break;
       }
@@ -405,7 +457,7 @@ export class Pipeline {
 
         // console.log(i, x, y)
 
-        const delta = {x: 0, y: 0};
+        const delta = { x: 0, y: 0 };
         if (x < 0) {
           delta.x += -x * 0.5;
         } else if (x > 25) {
@@ -432,7 +484,7 @@ export class Pipeline {
 
         // console.log(i, x, y)
 
-        const delta = {x: 0, y: 0};
+        const delta = { x: 0, y: 0 };
         if (x < 0) {
           delta.x += -x * 0.5;
         } else if (x > 25) {
@@ -495,7 +547,7 @@ export class Pipeline {
 
   clear() {
     this.nodes = new Map<string, PipelineNode>();
-    this.last_pos = {x: 50, y: 50}
+    this.last_pos = { x: 50, y: 50 }
     this.adding_edge = false;
     this.adding_edge_input = [null, null];
     this.adding_edge_output = null;
